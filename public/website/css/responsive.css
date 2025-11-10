@@ -1,0 +1,1060 @@
+/* XL Device :1200px. */
+@media (min-width: 1550px) and (max-width: 1700px) {
+    .main-menu ul {
+        gap: 0 28px;
+    }
+    .box-title h4 {
+        font-size: 20px;
+        margin: 0;
+    }
+    .box-title span {
+        width: 42px;
+        height: 42px;
+    }
+    .setup-box {
+        padding: 24px 16px;
+        height: 100%;
+    }
+     .product-item {
+        padding: 50px 24px;
+    }
+     .purches-info {
+        padding-left: 0;
+    }
+
+
+
+
+}
+
+
+@media (min-width: 1441px) and (max-width: 1549px) {
+    .main-menu ul {
+        gap: 0 20px;
+    }
+    .main-menu ul li a {
+        font-size: 15px;
+    }
+    .header-right {
+        gap: 0 24px;
+    }
+    .logo img {
+        max-width: 95px;
+    }
+    .hero-slider .owl-nav div img {
+        width: 20px;
+    }
+    .social-info li img {
+        width: 36px;
+    }
+    .about-box p {
+        font-size: 16px;
+    }
+    .about-card {
+        min-height: 300px;
+    }
+    .box-title h4 {
+        font-size: 18px;
+    }
+    .setup-description p {
+        font-size: 16px;
+    }
+    .box-title span {
+        width: 40px;
+        height: 40px;
+    }
+    .box-title {
+        gap: 0 20px;
+        margin-bottom: 20px;
+    }
+    .about-card p {
+        font-size: 16px;
+    }
+    .discover-content p {
+        font-size: 16px;
+    }
+    .action-btn {
+        height: 74px;
+        font-size: 22px;
+    }
+     .purches-info {
+        padding-left: 0;
+    }
+    .cart-list-table thead th {
+        font-size: 22px;
+        padding: 25px 30px;
+    }
+    .cart-list-table tr td {
+        padding: 30px 30px;
+    }
+    .purches-info ul li {
+        font-size: 22px;
+    }
+    .total-ammount-info h2 {
+        font-size: 28px;
+    }
+    .total-ammount-info {
+        padding-left: 0;
+    }
+    .login-screen-area {
+    padding: 80px 0;
+}
+
+}
+
+
+
+@media (min-width: 1200px) and (max-width: 1449px) {
+    .main-menu ul {
+        gap: 0 18px;
+    }
+    .main-menu ul li a {
+        font-size: 14px;
+    }
+    .header-right {
+        gap: 0 24px;
+    }
+    .logo img {
+        max-width: 90px;
+    }
+    .hero-slider .owl-nav div img {
+        width: 20px;
+    }
+    .social-info li img {
+        width: 36px;
+    }
+    .about-box p {
+        font-size: 15px;
+    }
+    .about-card {
+        min-height: 300px;
+    }
+    .box-title h4 {
+        font-size: 16px;
+    }
+    .setup-description p {
+        font-size: 15px;
+    }
+    .box-title span {
+        width: 40px;
+        height: 40px;
+    }
+    .box-title {
+        gap: 0 20px;
+        margin-bottom: 20px;
+    }
+    .about-card p {
+        font-size: 15px;
+    }
+    .discover-content p {
+        font-size: 16px;
+    }
+    .user-option a {
+        font-size: 15px;
+    }
+    .setup-box {
+        padding: 20px 15px;
+    }
+    .setup-box-wrap {
+        gap: 15px;
+    }
+    .delivary-note p {
+        font-size: 16px;
+    }
+    .title-wrap h2 {
+        font-size: 32px;
+        line-height: 90%;
+    }
+    .discover-content h2 {
+        font-size: 32px;
+    }
+    .title-wrap p {
+        font-size: 16px;
+    }
+    .action-btn {
+        height: 70px;
+        font-size: 22px;
+    }
+    .varieant-wrap {
+        display: grid;
+        gap: 40px 15px;
+    }
+    .varient-info h4 {
+        font-size: 16px;
+    }
+    .product-area {
+        padding: 80px 0;
+    }
+    .varient-info {
+        padding: 15px 0;
+        padding-bottom: 0;
+    }
+ .purches-info {
+        padding-left: 0;
+    }
+     .total-ammount-info {
+        padding-left: 0;
+    }
+    .cart-list-table thead th {
+        font-size: 22px;
+        padding: 25px 30px;
+    }
+    .cart-list-table tr td {
+        padding: 30px 30px;
+    }
+    .purches-info ul li {
+        font-size: 22px;
+    }
+    .total-ammount-info h2 {
+        font-size: 28px;
+    }
+    .item-thumb {
+        margin-left: 70px;
+    }
+.login-screen-area {
+    padding: 80px 0;
+}
+
+}
+
+
+
+
+@media (min-width: 1200px) and (max-width: 1300px) {
+    a.stock-info {
+        display: none !important;
+    }
+    .main-menu ul {
+        gap: 0 25px;
+    }
+    .box-left {
+        padding-right: 20px;
+    }
+    .box-right {
+        padding-left: 20px;
+    }
+    .about-box p {
+        font-size: 14px;
+    }
+    .about-card {
+        min-height: 270px;
+    }
+    .user-option a {
+        font-size: 14px;
+    }
+    .logo img {
+        max-width: 84px;
+    }
+    .product-item {
+        padding: 40px 20px;
+    }
+     .purches-info {
+        padding-left: 0;
+    }
+     .total-ammount-info {
+        padding-left: 0;
+    }
+        .cart-list-table thead th {
+        font-size: 22px;
+        padding: 25px 30px;
+    }
+    .cart-list-table tr td {
+        padding: 30px 30px;
+    }
+    .purches-info ul li {
+        font-size: 22px;
+    }
+    .total-ammount-info h2 {
+        font-size: 28px;
+    }
+    .item-thumb {
+        margin-left: 60px;
+    }
+
+}
+
+
+
+
+
+
+
+/* LG Device :992px. */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .rs-mainmenu{
+        display: none;
+    }
+     .logo {
+        text-align: left;
+    }
+    .logo img {
+        max-width: 90px;
+    }
+    .setup-box-wrap {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .hero-slider .owl-nav div img {
+        width: 18px;
+    }
+    .about-area {
+        padding: 70px 0;
+    }
+    .title-wrap h2 {
+        font-size: 30px;
+    }
+    .about-box p {
+        font-size: 14px;
+    }
+    .box-left {
+        padding-right: 15px;
+    }
+    .box-right {
+        padding-left: 15px;
+    }
+    .about-card {
+        min-height: 220px;
+        overflow: hidden;
+    }
+    .about-card h3 {
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+    .about-card p {
+        font-size: 16px;
+    }
+    .about-wrapper {
+        margin-bottom: 60px;
+    }
+    .delivary-info-area {
+        padding: 70px 0;
+    }
+    .box-title h4 {
+        font-size: 20px;
+    }
+    .box-title {
+        gap: 0 20px;
+        margin-bottom: 20px;
+    }
+    .setup-description p {
+        font-size: 16px;
+    }
+    .discover-content h2 {
+        font-size: 30px;
+        color: #fff;
+    }
+    .discover-content h2 {
+        font-size: 30px;
+        color: #fff;
+    }
+    .discover-content p {
+        font-size: 16px;
+    }
+    .social-info li img {
+        width: 32px;
+    }
+    .user-option a {
+        font-size: 15px;
+    }
+    header.header_area {
+        padding: 15px 0;
+    }
+    .menu_trigger{
+        display: block;
+    }
+    .popup-menu {
+        display: block;
+    }
+    .varieant-wrap {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px 20px;
+    }
+    .product-item {
+        padding: 40px 24px;
+    }
+    .action-btn {
+        height: 64px;
+        font-size: 20px;
+    }
+    .product-area {
+        padding: 70px 0;
+    }
+    .product-category-title h2 {
+        font-size: 32px;
+    }
+     .purches-info {
+        padding-left: 0;
+    }
+     .total-ammount-info {
+        padding-left: 0;
+    }
+    .cart-list-table thead th {
+        font-size: 20px;
+        padding: 20px 25px;
+    }
+    .cart-list-table tr td {
+        padding: 20px 20px;
+        font-size: 16px;
+    }
+    .item-thumb {
+        width: 70px;
+        height: 70px;
+        border: 4px solid #fff;
+        margin-left: 40px;
+    }
+    .category-btn {
+        font-size: 16px;
+        height: 32px;
+        width: 70px;
+    }
+    .quantity-wrap .quantity-box {
+        width: 95px;
+    }
+    .item__remove {
+        font-size: 14px;
+        padding: 3px 10px;
+    }
+    .quantity-wrap {
+        gap: 0 15px;
+    }
+    .shipping-title h2 {
+        font-size: 30px
+    }
+    .purches-info ul li {
+        font-size: 20px;
+    }
+    .total-ammount-info h2 {
+        font-size: 24px;
+    }
+    .login-screen-area {
+        padding: 80px 0;
+    }
+
+
+
+
+
+}
+ 
+
+
+
+
+
+/* LG Device :992px. */
+@media (min-width: 768px) and (max-width: 991px) {
+    .rs-mainmenu{
+        display: none;
+    }
+     .logo {
+        text-align: left;
+    }
+    .logo img {
+        max-width: 90px;
+    }
+    .setup-box-wrap {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+    .hero-slider .owl-nav div img {
+        width: 18px;
+    }
+    .about-area {
+        padding: 70px 0;
+    }
+    .title-wrap h2 {
+        font-size: 30px;
+    }
+    .about-box p {
+        font-size: 14px;
+    }
+    .box-left {
+        padding-right: 15px;
+    }
+    .box-right {
+        padding-left: 15px;
+    }
+    .about-card {
+        min-height: 250px;
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+   .about-card h3 {
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+    .about-card p {
+        font-size: 17px;
+    }
+    .about-wrapper {
+        margin-bottom: 60px;
+    }
+    .delivary-info-area {
+        padding: 70px 0;
+    }
+    .box-title h4 {
+        font-size: 20px;
+    }
+    .box-title {
+        gap: 0 20px;
+        margin-bottom: 20px;
+    }
+    .setup-description p {
+        font-size: 16px;
+    }
+    .discover-content h2 {
+        font-size: 30px;
+        color: #fff;
+    }
+    .discover-content h2 {
+        font-size: 30px;
+        color: #fff;
+    }
+    .discover-content p {
+        font-size: 16px;
+    }
+    .social-info li img {
+        width: 32px;
+    }
+    .user-option a {
+        font-size: 15px;
+    }
+    header.header_area {
+        padding: 15px 0;
+    }
+    .delivary-note p {
+        font-size: 14px;
+    }
+    .delivary-note {
+        padding: 15px;
+    }
+    .discover-area {
+        padding: 60px 0;
+    }
+    .common-btn {
+        font-size: 16px;
+    }
+    .social-info ul {
+        justify-content: flex-start;
+    }
+    .footer-widget {
+        margin-bottom: 30px;
+    }
+    .chlid-widget {
+        margin-bottom: 30px;
+    }
+    .menu_trigger{
+        display: block;
+    }
+    .popup-menu {
+        display: block;
+    }
+    .login-screen-area {
+        padding: 80px 0;
+    }
+    .product-item {
+        padding: 40px 30px;
+        margin-bottom: 50px;
+    }
+    .product-area {
+        padding: 60px 0;
+        padding-bottom: 10px;
+    }
+    .action-btn {
+        height: 70px;
+        font-size: 22px;
+    }
+    .product-category-title h2 {
+        font-size: 32px;
+    }
+    .shipping-title h2 {
+        font-size: 30px;
+    }
+    .shipping-title {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    .purches-info {
+        padding-left: 0;
+    }
+    .total-ammount-info {
+        padding-left: 0;
+    }
+     .cart-list-table thead th {
+        font-size: 15px;
+        padding: 12px 12px;
+    }
+    .category-btn {
+        font-size: 13px;
+        height: 26px;
+        width: 50px;
+    }
+    .cart-list-table tr td {
+        padding: 12px 12px;
+        text-align: center;
+        font-size: 15px;
+    }
+    .item-thumb {
+        width: 50px;
+        height: 50px;
+        border: 3px solid #fff;
+        margin-left: 10px;
+    }
+    .category-btn {
+        font-size: 13px;
+        height: 25px;
+        width: 50px;
+    }
+    .quantity-wrap .quantity-box {
+        width: 80px;
+    }
+    .item__remove {
+        font-size: 12px;
+        padding: 2px 7px;
+    }
+    .quantity-wrap {
+        gap: 0 15px;
+    }
+    .shipping-title h2 {
+        font-size: 30px
+    }
+    .purches-info ul li {
+        font-size: 18px;
+    }
+    .total-ammount-info h2 {
+        font-size: 22px;
+    }
+    .login-screen-area {
+        padding: 60px 0;
+    }
+    .purches-info {
+        margin-top: 30px;
+    }
+    .item__remove {
+        opacity: 1;
+        visibility: visible;
+    }
+    img.box-arrow {
+        position: absolute;
+        right: 50%;
+        top: 100%;
+        transform: unset;
+        transform: rotate(90deg);
+        margin-top: 3px;
+    }
+
+
+}
+ 
+
+
+
+
+
+
+/* SM Small Device :320px. */
+@media only screen and (max-width: 767px) {
+    .social-info ul {
+        justify-content: center;
+    }
+    .footer-widget {
+        margin-bottom: 30px;
+    }
+    .chlid-widget {
+        margin-bottom: 30px;
+    }
+    .rs-mainmenu{
+        display: none;
+    }
+     .logo {
+        text-align: left;
+    }
+    .logo img {
+        max-width: 80px;
+    }
+    .setup-box-wrap {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 20px;
+    }
+    .hero-slider .owl-nav div img {
+        width: 14px;
+    }
+    .about-area {
+        padding: 60px 0;
+    }
+    .title-wrap h2 {
+        font-size: 30px;
+    }
+    .about-box p {
+        font-size: 18px;
+    }
+    .hero-slider .owl-prev {
+        left: 10px;
+    }
+    .hero-slider .owl-next {
+        right: 10px;
+    }
+    .hero-area .container {
+        padding: 0;
+    }
+    .slider-item {
+        height: 400px;
+    }
+    .slider-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .user-option {
+        display: none;
+    }
+    header.header_area {
+        padding: 15px 0;
+    }
+    .box-left {
+        text-align: center;
+        padding-right: 0;
+    }
+    .box-right {
+        text-align: center;
+        padding-left: 0;
+        border-left: none;
+        padding-top: 140px;
+        position: relative;
+    }
+    .about-wrapper {
+        max-width: 100%;
+        display: block;
+    }
+    .about-box {
+        width: 100%;
+    }
+    .about-box.box-right:after {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1px;
+        height: 80px;
+        content: '';
+        background: #000;
+        top: 30px;
+    }
+    .about-card {
+        min-height: 280px;
+        margin-bottom: 25px;
+    }
+    .delivary-info-area {
+        padding: 50px 0;
+    }   
+    .delivary-note p {
+        font-size: 14px;
+    }
+    .discover-area {
+        padding: 50px 0;
+    }
+    .discover-content h2 {
+        font-size: 30px;
+    }
+    .discover-content p {
+        font-size: 16px;
+    }
+    .common-btn {
+        padding: 14px 28px;
+        font-size: 16px;
+    }   
+    footer {
+        padding: 40px 0;
+    }
+    .social-info li img {
+        width: 36px;
+    }
+    .hero-area {
+        overflow: hidden;
+    }
+    .hero-slider .owl-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0 12px;
+        align-items: center;
+        position: absolute;
+        left: 0;
+        bottom: 20px;
+        width: 100%;
+    }
+    .hero-slider .owl-dots div {
+        width: 10px;
+        height: 10px;
+        border: 2px solid #fff !important;
+        background: #fff !important;
+        border-radius: 100%;
+        transition: .3s;
+         transform: scale(1);
+    }
+    .hero-slider .owl-dots div.active{
+        background-color: transparent !important;
+        transform: scale(1.1);
+    }
+    .header-right {
+        gap: 0 20px;
+    }
+    .title-wrap p {
+        font-size: 16px;
+    }
+    .title-wrap {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    .popup-menu {
+        display: block;
+    }
+    .menu_trigger{
+        display: block;
+    }
+    .cart-btn {
+        display: none;
+    }
+    .popup-search {
+        padding:0 12px;
+        width: 100%;
+    }
+    .search-bar {
+        max-width: 260px;
+        margin: 0 auto;
+    }
+    .search-bar label {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+    .search-x img {
+        width: 20px;
+    }
+    .menu-inner {
+       width: 100%;
+    }
+    .popup-menu{
+        width: 100%;
+    }
+    .login-screen-area {
+        padding: 50px 0;
+    }
+    .login-screen .title-wrap {
+        max-width: 280px;
+        margin: 0 auto;
+        margin-bottom: 40px;
+    }
+    .single-field input {
+        height: 55px;
+        font-size: 16px;
+    }
+    .reset-password{
+        height: auto;
+    }
+    .product-item {
+        padding: 40px 15px;
+    }
+    .varieant-wrap {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px 10px;
+    }
+    .varient-info h4 {
+        font-size: 14px;
+    }
+    .product-action {
+        justify-content: space-between;
+        gap: 15px;
+        flex-direction: column;
+    }
+    .action-btn {
+        height: 60px;
+        font-size: 18px;
+    }
+    .product-category-title h2 {
+        font-size: 30px;
+    }
+    .product-area {
+        padding: 50px 0;
+    }
+    .product-title h3 {
+        font-size: 24px;
+    }
+    .product-size {
+        padding: 8px 20px;
+        font-size: 16px;
+    }
+    .cart-info-box {
+        padding: 50px 20px;
+    }
+    .cart-info-box h2 {
+        font-size: 30px;
+    }
+    .modal_x {
+        right: 20px;
+        top: 20px;
+    }
+    .cart-info-box img {
+        width: 90px;
+        margin-bottom: 20px;
+    }
+    button.modal_x img {
+        width: 20px;
+    }
+    .size-info-box h4 {
+        margin-bottom: 30px;
+        font-size: 30px;
+    }
+    .size-info-box {
+        padding: 40px 20px;
+        text-align: center;
+    }
+    .shipping-title h2 {
+        font-size: 30px;
+    }
+    .shipping-title {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+     .purches-info {
+        padding-left: 0;
+    }
+     .total-ammount-info {
+        padding-left: 0;
+    }
+     .cart-list-table thead th {
+        font-size: 18px;
+        padding: 20px 20px;
+    }
+    .category-btn {
+        font-size: 13px;
+        height: 26px;
+        width: 50px;
+    }
+    .cart-list-table tr td {
+        padding: 25px 20px;
+        text-align: center;
+        font-size: 15px;
+    }
+    .item-thumb {
+        width: 80px;
+        height: 80px;
+        border: 3px solid #fff;
+        margin-left: 20px;
+    }
+    .category-btn {
+        font-size: 13px;
+        height: 25px;
+        width: 50px;
+    }
+    .quantity-wrap .quantity-box {
+        width: 80px;
+    }
+    .item__remove {
+        font-size: 12px;
+        padding: 2px 7px;
+    }
+    .quantity-wrap {
+        gap: 0 15px;
+    }
+    .shipping-title h2 {
+        font-size: 30px
+    }
+    .purches-info ul li {
+        font-size: 14px;
+    }
+    .total-ammount-info h2 {
+        font-size: 16px;
+    }
+    .login-screen-area {
+        padding: 50px 0;
+    }
+    .purches-info {
+        margin-top: 30px;
+    }
+    .item__remove {
+        opacity: 1;
+        visibility: visible;
+    }
+    .cart-list-table table {
+        width: 700px;
+        margin-bottom: 30px;
+    }
+    .total-ammount-text span {
+        font-size: 12px;
+        max-width: 140px;
+    }
+    .ammount-text {
+        text-align: right;
+    }
+    .total-ammount-info {
+        padding-left: 0;
+        padding-top: 25px;
+    }
+
+    #style-3::-webkit-scrollbar-track
+    {
+        background-color: #E3E3E3;
+        border-radius: 10px;
+    }
+
+    #style-3::-webkit-scrollbar
+    {
+        height: 10px;
+        background-color: #E3E3E3;
+        border-radius: 10px;
+    }
+
+    #style-3::-webkit-scrollbar-thumb
+    {
+        background-color: #000000;
+        border-radius: 10px;
+    }
+    .setup-slider-wrap {
+        display: block;
+        padding: 0 20px;
+    }
+    img.box-arrow {
+        display: none !important;
+    }
+    .setup-box-wrap {
+        display: none;
+    }
+    .setup-slider .owl-nav img {
+        width: 10px !important;
+        filter: brightness(0);
+    }
+    .setup-slider-wrap .setup-box-wrap {
+        display: block !important;
+    }
+     .setup-slider .owl-nav div {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .setup-slider .owl-next {
+        right: -20px;
+    }
+    .setup-slider .owl-prev {
+        left: -20px;
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* SM Small Device :550px. */
+@media only screen and (min-width: 576px) and (max-width: 767px) {
+.menu-inner {
+    width: 430px;
+}
+  
+    
+    
+ 
+}
