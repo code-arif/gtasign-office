@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Http\Controllers\Api\User\Auth;
 
+use App\Helper\Helper;
 use App\Http\Controllers\Controller;
 use App\Mail\RegisterOtpMail;
 use App\Models\User;
@@ -29,6 +31,9 @@ class AuthenticationController extends Controller
                 'last_name'  => ['required', 'string', 'max:255'],
                 'email'      => ['required', 'string', 'email', 'unique:users', 'max:255'],
                 'password'   => ['required', 'string', 'min:8'],
+                'role'   => ['required', 'in:client,expert'],
+                'is_agree_termsconditions'   => ['required', 'bool'],
+
             ]);
 
             if ($validator->fails()) {
@@ -43,10 +48,14 @@ class AuthenticationController extends Controller
                 'first_name'      => $validatedData['first_name'],
                 'last_name'       => $validatedData['last_name'],
                 'email'           => $validatedData['email'],
+                'role'           => $validatedData['role'],
+                'is_agree_termsconditions' => $validatedData['is_agree_termsconditions'],
                 'password'        => Hash::make($validatedData['password']),
-                'otp'             => $otp,
-                'otp_expires_at'  => $otpExpiresAt,
-                'is_otp_verified' => false,
+            ]);
+            $user->otpVerifications()->create([
+                // 'otp_code'   => Hash::make($otp),
+                'otp_code'   => $otp,
+                'expires_at' => $otpExpiresAt,
             ]);
 
             // Try to send mail
@@ -58,7 +67,7 @@ class AuthenticationController extends Controller
             return $this->success([
                 'message' => 'OTP has been sent to your email. Please verify to complete registration.',
                 'email'   => $user->email,
-                'otp'     => $user->otp,
+                'otp'     => $user->latestOtp->otp_code,
             ], 'OTP Sent', 201);
         } catch (Exception $e) {
             // Rollback if any error occurs
@@ -86,20 +95,27 @@ class AuthenticationController extends Controller
             return $this->error([], 'User not found', 200);
         }
 
-        if ($user->otp !== $request->otp) {
+        if ($user->latestOtp->otp_code !== $request->otp) {
             return $this->error([], 'Your OTP is Invalid.', 403);
         }
-
-        if (! $user->otp_expires_at || Carbon::now()->gt($user->otp_expires_at)) {
+        $otp = $user->otpVerifications()
+            ->latest()
+            ->first();
+        if ($otp->is_Expired) {
             return $this->error([], 'OTP has expired');
         }
+        // if (! $user->otp_expires_at || Carbon::now()->gt($user->otp_expires_at)) {
+        //     return $this->error([], 'OTP has expired');
+        // }
 
         $user->update([
             'email_verified_at' => Carbon::now(),
-            'is_otp_verified'   => true,
-            'otp'               => null,
-            'otp_expires_at'    => null,
+            'is_verified'   => true,
         ]);
+        $otp->update([
+            'verified_at' => Carbon::now(),
+        ]);
+
 
         $token = auth('api')->login($user);
 
@@ -113,6 +129,44 @@ class AuthenticationController extends Controller
         ];
 
         return $this->success($userData, 'User Registration successful.', 200);
+    }
+    public function ResendOtp(Request $request)
+    {
+
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        try {
+            $user = User::where('email', $request->input('email'))->first();
+
+            if (!$user) {
+                return $this->error([], 'User not found.', 404);
+            }
+
+            if ($user->is_verified) {
+                return $this->success([], 'Email already verified.', 409);
+            }
+            $user->otpVerifications()->delete();
+
+            $newOtp               = rand(1000, 9999);
+            $otpExpiresAt         = Carbon::now()->addMinutes(5);
+            // $user->otp            = $newOtp;
+            // $user->otp_expires_at = $otpExpiresAt;
+            $user->otpVerifications()->create([
+                'otp_code' => $newOtp,
+                'expires_at' => $otpExpiresAt,
+            ]);
+
+            // $user->save();
+
+            //* Send the new OTP to the user's email
+            // Mail::to($user->email)->send(new SendOTPMail($newOtp));
+
+            return $this->success(['otp' => $user->latestOtp->otp_code], 'A new OTP has been sent to your email.', 200);
+        } catch (Exception $e) {
+            return $this->error([], $e->getMessage(), 200);
+        }
     }
 
     public function login(Request $request)
@@ -130,9 +184,13 @@ class AuthenticationController extends Controller
             $data = $validator->validated();
             $user = User::where('email', $data['email'])->first();
 
-            if (! $user->is_otp_verified) {
+            if (! $user->is_verified) {
                 return $this->error([], 'Please verify your email with the OTP before logging in.', 403);
             }
+            if (! $user->status) {
+                return $this->error([], 'Your account has been disabled. Please contact our support team for assistance..', 403);
+            }
+
 
             if (! $token = auth('api')->attempt($data)) {
                 return $this->error([], 'Invalid email or password.', 401);

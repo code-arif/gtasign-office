@@ -28,16 +28,18 @@ class User extends Authenticatable implements JWTSubject
         'first_name',
         'last_name',
         'email',
-        'phone_number',
-        'branch_code',
+        'is_verified',
+        'email_verified_at',
+        // 'phone_number',
+        // 'branch_code',
         'password',
-        'otp_expires_at',
-        'is_otp_verified',
-        'otp',
+        // 'otp_expires_at',
+        // 'is_otp_verified',
+        // 'otp',
         'role',
-        'avatar',
-        'reset_password_token',
-        'reset_password_token_expire_at'
+        // 'avatar',
+        // 'reset_password_token',
+        // 'reset_password_token_expire_at'
     ];
 
 
@@ -52,9 +54,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return [
             'email_verified_at'               => 'datetime',
-            'otp_expires_at'                  => 'datetime',
-            'is_otp_verified'                 => 'boolean',
-            'reset_password_token_expires_at' => 'datetime',
+            // 'otp_expires_at'                  => 'datetime',
+            // 'is_otp_verified'                 => 'boolean',
+            // 'reset_password_token_expires_at' => 'datetime',
             'password'                        => 'hashed',
         ];
     }
@@ -110,5 +112,13 @@ class User extends Authenticatable implements JWTSubject
     public function get_project()
     {
         return $this->hasMany(CompanyProject::class, 'company_id', 'id');
+    }
+    public function otpVerifications()
+    {
+        return $this->hasMany(OtpVerification::class);
+    }
+    public function latestOtp()
+    {
+        return $this->hasOne(OtpVerification::class)->latestOfMany();
     }
 }

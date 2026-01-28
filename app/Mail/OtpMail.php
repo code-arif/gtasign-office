@@ -10,7 +10,8 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OtpMail extends Mailable {
+class OtpMail extends Mailable
+{
     use Queueable, SerializesModels;
     public int $otp;
     public User $user;
@@ -18,16 +19,18 @@ class OtpMail extends Mailable {
     /**
      * Create a new message instance.
      */
-    public function __construct(int $otp,User $user, string $message) {
+    public function __construct(int $otp, User $user, string $message)
+    {
         $this->otp = $otp;
         $this->user = $user;
-        $this->header_message= $message;
+        $this->header_message = $message;
     }
 
     /**
      * Get the message envelope.
      */
-    public function envelope(): Envelope {
+    public function envelope(): Envelope
+    {
         return new Envelope(
             subject: $this->header_message,
         );
@@ -36,7 +39,8 @@ class OtpMail extends Mailable {
     /**
      * Get the message content definition.
      */
-    public function content(): Content {
+    public function content(): Content
+    {
         return new Content(
             view: 'mail.otpmail',
         );
@@ -47,7 +51,8 @@ class OtpMail extends Mailable {
      *
      * @return array<int, Attachment>
      */
-    public function attachments(): array {
+    public function attachments(): array
+    {
         return [];
     }
 }

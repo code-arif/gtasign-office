@@ -31,7 +31,7 @@ class ResetPasswordController extends Controller
 
 
         if ($validator->fails()) {
-            return $this->error(['validation failed'] , $validator->errors()->first(), 422);
+            return $this->error(['validation failed'], $validator->errors()->first(), 422);
         }
 
         try {
@@ -42,16 +42,28 @@ class ResetPasswordController extends Controller
             if ($user) {
                 try {
 
+
                     Mail::to($email)->send(new OtpMail($otp, $user, 'Your OTP for Reset Password'));
 
+                    // Delete any existing tokens for this email
+                    DB::table('password_reset_tokens')
+                        ->where('email', $request->email)
+                        ->delete();
 
-                    $user->update([
-                        'otp'            => $otp,
-                        'otp_expires_at' => Carbon::now()->addMinutes(5),
+                    // Insert new token
+                    DB::table('password_reset_tokens')->insert([
+                        'email' => $request->email,
+                        'token' => Hash::make($otp), // Store hashed token
+                        'created_at' => Carbon::now()
                     ]);
 
+                    // $user->update([
+                    //     'otp'            => $otp,
+                    //     'otp_expires_at' => Carbon::now()->addMinutes(5),
+                    // ]);
+
                     $data = [
-                        'email' => $user->email,
+                        'email' => $request->email,
                         'otp' => $otp,
 
                     ];
@@ -72,8 +84,6 @@ class ResetPasswordController extends Controller
 
     public function VerifyOTP(Request $request)
     {
-
-
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|exists:users,email',
             'otp'   => 'required',
@@ -88,30 +98,35 @@ class ResetPasswordController extends Controller
 
             $email = $request->input('email');
             $otp   = $request->input('otp');
-            $user = User::where('email', $email)->first();
+            $resetRecord = DB::table('password_reset_tokens')
+                ->where('email', $email)
+                ->first();
 
-            if (!$user) {
-                return $this->error(false, 'User not found', 404);
+            if (!$resetRecord) {
+                return $this->error(false, 'Invalid or expired reset token.', 404);
+            }
+            $createdAt = Carbon::parse($resetRecord->created_at);
+
+            if ($createdAt->addMinutes(10)->isPast()) {
+                DB::table('password_reset_tokens')
+                    ->where('email', $request->email)
+                    ->delete();
+                return $this->error([], 'Reset token has expired.', 400);
             }
 
-            if (Carbon::parse($user->otp_expires_at)->isPast()) {
+            if (!Hash::check($otp, $resetRecord->token)) {
 
-                return $this->error([], 'OTP has expaired', 400);
-            }
-
-            if ($user->otp !== $otp) {
-
-                return $this->error([], 'Invalid OTP', 400);
+                return $this->error(['d' => $resetRecord->token, 'r' => Hash::make($otp)], 'Invalid reset token.', 400);
             }
 
             $token = Str::random(60);
 
-            $user->update([
-                'otp'             => null,
-                'otp_expires_at'  => null,
-                'reset_password_token' => $token,
-                'reset_password_token_expire_at' => Carbon::now()->addHour(),
-            ]);
+            DB::table('password_reset_tokens')
+                ->where('email', $email)
+                ->update([
+                    'token' => $token,
+                    'created_at' => Carbon::now()->addMinutes(5),
+                ]);
 
             return response()->json([
                 'status'     => true,
@@ -125,18 +140,16 @@ class ResetPasswordController extends Controller
     }
 
 
-    public function ResetPassword(Request $request)
+    public function ResetPassword(Request $request, $token)
     {
-        $request->validate([
-            'email'    => 'required|email|exists:users,email',
-            'token'    => 'required|string',
-            'password' => 'required|string|min:6',
-        ]);
+        // $request->validate([
+        //     'email'    => 'required|email|exists:users,email',
+        //     'password' => 'required|string|min:6',
+        // ]);
 
 
         $validator = Validator::make($request->all(), [
             'email'    => 'required|email|exists:users,email',
-            'token'    => 'required|string',
             'password' => 'required|string|min:6',
         ]);
 
@@ -152,16 +165,20 @@ class ResetPasswordController extends Controller
             $newPassword = $request->input('password');
 
             $user = User::where('email', $email)->first();
-            if (!$user) {
+             $resetRecord = DB::table('password_reset_tokens')
+                ->where('email', $email)
+                ->first();
+
+            if (!$resetRecord) {
                 return $this->error(false, 'User not found', 404);
             }
 
-            if (!empty($user->reset_password_token) && $user->reset_password_token === $request->token && $user->reset_password_token_expire_at >= Carbon::now()) {
+            if (!empty($resetRecord->token) && $resetRecord->token === $request->token && $resetRecord->created_at >= Carbon::now()) {
                 $user->update([
                     'password'        => Hash::make($newPassword),
-                    'reset_password_token' => null,
-                    'reset_password_token_expire_at' => null,
                 ]);
+                $resetRecord = DB::table('password_reset_tokens')
+                ->where('email', $email)->delete();
 
                 return $this->success(true, 'Password reset Successfully.', 200);
             } else {

@@ -10,35 +10,29 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('email')->unique();
-            $table->enum('role', ['admin', 'user', 'seller'])->default('user');
-
-            $table->string('house')->nullable();
-            $table->string('road')->nullable();
-            $table->string('city')->nullable();
-
+            $table->enum('group', ['admin', 'user'])->default('user');
+            $table->enum('role', ['expert', 'client'])->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->boolean('is_verified')->default(false);
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password')->nullable();
 
-            $table->string('otp')->nullable();
-            $table->boolean('is_otp_verified')->default(false);
-            $table->timestamp('otp_expires_at')->nullable();
 
-            $table->string('avatar')->nullable();
-            $table->string('gender')->nullable();
+            // $table->string('otp')->nullable();
+            // $table->boolean('is_otp_verified')->default(false);
+            // $table->timestamp('otp_expires_at')->nullable();
 
-            $table->foreignId('plan_id')->nullable();
-            $table->string('subscription_status')->nullable();
-            $table->enum('payment_way', ['web', 'app', 'other'])->default('other');
-            $table->timestamp('last_activity_at')->nullable();
+            // $table->foreignId('plan_id')->nullable();
+            // $table->string('subscription_status')->nullable();
+            // $table->enum('payment_way', ['web', 'app', 'other'])->default('other');
+            // $table->timestamp('last_activity_at')->nullable();
 
             $table->string('google_id')->nullable();
             $table->boolean('is_agree_termsconditions')->default(false);
-            $table->timestamp('email_verified_at')->nullable();
             $table->boolean('is_social_logged')->default(false);
-            $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
