@@ -14,19 +14,29 @@ class UserListController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = User::select('id', 'name', 'email', 'phone_number', 'avatar', 'created_at','status')
-                        ->where('role', '!=', 'admin')
-                        ->latest();
+            $data = User::with('profile')->where('group', 'user')->latest();
 
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('avatar', function ($data) {
-                    if ($data->avatar) {
-                        $url = asset($data->avatar);
+                    if ($data->profile?->image) {
+                        $url = asset($data->profile?->image);
                         return '<img src="' . $url . '" alt="avatar" width="50px" height="50px">';
                     } else {
                         return '---';
                     }
+                })
+                ->addColumn('name', function ($data) {
+                    return $data->first_name ?? '---';
+                })
+                ->addColumn('email', function ($data) {
+                    return $data->email ?? '---';
+                })
+                ->addColumn('role', function ($data) {
+                    return $data->role ?? '---';
+                })
+                ->addColumn('created_at', function ($data) {
+                    return $data->created_at ? $data->created_at->format('Y-m-d') : '---';
                 })
                 ->addColumn('action', function ($data) {
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
@@ -35,20 +45,7 @@ class UserListController extends Controller
                             </a>
                             </div>';
                 })
-                ->addColumn('name', function ($data) {
-                    return $data->name ?? '---';
-                })
-                ->addColumn('email', function ($data) {
-                    return $data->email ?? '---';
-                })
-                ->addColumn('phone', function ($data) {
-                    return $data->phone ?? '---';
-                })
-
-                ->addColumn('created_at', function ($data) {
-                    return $data->created_at ? $data->created_at->format('Y-m-d') : '---';
-                })
-                ->rawColumns(['avatar', 'name', 'email', 'phone', 'created_at', 'action'])
+                ->rawColumns(['avatar', 'name', 'email', 'role', 'created_at', 'action'])
                 ->make(true);
         }
         return view("backend.layouts.user.index");

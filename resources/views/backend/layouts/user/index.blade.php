@@ -41,7 +41,7 @@
                                             <th class="bg-transparent border-bottom-0 wp-5">ID</th>
                                             <th class="bg-transparent border-bottom-0 wp-20">Name</th>
                                             <th class="bg-transparent border-bottom-0 wp-20">Email</th>
-                                            <th class="bg-transparent border-bottom-0 wp-15">Phone</th>
+                                            <th class="bg-transparent border-bottom-0 wp-15">Role</th>
 
                                             <th class="bg-transparent border-bottom-0 wp-15">Join Date</th>
                                             <th class="bg-transparent border-bottom-0 wp-10">Delete User</th>
@@ -119,8 +119,8 @@
                                 searchable: true
                             },
                             {
-                                data: 'phone_number',
-                                name: 'phone_number',
+                                data: 'role',
+                                name: 'role',
                                 orderable: true,
                                 searchable: true
                             },
