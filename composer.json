@@ -33,7 +33,12 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+        "app/Helper/auto_load/GlobalHelper.php",
+        "app/Helper/auto_load/ResponseHelper.php",
+        "app/Helper/auto_load/UserHelper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

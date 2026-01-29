@@ -52,8 +52,10 @@ class AuthenticationController extends Controller
                 'is_agree_termsconditions' => $validatedData['is_agree_termsconditions'],
                 'password'        => Hash::make($validatedData['password']),
             ]);
+            $user->profile()->create([
+                'username' => generate_username($validatedData['first_name'], $validatedData['last_name']),
+            ]);
             $user->otpVerifications()->create([
-                // 'otp_code'   => Hash::make($otp),
                 'otp_code'   => $otp,
                 'expires_at' => $otpExpiresAt,
             ]);

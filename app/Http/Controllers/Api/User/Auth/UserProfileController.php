@@ -176,10 +176,6 @@ class UserProfileController extends Controller
 
             $company = Company::where('user_id', $user->id)->first();
 
-            // if (! $company) {
-            //     return $this->error([], 'Company not found.', 404);
-            // }
-
             $userData = [
                 'id'            => $user->id,
                 'name'          => $user->name,
@@ -203,8 +199,8 @@ class UserProfileController extends Controller
             return $this->success([], 'User Profile not found', 200);
         }
 
-        if ($user->avatar) {
-            Helper::deleteImage($user->avatar);
+        if ($user->profile->image) {
+            Helper::deleteImage($user->profile->image);
         }
 
         $user->delete();

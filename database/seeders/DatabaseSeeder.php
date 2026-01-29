@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-
+use Doctrine\Inflector\Language;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(FaqSeeder::class);
         $this->call(SocialMediaSeeder::class);
         $this->call(DynamicPageSeeder::class);
+        $this->call(LanguageSeeder::class);
 
         // $this->call(PlanSeeder::class);
 

@@ -30,22 +30,16 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'is_verified',
         'email_verified_at',
-        // 'phone_number',
-        // 'branch_code',
         'password',
-        // 'otp_expires_at',
-        // 'is_otp_verified',
-        // 'otp',
         'role',
-        // 'avatar',
-        // 'reset_password_token',
-        // 'reset_password_token_expire_at'
+        'group',
+        'status',
     ];
 
 
     protected $hidden = [
         'password',
-        'remember_token',
+        // 'remember_token',
         'created_at',
         'updated_at',
     ];
@@ -60,6 +54,18 @@ class User extends Authenticatable implements JWTSubject
             'password'                        => 'hashed',
         ];
     }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
+
+
+
+
+
+
+
 
     public function getAvatarAttribute($value): string | null
     {

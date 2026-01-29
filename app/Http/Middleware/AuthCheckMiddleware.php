@@ -16,8 +16,8 @@ class AuthCheckMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check()) {
-            switch (Auth::user()->role) {
+        if (auth('web')->check()) {
+            switch (Auth::user('web')->role) {
                 case 'admin':
                     return redirect()->route('dashboard');
                 case 'user':

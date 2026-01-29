@@ -98,9 +98,7 @@ class ResetPasswordController extends Controller
 
             $email = $request->input('email');
             $otp   = $request->input('otp');
-            $resetRecord = DB::table('password_reset_tokens')
-                ->where('email', $email)
-                ->first();
+            $resetRecord = DB::table('password_reset_tokens')->where('email', $email)->first();
 
             if (!$resetRecord) {
                 return $this->error(false, 'Invalid or expired reset token.', 404);
@@ -108,32 +106,26 @@ class ResetPasswordController extends Controller
             $createdAt = Carbon::parse($resetRecord->created_at);
 
             if ($createdAt->addMinutes(10)->isPast()) {
-                DB::table('password_reset_tokens')
-                    ->where('email', $request->email)
-                    ->delete();
+                DB::table('password_reset_tokens')->where('email', $request->email)->delete();
                 return $this->error([], 'Reset token has expired.', 400);
             }
 
             if (!Hash::check($otp, $resetRecord->token)) {
 
-                return $this->error(['d' => $resetRecord->token, 'r' => Hash::make($otp)], 'Invalid reset token.', 400);
+                return $this->error([], 'Invalid reset token.', 400);
             }
 
             $token = Str::random(60);
 
             DB::table('password_reset_tokens')
-                ->where('email', $email)
-                ->update([
+                ->where('email', $email)->update([
                     'token' => $token,
                     'created_at' => Carbon::now()->addMinutes(5),
                 ]);
 
-            return response()->json([
-                'status'     => true,
-                'message'    => 'OTP verified successfully.',
-                'code'       => 200,
+            return $this->success([
                 'token'      => $token,
-            ]);
+            ], 'OTP verified successfully.');
         } catch (Exception $e) {
             return $this->error([], $e->getMessage(), 500);
         }
@@ -142,15 +134,9 @@ class ResetPasswordController extends Controller
 
     public function ResetPassword(Request $request, $token)
     {
-        // $request->validate([
-        //     'email'    => 'required|email|exists:users,email',
-        //     'password' => 'required|string|min:6',
-        // ]);
-
-
         $validator = Validator::make($request->all(), [
-            'email'    => 'required|email|exists:users,email',
-            'password' => 'required|string|min:6',
+            // 'email'    => 'required|email|exists:users,email',
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
 
@@ -161,24 +147,25 @@ class ResetPasswordController extends Controller
 
         try {
 
-            $email       = $request->input('email');
+            // $email       = $request->input('email');
             $newPassword = $request->input('password');
 
+            $resetRecord = DB::table('password_reset_tokens')->where('token', $token)->first();
+            $email       = $resetRecord->email;
             $user = User::where('email', $email)->first();
-             $resetRecord = DB::table('password_reset_tokens')
-                ->where('email', $email)
-                ->first();
+
+
 
             if (!$resetRecord) {
                 return $this->error(false, 'User not found', 404);
             }
 
-            if (!empty($resetRecord->token) && $resetRecord->token === $request->token && $resetRecord->created_at >= Carbon::now()) {
+            if (!empty($resetRecord->token) && $resetRecord->token === $token && $resetRecord->created_at >= Carbon::now()) {
                 $user->update([
                     'password'        => Hash::make($newPassword),
                 ]);
                 $resetRecord = DB::table('password_reset_tokens')
-                ->where('email', $email)->delete();
+                    ->where('email', $email)->delete();
 
                 return $this->success(true, 'Password reset Successfully.', 200);
             } else {

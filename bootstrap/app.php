@@ -12,13 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__ . '/../routes/web.php',
         api: __DIR__ . '/../routes/api.php',
         commands: __DIR__ . '/../routes/console.php',
-        channels: __DIR__.'/../routes/channels.php',
+        channels: __DIR__ . '/../routes/channels.php',
 
         health: '/up',
         then: function () {
             Route::middleware(['web', 'auth', 'admin'])->prefix('admin')->group(base_path('routes/backend.php'));
-            Route::middleware(['web'])->prefix('website')->group(base_path('routes/website.php'));
-            Route::middleware(['web'])->prefix('api/company')->group(base_path('routes/company.php'));
+            // Route::middleware(['web'])->prefix('website')->group(base_path('routes/website.php'));
+            // Route::middleware(['web'])->prefix('api/company')->group(base_path('routes/company.php'));
             // Route::middleware(['web'])->prefix('api/website')->group(base_path('routes/website.php'));
         }
     )
@@ -42,10 +42,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
+            'auth'      => \Illuminate\Auth\Middleware\Authenticate::class,
+            // 'auth.jwt'  => App\Http\Middleware\Authenticate::class, // for API
+
             'admin'     => App\Http\Middleware\AdminMiddleware::class,
-            'authCheck' => App\Http\Middleware\AuthCheckMiddleware::class,
-            'business'  => App\Http\Middleware\BusinessMiddleware::class,
-            'role'      => App\Http\Middleware\RoleMiddleware::class,
+            // 'authCheck' => App\Http\Middleware\AuthCheckMiddleware::class,
+            // 'business'  => App\Http\Middleware\BusinessMiddleware::class,
+            // 'role'      => App\Http\Middleware\RoleMiddleware::class,
+
         ]);
         $middleware->validateCsrfTokens(except: [
             'webhook/payment',
