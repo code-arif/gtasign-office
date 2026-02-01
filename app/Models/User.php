@@ -32,61 +32,22 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'address',
-        'username',
-        'slug',
         'email',
         'phone',
         'password',
-        'biography',
-        'jourcy_number',
-
-        'otp',
-        'otp_expires_at',
-        'otp_verified_at',
-        'reset_password_token',
-        'reset_password_token_expire_at',
-
-        'avatar',
-        'last_activity_at',
-
-        'stripe_customer_id',
-        'stripe_account_id',
-
-        'status'
+        'status',
+        'email_verified_at',
     ];
 
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'otp_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'last_activity_at' => 'datetime'
-        ];
-    }
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 
 
     public function getAvatarAttribute($value): string | null
@@ -115,55 +76,11 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
+    /**
+     * Relationship: Profile table
+     */
     public function profile()
     {
         return $this->hasOne(Profile::class);
-    }
-
-    public function referee()
-    {
-        return $this->belongsTo(User::class, 'referee_id');
-    }
-
-    // User Model
-    public function evaluatorEvaluations()
-    {
-        return $this->hasMany(RefereeEvaluation::class, 'evaluator_id');
-    }
-
-    // camp checkin referee
-    public function refereeCheckins()
-    {
-        return $this->hasMany(CampRefereeCheckin::class, 'referee_id');
-    }
-
-    // referee evaluation
-    public function evaluations()
-    {
-        return $this->hasMany(RefereeEvaluation::class, 'referee_id');
-    }
-
-    /**
-     * Get unread announcements count
-     */
-    public function unreadAnnouncementsCount()
-    {
-        return $this->unreadNotifications()
-            ->where('type', 'AnnouncementNotification')
-            ->count();
-    }
-
-    /**
-     * Referee camps with jersey numbers
-     */
-    public function refereeCamps()
-    {
-        return $this->belongsToMany(
-            Camp::class,
-            'camp_referee_jearsy_numbers',
-            'referee_id',
-            'camp_id'
-        )->withPivot('jersey_number')
-            ->withTimestamps();
     }
 }

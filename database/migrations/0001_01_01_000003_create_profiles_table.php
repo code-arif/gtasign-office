@@ -13,9 +13,18 @@ return new class extends Migration
     {
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->date('dob')->nullable();
-            $table->enum('gender', ['male', 'female', 'other'])->nullable();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('username')->unique();
+            $table->string('slug')->unique();
+
+            $table->string('tagline')->nullable();
+            $table->text('biography')->nullable();
+            $table->string('address')->nullable();
+            $table->string('avatar')->nullable();
+
             $table->timestamps();
         });
     }

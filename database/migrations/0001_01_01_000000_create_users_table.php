@@ -13,31 +13,15 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('first_name')->nullable();
-            $table->string('last_name')->nullable();
-            $table->string('address')->nullable();
-            $table->string('username')->unique();
-            $table->string('slug')->unique();
+
+            // Identity
             $table->string('email')->unique();
-            $table->string('phone')->unique()->nullable();
+            $table->string('phone')->nullable()->unique();
             $table->string('password')->nullable();
-            $table->text('biography')->nullable();
 
-
-            $table->string('otp')->nullable();
-            $table->timestamp('otp_expires_at')->nullable();
-            $table->timestamp('otp_verified_at')->nullable();
-            $table->longText('reset_password_token')->nullable();
-            $table->timestamp('reset_password_token_expire_at')->nullable();
-
-            $table->string('avatar')->nullable();
-
-            $table->timestamp('last_activity_at')->nullable();
-
-            $table->string('stripe_customer_id')->nullable();
-            $table->string('stripe_account_id')->nullable();
-
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            // System
+            $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
+            $table->timestamp('email_verified_at')->nullable();
 
             $table->rememberToken();
             $table->softDeletes();
