@@ -11,12 +11,12 @@
             {{-- PAGE-HEADER --}}
             <div class="page-header">
                 <div>
-                    <h1 class="page-title">Google Client Settings <i class="fa-solid fa-triangle-exclamation text-danger" title="Warning"></i></h1>
+                    <h1 class="page-title">Stripe Settings <i class="fa-solid fa-triangle-exclamation text-danger" title="Warning"></i></h1>
                 </div>
                 <div class="ms-auto pageheader-btn">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="javascript:void(0);">Settings</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Google</li>
+                        <li class="breadcrumb-item active" aria-current="page">Stripe</li>
                     </ol>
                 </div>
             </div>
@@ -28,7 +28,7 @@
                     <h2 class="card-header">Google Settings</h2>
                     <div class="card box-shadow-0">
                         <div class="card-body">
-                            <form method="post" action="{{ route('setting.social.update') }}" enctype="multipart/form-data">
+                            <form class="form form-horizontal" method="post" action="{{ route('admin.setting.social.update') }}" enctype="multipart/form-data">
                                 @csrf
                                 @method('PATCH')
 
@@ -36,8 +36,8 @@
                                     <label for="google_client_id" class="col-md-3 form-label">Google Client ID</label>
                                     <div class="col-md-9">
                                         <input class="form-control @error('google_client_id') is-invalid @enderror" id="google_client_id"
-                                            name="google_client_id" placeholder="Enter your google client ID" type="text"
-                                            value="{{ config('services.google.client_id') ?? old('google_client_id') }}">
+                                            name="google_client_id" placeholder="Enter your stripe key" type="text"
+                                            value="{{ env('GOOGLE_CLIENT_ID') ?? old('google_client_id') }}">
                                         @error('google_client_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -48,8 +48,8 @@
                                     <label for="google_client_secret" class="col-md-3 form-label">Google Client Secret</label>
                                     <div class="col-md-9">
                                         <input class="form-control @error('google_client_secret') is-invalid @enderror" id="google_client_secret"
-                                            name="google_client_secret" placeholder="Enter your google client secret" type="text"
-                                            value="{{ config('services.google.client_secret') ?? old('google_client_secret') }}">
+                                            name="google_client_secret" placeholder="Enter your stripe secret" type="text"
+                                            value="{{ env('GOOGLE_CLIENT_SECRET') ?? old('google_client_secret') }}">
                                         @error('google_client_secret')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -57,12 +57,12 @@
                                 </div>
 
                                 <div class="row mb-4">
-                                    <label for="google_redirect_url" class="col-md-3 form-label">Google Redirect Url</label>
+                                    <label for="google_redirect_uri" class="col-md-3 form-label">Google Redirect Uri</label>
                                     <div class="col-md-9">
-                                        <input class="form-control @error('google_redirect_url') is-invalid @enderror" id="google_redirect_url"
-                                            name="google_redirect_url" placeholder="Enter your google redirect url" type="text"
-                                            value="{{ config('services.google.redirect') ?? old('google_redirect_url') }}">
-                                        @error('google_redirect_url')
+                                        <input class="form-control @error('google_redirect_uri') is-invalid @enderror" id="google_redirect_uri"
+                                            name="google_redirect_uri" placeholder="Enter your stripe webhook secret" type="text"
+                                            value="{{ env('GOOGLE_REDIRECT_URI') ?? old('google_redirect_uri') }}">
+                                        @error('google_redirect_uri')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -71,7 +71,7 @@
                                 <div class="row justify-content-end">
                                     <div class="col-sm-9">
                                         <div>
-                                            <button class="btn btn-primary" type="submit">Submit</button>
+                                            <button class="submit btn btn-primary" type="submit">Submit</button>
                                         </div>
                                     </div>
                                 </div>

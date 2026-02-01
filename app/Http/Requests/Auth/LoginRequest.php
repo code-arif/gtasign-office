@@ -29,7 +29,6 @@ class LoginRequest extends FormRequest
         $data = [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'role' => ['required', 'string', 'in:user,admin'],
         ];
         if (env('RECAPTCHA_ENABLE') === 'yes')
         {

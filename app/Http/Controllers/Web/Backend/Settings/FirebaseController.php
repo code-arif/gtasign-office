@@ -31,7 +31,7 @@ class FirebaseController extends Controller {
      */
     public function update(Request $request): RedirectResponse {
         $request->validate([
-            'firebase_credentials' => 'nullable|string'
+            'firebase_credentials' => 'nullable|string|regex:/^[\S]*$/'
         ]);
 
         try {

@@ -53,6 +53,7 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    'frontend_url' => env('FRONTEND', 'https://whistleworks.org'),
 
     /*
     |--------------------------------------------------------------------------
@@ -122,5 +123,7 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+    'encryption_key' => env('APP_ENCRYPTION_KEY', 'base64:newencryptionkey1234567890abcdef'),
 
 ];

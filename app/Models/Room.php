@@ -6,23 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
 {
+    protected $fillable = ['user_one_id','user_two_id'];
 
-    protected $fillable = ['first_user_id','second_user_id'];
-
-    public function first_user()
+    public function userOne()
     {
-        return $this->belongsTo(User::class, 'first_user_id');
+        return $this->belongsTo(User::class, 'user_one_id');
     }
 
-    public function second_user()
+    public function userTwo()
     {
-        return $this->belongsTo(User::class, 'second_user_id');
+        return $this->belongsTo(User::class, 'user_two_id');
     }
 
-    public function chats(){
-       return  $this->hasMany(Chat::class, 'room_id', 'id');
+    public function chats()
+    {
+        return $this->hasMany(Chat::class);
     }
-
-
-
+    
 }

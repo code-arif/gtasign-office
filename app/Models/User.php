@@ -3,16 +3,24 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Stripe\Plan;
+use Stripe\Product;
+use Modules\Director\Models\Camp;
+use Spatie\Permission\Traits\HasRoles;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Notifications\AnnouncementNotification;
+use Modules\Director\Models\CampRefereeCheckin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Cashier\Billable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable, HasRoles, SoftDeletes;
 
-    use HasFactory, Notifiable, Billable;
+    protected $guard_name = ['api', 'web'];
 
     public function getJWTIdentifier()
     {
@@ -24,91 +32,138 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'first_name',
         'last_name',
+        'address',
+        'username',
+        'slug',
         'email',
-        'phone_number',
-        'branch_code',
+        'phone',
         'password',
-        'otp_expires_at',
-        'is_otp_verified',
+        'biography',
+        'jourcy_number',
+
         'otp',
-        'role',
-        'avatar',
+        'otp_expires_at',
+        'otp_verified_at',
         'reset_password_token',
-        'reset_password_token_expire_at'
+        'reset_password_token_expire_at',
+
+        'avatar',
+        'last_activity_at',
+
+        'stripe_customer_id',
+        'stripe_account_id',
+
+        'status'
     ];
 
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
-        'created_at',
-        'updated_at',
     ];
-
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
-            'email_verified_at'               => 'datetime',
-            'otp_expires_at'                  => 'datetime',
-            'is_otp_verified'                 => 'boolean',
-            'reset_password_token_expires_at' => 'datetime',
-            'password'                        => 'hashed',
+            'otp_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'last_activity_at' => 'datetime'
         ];
     }
+
 
     public function getAvatarAttribute($value): string | null
     {
         if (filter_var($value, FILTER_VALIDATE_URL)) {
             return $value;
         }
-        if (request()->is('api/*') && ! empty($value)) {
-
+        // Check if the request is an API request
+        if (request()->is('api/*') && !empty($value)) {
+            // Return the full URL for API requests
             return url($value);
         }
+
+        // Return only the path for web requests
         return $value;
     }
 
-    // company
-    public function company()
+    public function getRoleAttribute()
     {
-        return $this->hasOne(Company::class, 'user_id', 'id');
+        return  $this->getRoleNames()->first();
     }
 
-    // employee
-    public function employee()
+    public function firebaseTokens()
     {
-        return $this->hasOne(Employee::class, 'user_id', 'id');
-    }
-    public function certifcations()
-    {
-        return $this->hasMany(EmployeeCertification::class, 'employee_id', 'id');
+        return $this->hasMany(FirebaseTokens::class);
     }
 
-    public function experiences()
+
+    public function profile()
     {
-        return $this->hasMany(EmployeeExperience::class, 'employee_id', 'id');
+        return $this->hasOne(Profile::class);
     }
-    public function job_categories()
+
+    public function referee()
     {
-        return $this->hasMany(EmployeeJobCategory::class, 'employee_id', 'id');
+        return $this->belongsTo(User::class, 'referee_id');
     }
-    public function qualifications()
+
+    // User Model
+    public function evaluatorEvaluations()
     {
-        return $this->hasMany(EmployeeQualification::class, 'employee_id', 'id');
+        return $this->hasMany(RefereeEvaluation::class, 'evaluator_id');
     }
-    public function specializes()
+
+    // camp checkin referee
+    public function refereeCheckins()
     {
-        return $this->hasMany(EmployeeSpecialize::class, 'employee_id', 'id');
+        return $this->hasMany(CampRefereeCheckin::class, 'referee_id');
     }
-    public function specializations()
+
+    // referee evaluation
+    public function evaluations()
     {
-        return $this->hasMany(CompanySpecialize::class, 'company_id', 'id');
+        return $this->hasMany(RefereeEvaluation::class, 'referee_id');
     }
-    public function get_project()
+
+    /**
+     * Get unread announcements count
+     */
+    public function unreadAnnouncementsCount()
     {
-        return $this->hasMany(CompanyProject::class, 'company_id', 'id');
+        return $this->unreadNotifications()
+            ->where('type', 'AnnouncementNotification')
+            ->count();
+    }
+
+    /**
+     * Referee camps with jersey numbers
+     */
+    public function refereeCamps()
+    {
+        return $this->belongsToMany(
+            Camp::class,
+            'camp_referee_jearsy_numbers',
+            'referee_id',
+            'camp_id'
+        )->withPivot('jersey_number')
+            ->withTimestamps();
     }
 }

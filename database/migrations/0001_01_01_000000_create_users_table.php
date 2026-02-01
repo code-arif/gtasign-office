@@ -6,40 +6,41 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
+            $table->string('address')->nullable();
+            $table->string('username')->unique();
+            $table->string('slug')->unique();
             $table->string('email')->unique();
-            $table->enum('role', ['admin', 'user', 'seller'])->default('user');
+            $table->string('phone')->unique()->nullable();
+            $table->string('password')->nullable();
+            $table->text('biography')->nullable();
 
-            $table->string('house')->nullable();
-            $table->string('road')->nullable();
-            $table->string('city')->nullable();
+
+            $table->string('otp')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
+            $table->timestamp('otp_verified_at')->nullable();
+            $table->longText('reset_password_token')->nullable();
+            $table->timestamp('reset_password_token_expire_at')->nullable();
+
+            $table->string('avatar')->nullable();
+
+            $table->timestamp('last_activity_at')->nullable();
+
+            $table->string('stripe_customer_id')->nullable();
+            $table->string('stripe_account_id')->nullable();
 
             $table->enum('status', ['active', 'inactive'])->default('active');
 
-            $table->string('otp')->nullable();
-            $table->boolean('is_otp_verified')->default(false);
-            $table->timestamp('otp_expires_at')->nullable();
-
-            $table->string('avatar')->nullable();
-            $table->string('gender')->nullable();
-
-            $table->foreignId('plan_id')->nullable();
-            $table->string('subscription_status')->nullable();
-            $table->enum('payment_way', ['web', 'app', 'other'])->default('other');
-            $table->timestamp('last_activity_at')->nullable();
-
-            $table->string('google_id')->nullable();
-            $table->boolean('is_agree_termsconditions')->default(false);
-            $table->timestamp('email_verified_at')->nullable();
-            $table->boolean('is_social_logged')->default(false);
-            $table->string('password')->nullable();
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -59,6 +60,9 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('users');

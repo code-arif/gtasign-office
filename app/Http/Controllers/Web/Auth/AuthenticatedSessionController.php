@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Http\Controllers\Web\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\WebCustomRedirectMiddleware;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,47 +25,19 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
-        $request->session()->regenerate();
-        $user = auth('web')->user();
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
 
-        // Prevent admin from logging in via user login
-        if ($request->role === 'user' && $user->role === 'admin') {
-            Auth::guard('web')->logout();
-            return redirect()->back()->withErrors([
-                'email' => 'These credentials do not match our records.',
+            $request->authenticate();
+
+            $request->session()->regenerate();
+            session()->put('t-success', 'Password Confirmed Successfully');
+            return app(WebCustomRedirectMiddleware::class)->handle($request, function () {});
+
+        }else{
+            return back()->withErrors([
+                'email' => 'The provided credentials do not match our records.',
             ]);
         }
-
-        // Role-based redirect
-        if ($user->role === 'admin') {
-            return redirect()->intended(route('dashboard'));
-        }
-
-        if ($user->role === 'user') {
-            return redirect()->intended(route('home'));
-        }
-
-        // Optional fallback
-        return redirect()->route('login')->withErrors([
-            'email' => 'Your account role is not recognized.',
-        ]);
-    }
-
-
-    public function admin_login(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
-        $request->session()->regenerate();
-        $user = auth('web')->user();
-
-
-        // Role-based redirect
-        if ($user->role === 'admin') {
-            return redirect()->intended(route('dashboard'));
-        }
-
-
     }
 
     /**
@@ -76,6 +50,8 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
+
+        session()->put('t-success', 'Logout Successfully');
 
         return redirect('/');
     }

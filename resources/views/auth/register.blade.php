@@ -1,84 +1,94 @@
-@extends('website.app')
+@extends('auth.app')
 
-@section('contents')
-    <!--------- Product Area Start ------>
-    <section class="login-screen-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="title-wrap text-center">
-                        <h2>Create new account</h2>
-                        <p>Create an account to track your future orders, checkout faster, and sync your favorites.</p>
-                    </div>
-
-                    <div class="login-screen">
-                        <div class="login-form">
-                            <form method="POST" action="{{ route('register') }}">
-                                @csrf
-
-                                {{-- Customer Name --}}
-                                <div class="single-field">
-                                    <input type="text" name="name" value="{{ old('name') }}" required
-                                        placeholder="Customer’s Name">
-                                    @error('name')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                {{-- Branch Code --}}
-                                <div class="single-field">
-                                    <input type="text" name="branch_name" value="{{ old('branch_name') }}" required
-                                        placeholder="Branch Code">
-                                    @error('branch_name')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                {{-- Email --}}
-                                <div class="single-field">
-                                    <input type="email" name="email" value="{{ old('email') }}" required
-                                        placeholder="Your email address">
-                                    @error('email')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                {{-- Phone --}}
-                                <div class="single-field">
-                                    <input type="text" name="phone_number" value="{{ old('phone_number') }}" required
-                                        placeholder="Phone number">
-                                    @error('phone_number')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                {{-- Password --}}
-                                <div class="single-field last-field">
-                                    <input type="password" name="password" required autocomplete="new-password"
-                                        placeholder="Password">
-                                    @error('password')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                {{-- Confirm Password --}}
-                                <div class="single-field last-field">
-                                    <input type="password" name="password_confirmation" required autocomplete="new-password"
-                                        placeholder="Confirm Password">
-                                </div>
-
-                                <div class="submit-btn mt-5">
-                                    <button type="submit">Register</button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="login-option">
-                            <a href="{{ route('login') }}">I have a password. Sign in.</a>
-                        </div>
-                    </div>
+@section('content')
+<!-- CONTAINER OPEN -->
+<div class="col col-login mx-auto text-center">
+    <a href="index.html" class="text-center">
+        <img src="{{ asset($settings->logo ?? 'default/logo.svg') }}" class="header-brand-img" alt="">
+    </a>
+</div>
+<div class="container-login100">
+    <div class="wrap-login100 p-0">
+        <div class="card-body">
+            <form class="login100-form validate-form" method="POST" action="{{ route('register') }}">
+                @csrf
+                <div class="login100-form-title">
+                    <h2>Sign Up</h2>
                 </div>
-            </div>
+
+                <input type="hidden" name="role" value="1">
+
+                <div class="wrap-input100 validate-input" data-bs-validate="Valid name is required: sabbir">
+                    <input class="input100" type="text" name="name" placeholder="Name" value="{{ old('name') }}">
+                    <span class="focus-input100"></span>
+                    <span class="symbol-input100">
+                        <i class="zmdi zmdi-account" aria-hidden="true"></i>
+                    </span>
+                </div>
+                @error('name')
+                <div class="alert alert-danger">{{ $message }}</div>
+                @enderror
+
+                <div class="wrap-input100 validate-input" data-bs-validate="Valid email is required: ex@abc.xyz">
+                    <input class="input100" type="text" name="email" placeholder="Email" value="{{ old('email') }}">
+                    <span class="focus-input100"></span>
+                    <span class="symbol-input100">
+                        <i class="zmdi zmdi-email" aria-hidden="true"></i>
+                    </span>
+                </div>
+                @error('email')
+                <div class="alert alert-danger">{{ $message }}</div>
+                @enderror
+
+                <div class="wrap-input100 validate-input" data-bs-validate="Password is required">
+                    <input class="input100" type="password" name="password" placeholder="Password">
+                    <span class="focus-input100"></span>
+                    <span class="symbol-input100">
+                        <i class="zmdi zmdi-lock" aria-hidden="true"></i>
+                    </span>
+                </div>
+                @error('password')
+                <div class="alert alert-danger">{{ $message }}</div>
+                @enderror
+
+                <div class="wrap-input100 validate-input" data-bs-validate="Password is required">
+                    <input class="input100" type="password" name="password_confirmation" placeholder="Confirm Password">
+                    <span class="focus-input100"></span>
+                    <span class="symbol-input100">
+                        <i class="zmdi zmdi-lock" aria-hidden="true"></i>
+                    </span>
+                </div>
+                @error('password_confirmation')
+                <div class="alert alert-danger">{{ $message }}</div>
+                @enderror
+
+                <div class="text-end pt-1">
+                    <p class="mb-0"><a href="{{ route('login') }}" class="text-primary ms-1">login here</a></p>
+                </div>
+
+                @if(config('settings.recaptcha') === 'yes')
+                <div class="bi-login-input-wrapper save mt-3 mb-1">
+                    {!! htmlFormSnippet() !!}
+                    @if ($errors->has('g-recaptcha-response'))
+                        <div>
+                            <small class="text-danger">
+                                {{ $errors->first('g-recaptcha-response') }}
+                            </small>
+                        </div>
+                    @endif
+                </div>
+                @endif
+
+                <div class="container-login100-form-btn">
+                    <button type="submit" class="login100-form-btn btn-primary">
+                        Sign Up
+                    </button>
+                </div>
+
+            </form>
         </div>
-    </section>
+    </div>
+</div>
+<!-- CONTAINER CLOSED -->
 @endsection
+

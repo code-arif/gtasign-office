@@ -4,13 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Faq extends Model
+class FAQ extends Model
 {
     protected $guarded = [];
 
+    protected $hidden = ['created_at', 'updated_at','category'];
 
-    protected $hidded = [
-        'created_at',
-        'updated_at',
-    ];
 }

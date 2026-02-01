@@ -1,84 +1,62 @@
-@extends('website.app')
+@extends('auth.app')
 
-@section('contents')
-    <section class="login-screen-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="login-screen">
-                        <div class="title-wrap text-center">
-                            <h2>Log in</h2>
-                            <p>Enter your email and password to sign in to your account.</p>
-                        </div>
+@section('content')
+    <div class="container-login100">
+        <div class="wrap-login100 p-0">
+            <div class="card-body">
+                <form class="login100-form validate-form" method="POST" action="{{ route('login') }}">
+                    @csrf
+                    <div class="login100-form-title">
+                        <h2>Sign In</h2>
+                    </div>
 
-                        <div class="login-form">
-                            {{-- Global error alert --}}
-                            @if ($errors->any())
-                                <div class="alert alert-danger mb-3">
-                                    <ul class="mb-0">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
+                    <div class="wrap-input100 validate-input" data-bs-validate="Valid email is required: ex@abc.xyz">
+                        <input class="input100" type="text" name="email" placeholder="Email">
+                        <span class="focus-input100"></span>
+                        <span class="symbol-input100">
+                            <i class="zmdi zmdi-email" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    @error('email')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                    @enderror
+
+                    <div class="wrap-input100 validate-input" data-bs-validate="Password is required">
+                        <input class="input100" type="password" name="password" placeholder="Password">
+                        <span class="focus-input100"></span>
+                        <span class="symbol-input100">
+                            <i class="zmdi zmdi-lock" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    @error('password')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                    @enderror
+
+                    <div class="text-end pt-1">
+                        <p class="mb-0"><a href="{{ route('password.request') }}" class="text-primary ms-1">Forgot
+                                Password?</a></p>
+                    </div>
+
+                    @if (config('settings.recaptcha') === 'yes')
+                        <div class="bi-login-input-wrapper save mt-3 mb-1">
+                            {!! htmlFormSnippet() !!}
+                            @if ($errors->has('g-recaptcha-response'))
+                                <div>
+                                    <small class="text-danger">
+                                        {{ $errors->first('g-recaptcha-response') }}
+                                    </small>
                                 </div>
                             @endif
-
-                            <form method="POST" action="{{ route('login') }}">
-                                @csrf
-
-                                <input type="hidden" name="role" value="user">
-
-                                {{-- Email --}}
-                                <div class="single-field">
-                                    <input type="email" name="email" value="{{ old('email') }}" required
-                                        placeholder="Your email address">
-                                    @error('email')
-                                        <span class="text-danger small d-block mt-1">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                {{-- Branch Code --}}
-                                <div class="single-field">
-                                    <input type="text" name="branch_code" value="{{ old('branch_code') }}" required
-                                        placeholder="Branch Code">
-                                    @error('branch_code')
-                                        <span class="text-danger small d-block mt-1">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                {{-- Password --}}
-                                <div class="single-field last-field">
-                                    <input type="password" name="password" required placeholder="Password">
-                                    @error('password')
-                                        <span class="text-danger small d-block mt-1">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                {{-- Remember --}}
-                                <div class="single-checkbox">
-                                    <div class="form-check">
-                                        <input class="form-check-input" required type="checkbox" name="remember"
-                                            id="flexCheckDefault">
-                                        <label class="form-check-label" for="flexCheckDefault">
-                                            Save ID
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="submit-btn">
-                                    <button type="submit">Log In</button>
-                                </div>
-                            </form>
                         </div>
+                    @endif
 
-                        <div class="login-option">
-                            <a href="{{ route('password.request') }}">Forgot your password ?</a>
-                            <span></span>
-                            <a href="{{ route('register') }}">Create new account</a>
-                        </div>
+                    <div class="container-login100-form-btn">
+                        <button type="submit" class="login100-form-btn btn-primary">
+                            Login
+                        </button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
-    </section>
+    </div>
 @endsection

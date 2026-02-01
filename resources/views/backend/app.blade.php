@@ -1,6 +1,3 @@
-@php
-$settings = \App\Models\Setting::first();
-@endphp
 <!doctype html>
 <html lang="en" dir="ltr">
 <head>
@@ -10,44 +7,51 @@ $settings = \App\Models\Setting::first();
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="{!! strip_tags($settings->description ?? '') !!}">
-    <meta name="author" content="{{ $settings->author ?? '' }}">
-    <meta name="keywords" content="{!! strip_tags($settings->keywords ?? '') !!}">
+    <meta name="description" content="{!! strip_tags(settings()->description ?? '') !!}">
+    <meta name="author" content="{{ settings()->author ?? '' }}">
+    <meta name="keywords" content="{!! strip_tags(settings()->keywords ?? '') !!}">
+
     <!-- FAVICON -->
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset($settings->favicon ?? 'default/logo.png') }}" />
+    <link rel="shortcut icon" type="image/png" href="{{ asset(settings()->favicon ?? 'default/favicon.png') }}" />
 
     <!-- TITLE -->
-    <title> @yield('title') </title>
+    <title>{{ config('app.name') }} - {{ $title ?? settings()->title ?? '' }}</title>
     <!-- Scripts -->
+
+    <script>
+
+    window.authUserId = {{ auth()->id() ?? 'null' }};
+</script>
 
     @vite(['resources/js/app.js'])
 
+    @include('backend.partials._styles')
 
-    @include('backend.partials.styles')
+    @livewireStyles
 
 
 </head>
 
 <body class="ltr app sidebar-mini">
-    @include('backend.partials.switcher')
+    @include('backend.partials._switcher')
 
-    @include('backend.partials.loader')
+    @include('backend.partials._loader')
 
     <!-- PAGE -->
     <div class="page">
         <div class="page-main">
-            @include('backend.partials.header')
-            @include('backend.partials.sidebar')
+            @include('backend.partials._header')
+            @include('backend.partials._sidebar')
 
             @yield('content')
         </div>
 
-        @include('backend.partials.footer')
-
+        @include('backend.partials._footer')
     </div>
     <!-- page -->
-    @include('backend.partials.scripts')
+    @include('backend.partials._scripts')
 
+    @livewireScripts
 </body>
 
 </html>

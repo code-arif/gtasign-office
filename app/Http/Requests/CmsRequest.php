@@ -27,13 +27,19 @@ class CmsRequest extends FormRequest
             'sub_title'         => 'nullable|string|max:255',
             'description'       => 'nullable|string',
             'sub_description'   => 'nullable|string',
-            'bg'                => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-            'image'             => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'bg'                => 'nullable|image|max:5120',
+            'image'             => 'nullable|image|max:5120',
+            'video'             => 'nullable|file|mimes:mp4,avi,mov,mkv,flv,wmv,webm,3gp,ogg|max:51200',
             'btn_text'          => 'nullable|string|max:50',
             'btn_link'          => 'nullable|string|max:100',
             'btn_color'         => 'nullable|string|max:50',
-            'rating'            => 'nullable|integer|between:1,5'
+            'rating'            => 'nullable|integer|between:1,5',
+            'email'             => 'nullable|email|max:100',
+            'phone'             => 'nullable|string|max:100',
+            'address'          => 'nullable|string|max:255',
+            'slogan'           => 'nullable|string|max:255',
+            'business_name'    => 'nullable|string|max:255',
+            'video_path'       => 'nullable|max:102400'
         ];
     }
 }
-

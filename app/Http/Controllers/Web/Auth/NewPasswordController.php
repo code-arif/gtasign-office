@@ -29,7 +29,6 @@ class NewPasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // dd($request->all());
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
@@ -57,6 +56,6 @@ class NewPasswordController extends Controller
         return $status == Password::PASSWORD_RESET
                     ? redirect()->route('login')->with('status', __($status))
                     : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+                            ->withErrors(['email' => __($status)]);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB as FacadesDB;
 
 class SettingSeeder extends Seeder
 {
@@ -14,18 +14,17 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         DB::table('settings')->insert([
-            'title'         => 'BMW',
+            'title'         => 'Whistle Work',
             'phone'         => '123456789',
-            'email'         => 'bmw@example.com',
-            'name'          => 'BWM - PARTS AND ACCESSORIES',
-            'copyright'     => 'Copyright © 2025 BMW. All rights reserved.',
-            'description'   => "BMW parts and accessories are designed to enhance the performance, style, and comfort of your vehicle.
-                                Genuine BMW parts ensure perfect compatibility, maintaining the car's reliability and safety.",
-            'address'       => 'Cairo, Egypt',
-            'keywords'      => 'BMW, PARTS, ACCESSORIES',
-            'author'        => 'BMW',
-            'created_at'    => now(),
-            'updated_at'    => now(),
+            'email'         => 'admin@admin.com',
+            'name'          => 'Admin',
+            'copyright'     => 'Copyright © 2026 Whistle Work. All rights reserved.',
+            'description'   => "Whistle Work is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience",
+            'address'       => 'New York, USA',
+            'keywords'      => 'Laravel, Framework, PHP',
+            'author'        => 'Drew Bontrager',
+            'created_at'    => FacadesDB::raw('CURRENT_TIMESTAMP'),
+            'updated_at'    => FacadesDB::raw('CURRENT_TIMESTAMP'),
         ]);
     }
 }

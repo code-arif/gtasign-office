@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Web\Backend\Settings;
 
-use Exception;
-use App\Models\User;
-use App\Helper\Helper;
-use Illuminate\View\View;
-use Illuminate\Http\Request;
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Exception;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
@@ -21,10 +21,14 @@ class ProfileController extends Controller
         return view('backend.layouts.settings.profile_settings', compact('user'));
     }
 
+    /**
+     * Update user email and name
+     */
     public function UpdateProfile(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'  => 'nullable|max:100|min:2',
+            'first_name'  => 'nullable|max:100|min:2',
+            'last_name'  => 'nullable|max:100|min:2',
             'email' => 'nullable|email|unique:users,email,' . auth()->user()->id,
         ]);
 
@@ -32,8 +36,9 @@ class ProfileController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         try {
-            $user        = User::find(auth()->user()->id);
-            $user->name  = $request->name;
+            $user = User::find(auth()->user()->id);
+            $user->first_name  = $request->first_name;
+            $user->last_name  = $request->last_name;
             $user->email = $request->email;
 
             $user->save();
@@ -43,6 +48,11 @@ class ProfileController extends Controller
         }
         return redirect()->back();
     }
+
+
+    /**
+     * Update admin password
+     */
     public function UpdatePassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -67,24 +77,28 @@ class ProfileController extends Controller
             return redirect()->back()->with('t-error', 'Something went wrong');
         }
     }
+
+    /**
+     * Update admin profile image
+     */
     public function UpdateProfilePicture(Request $request)
     {
         $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+            'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         try {
             $user      = Auth::user();
-            $image     = $request->file('avatar');
+            $image     = $request->file('profile_picture');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
 
             //? Check if there's an existing profile picture
             if ($user->avatar && file_exists(public_path($user->avatar))) {
-                Helper::deleteImage(public_path($user->avatar));
+                Helper::fileDelete(public_path($user->avatar));
             }
 
             //* Use the Helper class to handle the file upload
-            $imagePath = Helper::uploadImage($image, 'profile', $imageName);
+            $imagePath = Helper::fileUpload($image, 'profile', $imageName);
 
             if ($imagePath === null) {
                 throw new Exception('Failed to upload image.');
@@ -96,11 +110,12 @@ class ProfileController extends Controller
 
             return response()->json([
                 'success'   => true,
+                'message'   => 'Profile picture updated successfully.',
                 'image_url' => asset($imagePath),
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'success' => false,
+                't-success' => false,
                 'message' => $e->getMessage(),
             ]);
         }

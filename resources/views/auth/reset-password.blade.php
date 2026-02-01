@@ -1,72 +1,66 @@
-@extends('website.app')
+@extends('auth.app')
 
-@section('contents')
-    <section class="login-screen-area reset-password">
-        <div class="container mb-5">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="login-screen">
-                        <div class="title-wrap text-center">
-                            <h2>Password Reset</h2>
-                            <p>We’ll send a password reset link to this email.</p>
+@section('content')
+<!-- CONTAINER OPEN -->
+<div class="col col-login mx-auto text-center">
+    <a href="index.html" class="text-center">
+        <img src="{{ asset($settings->logo ?? 'default/logo.svg') }}" class="header-brand-img" alt="">
+    </a>
+</div>
+<div class="container-login100">
+    <div class="wrap-login100 p-0">
+        <div class="card-body">
+            <form class="card shadow-none" method="POST" action="{{ route('password.store') }}">
+                @csrf
+
+                <div class="card-body">
+                    <div class="text-center">
+                        <span class="login100-form-title">
+                            Forgot Password
+                        </span>
+                        <p class="text-muted">Enter your email and instructions will be sent to you!</p>
+                    </div>
+                    <div class="pt-3" id="forgot">
+
+                        <!-- Password Reset Token -->
+                        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">E-Mail:</label>
+                            <input class="form-control" name="email" id="email" placeholder="Enter Your Email" type="email" value="{{ old('email') }}">
                         </div>
-                        <div class="login-form">
-                            <form method="POST" action="{{ route('password.store') }}">
-                                @csrf
+                        @error('email')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
 
-                                <!-- Password Reset Token -->
-                                <input type="hidden" name="token" value="{{ $request->route('token') }}">
-
-
-                                <div class="single-field last-field mb-5">
-                                    {{-- <input type="email" placeholder="Your email address"> --}}
-                                    <input  name="email" id="email" placeholder="Enter Your Email"
-                                        type="email" value="{{ old('email') }}">
-                                    @error('email')
-                                        <div class="alert alert-danger">{{ $message }}</div>
-                                    @enderror
-
-                                </div>
-
-                                <div class="single-field last-field mb-5">
-                                    {{-- <input type="email" placeholder="Your email address"> --}}
-                                    <input  name="password" id="password"
-                                        placeholder="Enter Your Password" type="password" value="{{ old('password') }}">
-                                    @error('password')
-                                        <div class="alert alert-danger">{{ $message }}</div>
-                                    @enderror
-
-                                </div>
-
-                                <div class="single-field last-field mb-5">
-                                    {{-- <input type="email" placeholder="Your email address"> --}}
-                                    <input  name="password_confirmation" id="password_confirmation"
-                                        placeholder="Enter Your Confirm Password" type="password"
-                                        value="{{ old('password_confirmation') }}">
-                                    @error('password')
-                                        <div class="alert alert-danger">{{ $message }}</div>
-                                    @enderror
-
-                                </div>
-
-
-
-                                <div class="submit-btn">
-                                    <button type="submit">
-                                        Reset Password
-                                    </button>
-                                </div>
-
-
-                            </form>
+                        <div class="form-group">
+                            <label class="form-label" for="password">Password:</label>
+                            <input class="form-control" name="password" id="password" placeholder="Enter Your Password" type="password" value="{{ old('password') }}">
                         </div>
-                        <div class="login-option">
-                            <a href="{{ route('login') }}">I have a password. Sign in.</a>
+                        @error('password')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
+
+                        <div class="form-group">
+                            <label class="form-label" for="password_confirmation">Confirm Password:</label>
+                            <input class="form-control" name="password_confirmation" id="password_confirmation" placeholder="Enter Your Confirm Password" type="password" value="{{ old('password_confirmation') }}">
+                        </div>
+                        @error('password_confirmation')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
+
+                        <div class="container-login100-form-btn">
+                            <button type="submit" class="login100-form-btn btn-primary">
+                                Reset Password
+                            </button>
                         </div>
 
                     </div>
+
                 </div>
-            </div>
+            </form>
         </div>
-    </section>
+    </div>
+</div>
+<!-- CONTAINER CLOSED -->
 @endsection

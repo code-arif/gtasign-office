@@ -112,8 +112,8 @@ return [
             'replace_placeholders' => true,
         ],
 
-        'errorlog' => [
-            'driver' => 'errorlog',
+        't-errorlog' => [
+            'driver' => 't-errorlog',
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
