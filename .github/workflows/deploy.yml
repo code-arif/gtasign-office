@@ -1,23 +1,23 @@
-name: Deploy project to our server
+# name: Deploy project to our server
 
-on:
-  push:
-    branches:
-      - deploy
+# on:
+#   push:
+#     branches:
+#       - deploy
 
-jobs:
-  FTP-Deploy-Action:
-    name: FTP Deploy
-    runs-on: ubuntu-latest
+# jobs:
+#   FTP-Deploy-Action:
+#     name: FTP Deploy
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2.1.0
-        with:
-          fetch-depth: 2
+#     steps:
+#       - uses: actions/checkout@v2.1.0
+#         with:
+#           fetch-depth: 2
 
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+#       - name: FTP Deploy
+#         uses: SamKirkland/FTP-Deploy-Action@4.3.0
+#         with:
+#           server: ${{ secrets.FTP_SERVER }}
+#           username: ${{ secrets.FTP_USERNAME }}
+#           password: ${{ secrets.FTP_PASSWORD }}
