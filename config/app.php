@@ -124,6 +124,11 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+<<<<<<< HEAD
     'encryption_key' => env('APP_ENCRYPTION_KEY', 'base64:newencryptionkey1234567890abcdef'),
+=======
+    'frontend_url' => env('FRONTEND_URL', 'https://secaax.com/'),
+
+>>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
 
 ];

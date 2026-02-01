@@ -43,11 +43,21 @@
                                 <table class="table table-bordered text-nowrap border-bottom" id="datatable">
                                     <thead>
                                         <tr>
+<<<<<<< HEAD:resources/views/backend/layouts/sportsType/index.blade.php
                                             <th class="bg-transparent border-bottom-0 wp-15">ID</th>
                                             <th class="bg-transparent border-bottom-0">Sports Type Name</th>
                                             <th class="bg-transparent border-bottom-0">Icon</th>
                                             <th class="bg-transparent border-bottom-0">Status</th>
                                             <th class="bg-transparent border-bottom-0">Action</th>
+=======
+                                            <th class="bg-transparent border-bottom-0 wp-5">ID</th>
+                                            <th class="bg-transparent border-bottom-0 wp-20">Name</th>
+                                            <th class="bg-transparent border-bottom-0 wp-20">Email</th>
+                                            <th class="bg-transparent border-bottom-0 wp-15">Role</th>
+
+                                            <th class="bg-transparent border-bottom-0 wp-15">Join Date</th>
+                                            <th class="bg-transparent border-bottom-0 wp-10">Delete User</th>
+>>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182:resources/views/backend/layouts/user/index.blade.php
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -105,6 +115,7 @@
                     type: "GET",
                 },
 
+<<<<<<< HEAD:resources/views/backend/layouts/sportsType/index.blade.php
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -123,6 +134,48 @@
                         orderable: false,
                         searchable: false
                     },
+=======
+                columns: [
+                            {
+                                data: 'DT_RowIndex',
+                                name: 'DT_RowIndex',
+                                orderable: false,
+                                searchable: false
+                            },
+                            {
+                                data: 'name',
+                                name: 'name',
+                                orderable: true,
+                                searchable: true
+                            },
+                            {
+                                data: 'email',
+                                name: 'email',
+                                orderable: true,
+                                searchable: true
+                            },
+                            {
+                                data: 'role',
+                                name: 'role',
+                                orderable: true,
+                                searchable: true
+                            },
+
+
+                            {
+                                data: 'created_at',
+                                name: 'created_at',
+                                orderable: true,
+                                searchable: false
+                            },
+                            {
+                                data: 'action',
+                                name: 'action',
+                                orderable: false,
+                                searchable: false
+                            }
+                        ],
+>>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182:resources/views/backend/layouts/user/index.blade.php
 
                     {
                         data: 'status',

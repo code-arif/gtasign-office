@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__ . '/../routes/api.php',
         commands: __DIR__ . '/../routes/console.php',
         channels: __DIR__ . '/../routes/channels.php',
+<<<<<<< HEAD
         health: '/up',
         then: function () {
             Route::middleware(['web'])->prefix('ajax')->name('ajax.')->group(base_path('routes/ajax.php'));
@@ -39,6 +40,15 @@ return Application::configure(basePath: dirname(__DIR__))
             Route::middleware(['api', 'api-retailer'])->prefix('api/retailer')->name('api.retailer.')->group(base_path('routes/api-retailer.php'));
             Route::middleware(['api', 'otp', 'api-customer'])->prefix('api/customer')->name('api.customer.')->group(base_path('routes/api-customer.php'));
             Route::middleware(['api'])->group(base_path('routes/api-stripe.php'));
+=======
+
+        health: '/up',
+        then: function () {
+            Route::middleware(['web', 'auth', 'admin'])->prefix('admin')->group(base_path('routes/backend.php'));
+            // Route::middleware(['web'])->prefix('website')->group(base_path('routes/website.php'));
+            // Route::middleware(['web'])->prefix('api/company')->group(base_path('routes/company.php'));
+            // Route::middleware(['web'])->prefix('api/website')->group(base_path('routes/website.php'));
+>>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
         }
     )
     ->withBroadcasting(
@@ -47,6 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
+<<<<<<< HEAD
             'web-developer'         => WebDeveloperMiddleware::class,
             'web-admin'             => WebAdminMiddleware::class,
             'api-admin'             => ApiAdminMiddleware::class,
@@ -58,6 +69,16 @@ return Application::configure(basePath: dirname(__DIR__))
             'role'                  => RoleMiddleware::class,
             'permission'            => PermissionMiddleware::class,
             'role_or_permission'    => RoleOrPermissionMiddleware::class
+=======
+            'auth'      => \Illuminate\Auth\Middleware\Authenticate::class,
+            // 'auth.jwt'  => App\Http\Middleware\Authenticate::class, // for API
+
+            'admin'     => App\Http\Middleware\AdminMiddleware::class,
+            // 'authCheck' => App\Http\Middleware\AuthCheckMiddleware::class,
+            // 'business'  => App\Http\Middleware\BusinessMiddleware::class,
+            // 'role'      => App\Http\Middleware\RoleMiddleware::class,
+
+>>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
         ]);
         $middleware->validateCsrfTokens(except: [
             'webhook/stripe',

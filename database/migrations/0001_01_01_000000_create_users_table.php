@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+<<<<<<< HEAD
 
             // Identity
             $table->string('email')->unique();
@@ -23,6 +24,31 @@ return new class extends Migration
             $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
             $table->timestamp('email_verified_at')->nullable();
 
+=======
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('email')->unique();
+            $table->enum('group', ['admin', 'user'])->default('user');
+            $table->enum('role', ['expert', 'client', 'admin'])->default('client');
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->boolean('is_verified')->default(false);
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password')->nullable();
+
+
+            // $table->string('otp')->nullable();
+            // $table->boolean('is_otp_verified')->default(false);
+            // $table->timestamp('otp_expires_at')->nullable();
+
+            // $table->foreignId('plan_id')->nullable();
+            // $table->string('subscription_status')->nullable();
+            // $table->enum('payment_way', ['web', 'app', 'other'])->default('other');
+            // $table->timestamp('last_activity_at')->nullable();
+
+            $table->string('google_id')->nullable();
+            $table->boolean('is_agree_termsconditions')->default(false);
+            $table->boolean('is_social_logged')->default(false);
+>>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();

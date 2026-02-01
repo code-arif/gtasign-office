@@ -50,6 +50,7 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
+<<<<<<< HEAD
             "Database\\Seeders\\": "database/seeders/",
             "Modules\\": "Modules/"
         },
@@ -60,6 +61,14 @@
             "app/Helpers/S3.php",
             "app/Helpers/Text.php",
             "app/Helpers/Encryption.php"
+=======
+            "Database\\Seeders\\": "database/seeders/"
+        },
+        "files": [
+        "app/Helper/auto_load/GlobalHelper.php",
+        "app/Helper/auto_load/ResponseHelper.php",
+        "app/Helper/auto_load/UserHelper.php"
+>>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
         ]
     },
     "autoload-dev": {

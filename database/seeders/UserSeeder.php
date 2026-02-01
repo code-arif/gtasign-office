@@ -11,6 +11,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+<<<<<<< HEAD
         if (!app()->environment('local')) {
             return;
         }
@@ -118,5 +119,33 @@ class UserSeeder extends Seeder
          * ========================= */
         DB::table('users')->insert($users);
         DB::table('model_has_roles')->insert($modelRoles);
+=======
+        DB::table('users')->insert([
+            [
+                'first_name' => 'client',
+                'last_name'  => 'john',
+                'email'      => 'client@gmail.com',
+                'group'      => 'user',
+                'role'       => 'client',
+                'password'   => Hash::make('12345678'),
+            ],
+            [
+                'first_name' => 'admin',
+                'last_name'  => 'user',
+                'email'      => 'admin@gmail.com',
+                'group'      => 'admin',   // ✅ admin belongs here
+                'role'       => 'admin',
+                'password'   => Hash::make('12345678'),
+            ],
+            [
+                'first_name' => 'expert',
+                'last_name'  => 'user',
+                'email'      => 'expert@gmail.com',
+                'group'      => 'user',
+                'role'       => 'expert',
+                'password'   => Hash::make('12345678'),
+            ],
+        ]);
+>>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
     }
 }
