@@ -8,7 +8,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Models\UserSecurityToken;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -52,21 +52,6 @@ class LoginController extends Controller
                 return $this->error(null, 'Invalid credentials', 422);
             }
 
-            // Fetch latest unused OTP
-            $token = UserSecurityToken::where('user_id', $user->id)
-                ->where('type', 'login_otp')
-                ->whereNull('used_at')
-                ->where('expires_at', '>', now())
-                ->latest()
-                ->first();
-
-            if (!$token || !Hash::check($request->otp, $token->token_hash)) {
-                return $this->error(null, 'Invalid or expired OTP', 422);
-            }
-
-            // Mark OTP as used
-            $token->update(['used_at' => now()]);
-
             // Generate JWT token
             $token = auth('api')->login($user);
             $expiresIn = auth('api')->factory()->getTTL() * 60;
@@ -75,17 +60,7 @@ class LoginController extends Controller
             return $this->success(
                 'Login successful',
                 [
-                    'user' => [
-                        'id'          => $user->id,
-                        'email'       => $user->email,
-                        'username'    => $user->username,
-                        'first_name'  => $user->first_name,
-                        'last_name'   => $user->last_name,
-                        'avatar'      => $user->avatar,
-                        'status'      => $user->status,
-                        'role'        => $user->role ?? null,
-                        'biography'   => $user->biography,
-                    ],
+                    'user'       => new UserResource($user),
                     'token'      => $token,
                     'token_type' => 'bearer',
                     'expires_in' => $expiresIn,

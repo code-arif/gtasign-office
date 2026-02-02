@@ -37,7 +37,7 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
     Route::post('/resend-otp', [RegisterController::class, 'ResendOtp']); // done
 
     //login
-    Route::post('/login', [LoginController::class, 'login']) // done
+    Route::post('/login', [LoginController::class, 'login']); // done
 
     //forgot password
     Route::post('/forgot-password', [ResetPasswordController::class, 'forgotPassword']); // done
