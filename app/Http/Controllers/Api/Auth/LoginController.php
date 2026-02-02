@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Helpers\Helper;
-use App\Traits\ApiResponse;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Controller;
-use App\Models\User;
 use Exception;
+use App\Models\User;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use App\Models\UserSecurityToken;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,108 +16,131 @@ class LoginController extends Controller
 {
     use ApiResponse;
 
-    public $select;
-    public function __construct()
-    {
-        parent::__construct();
-        $this->select = ['id', 'name', 'username', 'email', 'avatar', 'otp_verified_at', 'last_activity_at'];
-    }
-
     /**
      * User Login
+     * Flow:
+     * 1. Validate input
+     * 2. Verify user existence and status
+     * 3. Verify password
+     * 4. Verify email verification
+     * 5. Update last activity / clear temporary fields
+     * 6. Generate JWT token
      */
     public function login(Request $request)
     {
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'email'    => 'required|email|exists:users,email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationError($validator->errors()->toArray(), 'Validation failed', 422);
+        }
+
         try {
-            // Validate Request
-            $validator = Validator::make($request->all(), [
-                'email'    => 'required|email|exists:users,email',
-                'password' => 'required|string|min:6',
-            ]);
+            // Fetch user
+            $user = User::where('email', strtolower($request->email))->first();
 
-            if ($validator->fails()) {
-                return $this->error($validator->errors(), 'Validation failed', 422);
-            }
-
-            // Find User
-            $user = User::where('email', $request->email)->first();
-
-            if (!$user) {
-                return $this->error(null, 'User not found', 404);
-            }
-
-            // Check Active Status
+            // Check if user is active
             if ($user->status !== 'active') {
-                return $this->error(null, 'User is not active', 403);
+                return $this->error(null, 'User account is not active', 403);
             }
 
-            // Check Password
+            // Check password
             if (!Hash::check($request->password, $user->password)) {
                 return $this->error(null, 'Invalid credentials', 422);
             }
 
-            // Check Email Verification
-            if (!$user->otp_verified_at) {
-                return $this->error(
-                    ['is_otp_verified' => false],
-                    'Email not verified. Please verify your email before logging in.',
-                    403
-                );
+            // Fetch latest unused OTP
+            $token = UserSecurityToken::where('user_id', $user->id)
+                ->where('type', 'login_otp')
+                ->whereNull('used_at')
+                ->where('expires_at', '>', now())
+                ->latest()
+                ->first();
+
+            if (!$token || !Hash::check($request->otp, $token->token_hash)) {
+                return $this->error(null, 'Invalid or expired OTP', 422);
             }
 
-            // Clear OTP / Reset fields after verification
-            $user->update([
-                'otp'                              => null,
-                'otp_expires_at'                   => null,
-                'reset_password_token'             => null,
-                'reset_password_token_expire_at'   => null,
-                'last_activity_at'                 => now(),
-            ]);
+            // Mark OTP as used
+            $token->update(['used_at' => now()]);
 
-            // Generate Token
+            // Generate JWT token
             $token = auth('api')->login($user);
+            $expiresIn = auth('api')->factory()->getTTL() * 60;
 
-            // Success Response
-            return $this->success('Login successful', [
-                'user'       => [
-                    'id'          => $user->id,
-                    'email'       => $user->email,
-                    'username'    => $user->username,
-                    'name'        => $user->name,
-                    'first_name'  => $user->first_name,
-                    'last_name'   => $user->last_name,
-                    'avatar'      => $user->avatar,
-                    'address'     => $user->address,
-                    'status'      => $user->status,
-                    'role'        => $user->role ?? null,
-                    'biography'   => $user->biography,
-                ],
-                'token'      => $token,
-                'token_type' => 'bearer',
-                'expires_in' => auth('api')->factory()->getTTL() * 60,
-            ]);
+            // Success response
+            return $this->success(
+                'Login successful',
+                [
+                    'user' => [
+                        'id'          => $user->id,
+                        'email'       => $user->email,
+                        'username'    => $user->username,
+                        'first_name'  => $user->first_name,
+                        'last_name'   => $user->last_name,
+                        'avatar'      => $user->avatar,
+                        'status'      => $user->status,
+                        'role'        => $user->role ?? null,
+                        'biography'   => $user->biography,
+                    ],
+                    'token'      => $token,
+                    'token_type' => 'bearer',
+                    'expires_in' => $expiresIn,
+                ]
+            );
         } catch (Exception $e) {
-            return $this->error(['error' => $e->getMessage()], 'An error occurred during login', 500);
+            return $this->error(['exception' => $e->getMessage()], 'Login failed', 500);
         }
     }
 
-
+    /**
+     * Refresh JWT token
+     * Allows client to get a new access token using current valid token
+     */
     public function refreshToken()
     {
-        $refreshToken = auth('api')->refresh();
+        try {
+            $refreshToken = auth('api')->refresh();
+            $expiresIn = auth('api')->factory()->getTTL() * 60;
+            $user = auth('api')->user();
 
-        if (empty($refreshToken)) {
-            return Helper::jsonErrorResponse('Failed to refresh the token.', 401);
+            return $this->success(
+                'Access token refreshed successfully',
+                [
+                    'token'      => $refreshToken,
+                    'token_type' => 'bearer',
+                    'expires_in' => $expiresIn,
+                    'user'       => $user->only([
+                        'id',
+                        'email',
+                        'username',
+                        'first_name',
+                        'last_name',
+                        'avatar',
+                        'role',
+                        'status'
+                    ]),
+                ]
+            );
+        } catch (Exception $e) {
+            return $this->error(['exception' => $e->getMessage()], 'Failed to refresh token', 401);
         }
+    }
 
-        return response()->json([
-            'status'     => true,
-            'message'    => 'Access token refreshed successfully.',
-            'code'       => 200,
-            'token_type' => 'bearer',
-            'token'      => $refreshToken,
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
-            'data' => auth('api')->user()
-        ]);
+    /**
+     * Logout user
+     * Invalidates the current JWT token
+     */
+    public function logout()
+    {
+        try {
+            auth('api')->logout();
+            return $this->success('Logged out successfully', null, 200);
+        } catch (Exception $e) {
+            return $this->error(['exception' => $e->getMessage()], 'Logout failed', 500);
+        }
     }
 }

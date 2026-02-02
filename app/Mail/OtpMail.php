@@ -11,11 +11,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-<<<<<<< HEAD
 class OtpMail extends Mailable implements ShouldQueue
-=======
-class OtpMail extends Mailable
->>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
 {
     use Queueable, SerializesModels;
     public int $otp;

@@ -30,25 +30,14 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__ . '/../routes/api.php',
         commands: __DIR__ . '/../routes/console.php',
         channels: __DIR__ . '/../routes/channels.php',
-<<<<<<< HEAD
         health: '/up',
         then: function () {
             Route::middleware(['web'])->prefix('ajax')->name('ajax.')->group(base_path('routes/ajax.php'));
             Route::middleware(['web', 'web-developer'])->prefix('developer')->name('developer.')->group(base_path('routes/web-developer.php'));
             Route::middleware(['web', 'web-admin'])->prefix('admin')->name('admin.')->group(base_path('routes/web-admin.php'));
             Route::middleware(['api', 'api-admin'])->prefix('api.admin')->name('api.admin.')->group(base_path('routes/api-admin.php'));
-            Route::middleware(['api', 'api-retailer'])->prefix('api/retailer')->name('api.retailer.')->group(base_path('routes/api-retailer.php'));
             Route::middleware(['api', 'otp', 'api-customer'])->prefix('api/customer')->name('api.customer.')->group(base_path('routes/api-customer.php'));
             Route::middleware(['api'])->group(base_path('routes/api-stripe.php'));
-=======
-
-        health: '/up',
-        then: function () {
-            Route::middleware(['web', 'auth', 'admin'])->prefix('admin')->group(base_path('routes/backend.php'));
-            // Route::middleware(['web'])->prefix('website')->group(base_path('routes/website.php'));
-            // Route::middleware(['web'])->prefix('api/company')->group(base_path('routes/company.php'));
-            // Route::middleware(['web'])->prefix('api/website')->group(base_path('routes/website.php'));
->>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
         }
     )
     ->withBroadcasting(
@@ -57,38 +46,19 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-<<<<<<< HEAD
             'web-developer'         => WebDeveloperMiddleware::class,
             'web-admin'             => WebAdminMiddleware::class,
             'api-admin'             => ApiAdminMiddleware::class,
             'api-customer'          => ApiCustomerMiddleware::class,
-            'api-retailer'          => ApiRetailerMiddleware::class,
             'api-otp'               => ApiOtpVerifiedMiddleware::class,
             'web-otp'               => WebOtpVerifiedMiddleware::class,
             'check'                 => WebAuthCheckMiddleware::class,
             'role'                  => RoleMiddleware::class,
             'permission'            => PermissionMiddleware::class,
             'role_or_permission'    => RoleOrPermissionMiddleware::class
-=======
-            'auth'      => \Illuminate\Auth\Middleware\Authenticate::class,
-            // 'auth.jwt'  => App\Http\Middleware\Authenticate::class, // for API
-
-            'admin'     => App\Http\Middleware\AdminMiddleware::class,
-            // 'authCheck' => App\Http\Middleware\AuthCheckMiddleware::class,
-            // 'business'  => App\Http\Middleware\BusinessMiddleware::class,
-            // 'role'      => App\Http\Middleware\RoleMiddleware::class,
-
->>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
         ]);
         $middleware->validateCsrfTokens(except: [
-            'webhook/stripe',
-            'https://whistle-works.netlify.app/*',
-            'http://localhost:5173',
-            'http://localhost:5173/*',
-            'https://admin.whistleworks.org',
-            'https://admin.whistleworks.org/*',
-            'https://admin.whistleworks.org/api/',
-            'https://admin.whistleworks.org/api/*'
+            '*/'
         ]);
         $middleware->api([
             StartSession::class,
@@ -101,28 +71,5 @@ return Application::configure(basePath: dirname(__DIR__))
     //     $schedule->command('app:partnertrashdelete')->daily();
     // })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->render(function (Throwable $e, Request $request) {
-            if ($request->is('api/*')) {
-                if ($e instanceof ValidationException) {
-                    return Helper::jsonErrorResponse($e->getMessage(), 422, $e->errors());
-                }
-
-                if ($e instanceof ModelNotFoundException) {
-                    return Helper::jsonErrorResponse($e->getMessage(), 404);
-                }
-
-                if ($e instanceof AuthenticationException) {
-                    return Helper::jsonErrorResponse($e->getMessage(), 401);
-                }
-                if ($e instanceof AuthorizationException) {
-                    return Helper::jsonErrorResponse($e->getMessage(), 403);
-                }
-                // Dynamically determine the status code if available
-                $statusCode = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
-
-                return Helper::jsonErrorResponse($e->getMessage(), $statusCode);
-            } else {
-                return null;
-            }
-        });
+       
     })->create();

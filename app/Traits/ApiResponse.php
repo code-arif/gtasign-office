@@ -4,31 +4,59 @@ namespace App\Traits;
 
 trait ApiResponse
 {
-    public function success($message = null, $data = null, $code = 200)
-    {
+    /**
+     * Unified API Response
+     */
+    protected function respond(
+        bool $success,
+        ?string $message = null,
+        mixed $data = null,
+        mixed $errors = null,
+        int $code = 200
+    ) {
         return response()->json([
-<<<<<<< HEAD
-            'success' => true,
+            'success' => $success,
             'message' => $message,
             'data'    => $data,
+            'errors'  => $errors,
             'code'    => $code,
-=======
-            'status' => true ,
-            'message' => $message ,
-            'data' => $data ,
-            'code' => $code ,
-
->>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
         ], $code);
     }
 
-    public function error($data, $message = null, $code = 500)
+    /**
+     * Success Response
+     */
+    protected function success(
+        ?string $message = null,
+        mixed $data = null,
+        int $code = 200
+    ) {
+        return $this->respond(true, $message, $data, null, $code);
+    }
+
+    /**
+     * Error Response
+     */
+    protected function error(
+        ?string $message = null,
+        mixed $errors = null,
+        int $code = 500
+    ) {
+        return $this->respond(false, $message, null, $errors, $code);
+    }
+
+
+    /*
+    * Validation error
+    */
+    public function validationError($errors, $message = 'Validation failed', $code = 422)
     {
         return response()->json([
-            'status' => false,
+            'success' => false,
             'message' => $message,
-            'data' => $data,
-            'code' => $code
+            'data'    => [],
+            'errors'  => $errors,
+            'code'    => $code
         ], $code);
     }
 }

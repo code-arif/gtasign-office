@@ -12,7 +12,9 @@ use Kreait\Firebase\Messaging\Notification;
 
 class Helper
 {
-    //! File or Image Upload
+    /**
+     * Upload file
+     */
     public static function fileUpload($file, $folder): ?string
     {
         if (!$file->isValid()) {
@@ -28,7 +30,9 @@ class Helper
         return 'uploads/' . $folder . '/' . $imageName;
     }
 
-    //! File or Image Delete
+    /**
+     * Delete file
+     */
     public static function fileDelete(string $path): void
     {
         if (file_exists($path)) {
@@ -36,84 +40,33 @@ class Helper
         }
     }
 
-    //! Generate Slug
-    public static function makeSlug($model, string $title): string
+    /**
+     * Generate a random alphanumeric string.
+     */
+    public static function randomAlphaNum($length = 8)
     {
-        $slug = Str::slug($title);
-        while ($model::where('slug', $slug)->exists()) {
-            $randomString = Str::random(5);
-            $slug         = Str::slug($title) . '-' . $randomString;
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
-        return $slug;
+        return $randomString;
     }
 
-    //! JSON Response
-    public static function jsonResponse(bool $status, string $message, int $code, $data = null, bool $paginate = false, $paginateData = null): JsonResponse
+    /**
+     * Generate slug for user profile
+     */
+    public static function generateSlug(string $firstName): string
     {
-        $response = [
-            'status'  => $status,
-            'message' => $message,
-            'code'    => $code,
-        ];
-        if ($paginate && !empty($paginateData)) {
-            $response['data'] = $data;
-            $response['pagination'] = [
-                'current_page' => $paginateData->currentPage(),
-                'last_page' => $paginateData->lastPage(),
-                'per_page' => $paginateData->perPage(),
-                'total' => $paginateData->total(),
-                'first_page_url' => $paginateData->url(1),
-                'last_page_url' => $paginateData->url($paginateData->lastPage()),
-                'next_page_url' => $paginateData->nextPageUrl(),
-                'prev_page_url' => $paginateData->previousPageUrl(),
-                'from' => $paginateData->firstItem(),
-                'to' => $paginateData->lastItem(),
-                'path' => $paginateData->path(),
-            ];
-        } elseif ($paginate && !empty($data)) {
-            $response['data'] = $data->items();
-            $response['pagination'] = [
-                'current_page' => $data->currentPage(),
-                'last_page' => $data->lastPage(),
-                'per_page' => $data->perPage(),
-                'total' => $data->total(),
-                'first_page_url' => $data->url(1),
-                'last_page_url' => $data->url($data->lastPage()),
-                'next_page_url' => $data->nextPageUrl(),
-                'prev_page_url' => $data->previousPageUrl(),
-                'from' => $data->firstItem(),
-                'to' => $data->lastItem(),
-                'path' => $data->path(),
-            ];
-        } elseif ($data !== null) {
-            $response['data'] = $data;
-        }
-
-        return response()->json($response, $code);
+        return strtolower($firstName) . self::randomAlphaNum(8);
     }
 
-    public static function jsonErrorResponse(string $message, int $code = 400, array $errors = []): JsonResponse
+    /**
+     * Generate username for user profile
+     */
+    public static function generateUsername(string $firstName): string
     {
-        $response = [
-            'status'  => false,
-            'message' => $message,
-            'code'    => $code,
-            't-errors'  => $errors,
-        ];
-        return response()->json($response, $code);
-    }
-
-    public static function sendNotifyMobile($token, $notifyData): void
-    {
-        try {
-            $factory = (new Factory)->withServiceAccount(storage_path(config('firebase.credentials')));
-            $messaging = $factory->createMessaging();
-            $notification = Notification::create($notifyData['title'], Str::limit($notifyData['body'], 100), $notifyData['icon']);
-            $message = CloudMessage::withTarget('token', $token)->withNotification($notification);
-            $messaging->send($message);
-        } catch (Exception $exception) {
-            Log::error($exception->getMessage());
-        }
-        return;
+        return '@' . strtolower($firstName) . self::randomAlphaNum(8);
     }
 }

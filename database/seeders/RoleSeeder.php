@@ -19,13 +19,18 @@ class RoleSeeder extends Seeder
         // Create roles
         $roles = [
             'admin',
-            'director',
-            'evaluator',
-            'referee'
+            'expert',
+            'client',
         ];
 
         foreach ($roles as $role) {
-            Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
+            $guard = match ($role) {
+                'admin' => 'web',
+                'expert', 'client' => 'api',
+                default => 'api'
+            };
+
+            Role::firstOrCreate(['name' => $role, 'guard_name' => $guard]);
         }
 
         $this->command->info('Roles created successfully!');
@@ -37,30 +42,6 @@ class RoleSeeder extends Seeder
             'create users',
             'edit users',
             'delete users',
-
-            // Camp Management
-            'view camps',
-            'create camps',
-            'edit camps',
-            'delete camps',
-
-            // Schedule Management
-            'view schedules',
-            'create schedules',
-            'edit schedules',
-            'delete schedules',
-
-            // Game Slot Management
-            'view game-slots',
-            'create game-slots',
-            'edit game-slots',
-            'delete game-slots',
-
-            // Crew Management
-            'view crews',
-            'create crews',
-            'edit crews',
-            'delete crews',
         ];
 
         foreach ($permissions as $permission) {
@@ -73,23 +54,6 @@ class RoleSeeder extends Seeder
         $admin = Role::findByName('admin');
         $admin->givePermissionTo(Permission::all());
 
-        $director = Role::findByName('director');
-        $director->givePermissionTo([
-            'view camps', 'create camps', 'edit camps',
-            'view schedules', 'create schedules', 'edit schedules',
-            'view game-slots', 'create game-slots', 'edit game-slots',
-            'view crews', 'create crews', 'edit crews',
-        ]);
-
-        $evaluator = Role::findByName('evaluator');
-        $evaluator->givePermissionTo([
-            'view camps', 'view schedules', 'view game-slots',
-        ]);
-
-        $referee = Role::findByName('referee');
-        $referee->givePermissionTo([
-            'view schedules', 'view game-slots',
-        ]);
 
         $this->command->info('Permissions assigned to roles successfully!');
     }

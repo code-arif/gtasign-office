@@ -1,18 +1,5 @@
 <?php
 
-<<<<<<< HEAD
-=======
-use App\Http\Controllers\Api\ResetPasswordController;
-use App\Http\Controllers\Api\User\Auth\AuthenticationController;
-use App\Http\Controllers\Api\User\Auth\SocialLoginController;
-use App\Http\Controllers\Api\User\Auth\UserProfileController;
-use App\Http\Controllers\Api\User\Profile\ClientProfileController;
-use App\Http\Controllers\Api\Website\UserManageController;
-use App\Http\Controllers\LanguageController;
-use App\Http\Controllers\Web\Backend\Settings\DynamicPageController;
-use App\Http\Controllers\Web\Backend\SplashController;
-use Illuminate\Support\Facades\Broadcast;
->>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\Auth\UserController;
@@ -24,89 +11,33 @@ use App\Http\Controllers\Api\Auth\SocialLoginController;
 use App\Http\Controllers\Api\Frontend\ContactController;
 use App\Http\Controllers\Api\Frontend\SettingsController;
 use App\Http\Controllers\Api\Auth\ResetPasswordController;
-use App\Http\Controllers\Api\Frontend\AnnouncementController;
 use App\Http\Controllers\Api\Frontend\CMS\HomePageController;
 use App\Http\Controllers\Api\Frontend\NotificationController;
 use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
-use App\Http\Controllers\Api\Frontend\Roster\RosterController;
-use App\Http\Controllers\Api\Frontend\RefereeEvaluationController;
-use App\Http\Controllers\Api\Frontend\Evaluator\EvaluatorController;
-use App\Http\Controllers\Api\Frontend\Evaluator\GameOverviewController;
-use App\Http\Controllers\Api\Frontend\Referee\EvaluatedRefereeController;
-use App\Http\Controllers\Api\Frontend\Referee\RefereeAssignmentController;
-use App\Http\Controllers\Api\Frontend\Referee\RefereeAssignmentCrewController;
-use App\Http\Controllers\Api\Frontend\CampRanking\CampRankingSettingsController;
 use App\Http\Controllers\Api\Frontend\CMS\AboutPageController;
-use App\Http\Controllers\Api\Frontend\Evaluator\CampEvaluatorRegistrationController;
-use App\Http\Controllers\Api\Frontend\Evaluator\CampEvaluatorRegisterManageForDirectorController;
 
-<<<<<<< HEAD
 // health check
 Route::get('/health-check', function () {
-    return "All Right... 👍";
-=======
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
-
-Route::get('splash', [SplashController::class, 'Splash']);
-
-Route::get('privacy-policy', [DynamicPageController::class, 'privacyPolicy']);
-Route::get('term-conditions', [DynamicPageController::class, 'agreement']);
-
-
-/*
-|--------------------------------------------------------------------------
-| Guest Routes (No Auth Required)
-|--------------------------------------------------------------------------
-*/
-
-Broadcast::routes([
-    'middleware' => ['auth:api'], // or 'auth:jwt' depending on guard
-]);
-
-Route::group(['middleware' => 'guest:api'], function () {
-    // Authentication
-    Route::post('/login', [AuthenticationController::class, 'login']);
-    Route::post('/register', [AuthenticationController::class, 'register'])->name('api.register');
-    Route::post('/register-otp-verify', [AuthenticationController::class, 'RegistrationVerifyOtp']);
-    Route::post('/resend-otp', [AuthenticationController::class, 'ResendOtp']);
-    // Password Reset
-    Route::post('forgot-password', [ResetPasswordController::class, 'forgotPassword']);
-    Route::post('/verify-otp', [ResetPasswordController::class, 'VerifyOTP']);
-    Route::post('/reset-password/{token}', [ResetPasswordController::class, 'ResetPassword']);
-    // Social Login
-    Route::post('social/signin/{provider}', [SocialLoginController::class, 'socialSignin']);
->>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
-});
-Route::group(['middleware' => 'auth:api'], function () {
-    // profile
-    Route::get('/profile', [ClientProfileController::class, 'profile']);
-    Route::post('/profile/update', [ClientProfileController::class, 'profileUpdate']);
-    Route::post('/profile/change-password', [UserProfileController::class, 'updatePassword']);
-
-    Route::post('/profile/delete', [UserProfileController::class, 'deleteProfile']);
-    Route::post('/logout', [AuthenticationController::class, 'logout']);
+    return response()->json([
+        'status' => "OK",
+        'Message' => "Project is ready to serve",
+    ], 200);
 });
 
-<<<<<<< HEAD
 
 /*
 |--------------------------------------------------------------------------
 | User Authentication Routes
 |--------------------------------------------------------------------------
 */
-Route::group(['middleware' => 'guest:api'], function ($router) {
+Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router) {
     //register
     Route::post('/register', [RegisterController::class, 'register']); // done
     Route::post('/verify-email', [RegisterController::class, 'VerifyEmail']); // done
     Route::post('/resend-otp', [RegisterController::class, 'ResendOtp']); // done
-    // Route::post('/verify-otp', [RegisterController::class, 'VerifyEmail']); // working
 
     //login
-    Route::post('/login', [LoginController::class, 'login'])->name('api.login'); // done
+    Route::post('/login', [LoginController::class, 'login']) // done
 
     //forgot password
     Route::post('/forgot-password', [ResetPasswordController::class, 'forgotPassword']); // done
@@ -133,140 +64,9 @@ Route::group(['middleware' => ['auth:api', 'api-otp']], function ($router) {
     Route::post('/change-password', [UserController::class, 'changePassword']); // done
 });
 
-/*
-|--------------------------------------------------------------------------
-| Referee Evaluation API Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth:api', 'role:director|evaluator,api'])->group(function () {
-    Route::prefix('referee/evaluation')->group(function () {
-        Route::post('/upsert', [RefereeEvaluationController::class, 'storeOrUpdate']); // working - store evaluation
-        Route::delete('/destroy/{id}', [RefereeEvaluationController::class, 'destroy']); // working - delete evaluation
-        Route::get('/my-evaluations/{campId}', [RefereeEvaluationController::class, 'getMyEvaluations']); // working - get my evaluations (edit required for permission director)
-        Route::get('/camp/{campId}', [RefereeEvaluationController::class, 'getEvaluationsByCamp']); // working - get evaluations by camp
-        Route::get('/details/{evaluationId}', [RefereeEvaluationController::class, 'show']); // working - get evaluation details
-
-        // Get referee statistics
-        Route::get('/{refereeId}/stats', [RefereeEvaluationController::class, 'getRefereeStats']); // done
-
-        // Get all registered referee
-        Route::get('/camp/{campId}/all-registered-in-referees', [RefereeEvaluationController::class, 'getAllRegisteredInReferees']); // done
-        Route::get('/camp/{campId}/all-referees', [RefereeEvaluationController::class, 'getAllReferees']); // done
-    });
-
-    // Game overview
-    Route::get('/evaluator/{campId}/game-overview', [GameOverviewController::class, 'gameOverview']);
-});
-
-// Roster camp details
-Route::get('/roster/camp/details/{campId}', [RosterController::class, 'campDetails'])->middleware('auth:api', 'role:director|referee|evaluator,api');
-
-// Referee histroy
-Route::get('/camp/{campId}/referee/{refereeId}/history', [RefereeEvaluationController::class, 'getRefereeEvaluationHistory'])->middleware('auth:api', 'role:director|referee|evaluator,api');
-
-// Referee histroy
-Route::get('/referee/evaluation/camp/{campId}', [RefereeEvaluationController::class, 'getEvaluationsByCamp'])->middleware('auth:api', 'role:director|referee|evaluator,api');
-
-/*
-|--------------------------------------------------------------------------
-| Referee API Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth:api', 'role:referee'])->group(function () {
-    // Get my evaluations (for logged-in referee)
-    Route::get('/referee/my-evaluations/{campId}', [EvaluatedRefereeController::class, 'getRefereeEvaluations']);
-
-    Route::prefix('referee')->group(function () {
-        // Get all game slots where referee is assigned
-        Route::get('/my-assigned-slots', [RefereeAssignmentController::class, 'getMyAssignedSlots']); // done
-
-        Route::get('/camp/{campId}/assigned-slots', [RefereeAssignmentController::class, 'getCampAssignedSlots']);
-
-        // Get specific game slot details with all assigned referees
-        Route::get('/game-slot/{gameSlotId}', [RefereeAssignmentController::class, 'getGameSlotDetails']);
-
-        // Get upcoming game slots only
-        Route::get('/upcoming-slots', [RefereeAssignmentController::class, 'getUpcomingSlots']);
-=======
-// logout
->>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
 
 
-        // ===== NEW CREW-RELATED ROUTES =====
 
-<<<<<<< HEAD
-        // Get all crews where referee is a member (across all camps)
-        Route::get('/my-crews', [RefereeAssignmentCrewController::class, 'getMyCrews']);
-
-        // Get crews for a specific camp where referee is a member
-        Route::get('/camp/{campId}/crews', [RefereeAssignmentCrewController::class, 'getCampCrews']);
-
-        // Get specific crew details with all game assignments
-        Route::get('/crew/{crewId}/details', [RefereeAssignmentCrewController::class, 'getCrewDetails']);
-
-        // Get upcoming games for all crews where referee is a member
-        Route::get('/my-crews/upcoming-games', [RefereeAssignmentCrewController::class, 'getMyCrewUpcomingGames']);
-    });
-});
-
-/*
-|--------------------------------------------------------------------------
-| Evaluator API Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth:api', 'role:evaluator'])->group(function () {
-    Route::prefix('/evaluator')->group(function () {
-        Route::get('/active-camps', [EvaluatorController::class, 'getActiveCamps']);
-    });
-});
-=======
-Route::get('/languages', [LanguageController::class, 'getLangApi']);
-
->>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
-
-
-/*
-|--------------------------------------------------------------------------
-| EVALUATOR REGISTRATION ROUTES
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth:api', 'role:evaluator,api'])->group(function () {
-    // Evaluator registers for camps
-    Route::prefix('evaluator/camp-registration')->group(function () {
-        Route::post('/register', [CampEvaluatorRegistrationController::class, 'register']); // done
-        Route::get('/my-registrations', [CampEvaluatorRegistrationController::class, 'myRegistrations']); //done
-        Route::delete('/cancel/{registrationId}', [CampEvaluatorRegistrationController::class, 'cancel']); // done
-        Route::get('/previous-camps', [CampEvaluatorRegistrationController::class, 'previousCamp']); // done
-    });
-});
-
-<<<<<<< HEAD
-// Director manages evaluator registrations
-Route::middleware(['auth:api', 'role:director,api'])->group(function () {
-    Route::prefix('director/evaluator-registrations')->group(function () {
-        Route::get('/camp/{campId}', [CampEvaluatorRegisterManageForDirectorController::class, 'getCampRegistrations']); //done
-        Route::post('/approve/{registrationId}', [CampEvaluatorRegisterManageForDirectorController::class, 'approve']); // done
-        Route::post('/reject/{registrationId}', [CampEvaluatorRegisterManageForDirectorController::class, 'reject']); // done
-        Route::delete('/remove/{registrationId}', [CampEvaluatorRegisterManageForDirectorController::class, 'removeEvaluator']); // done
-    });
-});
-
-// Ranking Settings Routes (Only for Directors)
-Route::middleware(['auth:api', 'role:director,api'])->group(function () {
-    Route::prefix('camp/{campId}/ranking-settings')->group(function () {
-        // Get ranking settings for a camp
-        Route::get('/', [CampRankingSettingsController::class, 'getRankingSettings']);
-
-        // Update ranking settings for a camp
-        Route::put('/', [CampRankingSettingsController::class, 'updateRankingSettings']);
-
-        // Toggle individual evaluator permission
-        Route::put(
-            '/evaluator/{evaluatorId}/toggle-permission',
-            [CampRankingSettingsController::class, 'toggleEvaluatorPermission']
-        );
-    });
-});
 
 // contact from submit
 Route::post('/contact-form', [ContactController::class, 'submitContact']);
@@ -282,16 +82,7 @@ Route::get('/terms-and-conditions', [PrivecyPolicyController::class, 'termsAndCo
 // get setting data
 Route::get('/settings', [SettingsController::class, 'index']);
 
-/*
-|--------------------------------------------------------------------------
-| Announcement making route
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth:api'])->group(function () {
-    // Making announcement only for director
-    Route::post('/director/announcement/store', [AnnouncementController::class, 'store'])->middleware('role:director'); // done
-    Route::delete('director/announcements/delete/{id}', [AnnouncementController::class, 'destroy'])->middleware('role:director'); // done
-});
+
 
 
 // === Unified Notification Routes ===
@@ -348,26 +139,3 @@ Route::middleware(['auth:api'])->controller(FirebaseTokenController::class)->pre
     Route::post("token/get", "getToken");
     Route::post("token/delete", "deleteToken");
 });
-=======
-Route::post('/update/role', [AuthenticationController::class, 'updateRole']);
-
-
-
-
-
-// website route list
-
-// Route::middleware('auth')->prefix('auth')->group(function () {
-
-Route::get('/website/user/details', [UserManageController::class, 'user_info']);
-Route::post('/website/user/avatar/update', [UserManageController::class, 'user_avatar_update']);
-
-// job list
-
-Route::get('/website/featured/jobs/list', [UserManageController::class, 'featuredJobList']);
-Route::get('/website/recommanded/jobs/list', [UserManageController::class, 'recommadedJobList']);
-
-Route::get('website/company/job/list', [UserManageController::class, 'companyJobList']);
-
-Route::get('website/company/job/applicants/{id}', [UserManageController::class, 'jobApplicantList']);
->>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
