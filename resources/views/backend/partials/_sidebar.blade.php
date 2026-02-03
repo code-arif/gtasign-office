@@ -27,23 +27,21 @@
                 </li>
 
                 <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.sports-type.*') ? 'has-link active' : '' }}"
-                        href="{{ route('admin.sports-type.index') }}">
-                        <i class="fa-solid fa-baseball-bat-ball side-menu__icon"></i>
-                        <span class="side-menu__label">Sports Type</span>
-
+                    <a class="side-menu__item {{ request()->routeIs('admin.setting.*') ? 'has-link active' : '' }}"
+                        data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fa-solid fa-gem"></i>
+                        <span class="side-menu__label">Manage Gigs</span>
+                        <i class="angle fa fa-angle-right"></i>
                     </a>
+
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.categories.index') }}" class="slide-item"> Manage Category </a></li>
+                        <li><a href="{{ route('admin.cms.privecyandterms.privacy') }}" class="slide-item">Privacy
+                                Policy</a></li>
+
+                    </ul>
                 </li>
 
-                {{-- user list --}}
-                <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.users.manage.*') ? 'has-link active' : '' }}"
-                        href="{{ route('admin.users.manage.index') }}">
-                        <i class="fa-solid fa-users side-menu__icon"></i>
-                        <span class="side-menu__label">User List</span>
-
-                    </a>
-                </li>
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.setting.*') ? 'has-link active' : '' }}"
                         data-bs-toggle="slide" href="#">

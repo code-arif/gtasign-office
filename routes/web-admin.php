@@ -26,30 +26,42 @@ use App\Http\Controllers\Web\Backend\Settings\ProfileController;
 use App\Http\Controllers\Web\Backend\Settings\SettingController;
 use App\Http\Controllers\Web\Backend\Access\PermissionController;
 use App\Http\Controllers\Web\Backend\Settings\FirebaseController;
+use App\Http\Controllers\Web\Backend\CMS\GettingStartedController;
+use App\Http\Controllers\Web\Backend\Gig\CategoryManageController;
 use App\Http\Controllers\Web\Backend\Settings\GoogleMapController;
 use App\Http\Controllers\Web\Backend\Settings\SignatureController;
 use App\Http\Controllers\Web\Backend\CMS\AboutPageOurTeamController;
-use App\Http\Controllers\Web\Backend\CMS\GettingStartedController;
 use App\Http\Controllers\Web\Backend\Settings\MailSettingController;
 use App\Http\Controllers\Web\Backend\SportsType\SportsTypeController;
 use App\Http\Controllers\Web\Backend\CMS\Web\PrivacyTerms\PrivacAndTermsController;
 
+
+/*
+|--------------------------------------------------------------------------
+| Admin Dashboard Routes
+|--------------------------------------------------------------------------
+*/
+
 Route::get("dashboard", [DashboardController::class, 'index'])->name('dashboard');
 
 
-/**
- * Sports Type Management Routes
- */
-Route::group(['prefix' => 'sports-type', 'as' => 'sports-type.'], function () {
-    Route::get('/', [SportsTypeController::class, 'index'])->name('index');
-    Route::get('/create', [SportsTypeController::class, 'create'])->name('create');
-    Route::post('/store', [SportsTypeController::class, 'store'])->name('store');
-    Route::get('/show/{id}', [SportsTypeController::class, 'show'])->name('show');
-    Route::get('/edit/{id}', [SportsTypeController::class, 'edit'])->name('edit');
-    Route::post('/update/{id}', [SportsTypeController::class, 'update'])->name('update');
-    Route::delete('/delete/{id}', [SportsTypeController::class, 'destroy'])->name('destroy');
-    Route::get('/status/{id}', [SportsTypeController::class, 'status'])->name('status');
+/*
+|--------------------------------------------------------------------------
+| Category Management Routes
+|--------------------------------------------------------------------------
+*/
+Route::group(['prefix' => 'categories', 'as' => 'categories.'], function () {
+    Route::get('/', [CategoryManageController::class, 'index'])->name('index');
+    Route::get('/create', [CategoryManageController::class, 'create'])->name('create');
+    Route::post('/store', [CategoryManageController::class, 'store'])->name('store');
+    Route::get('/show/{id}', [CategoryManageController::class, 'show'])->name('show');
+    Route::get('/edit/{id}', [CategoryManageController::class, 'edit'])->name('edit');
+    Route::post('/update/{id}', [CategoryManageController::class, 'update'])->name('update');
+    Route::delete('/delete/{id}', [CategoryManageController::class, 'destroy'])->name('destroy');
+    Route::get('/status/{id}', [CategoryManageController::class, 'status'])->name('status');
+    Route::get('/get/{id}', [CategoryManageController::class, 'getCategory'])->name('get');
 });
+
 
 /**
  * User Management Routes
@@ -297,10 +309,6 @@ Route::prefix('setting/other')->name('setting.other')->group(function () {
     Route::get('/access', [OtherController::class, 'access'])->name('.access');
 });
 
-//livewire
-Route::prefix('livewire/crud')->name('livewire.crud')->group(function () {
-    Route::get('/', [LivewireController::class, 'index'])->name('.index');
-});
 
 
 // Run artisan commands for optimization and cache clearing

@@ -32,7 +32,6 @@ return Application::configure(basePath: dirname(__DIR__))
         channels: __DIR__ . '/../routes/channels.php',
         health: '/up',
         then: function () {
-            Route::middleware(['web'])->prefix('ajax')->name('ajax.')->group(base_path('routes/ajax.php'));
             Route::middleware(['web', 'web-developer'])->prefix('developer')->name('developer.')->group(base_path('routes/web-developer.php'));
             Route::middleware(['web', 'web-admin'])->prefix('admin')->name('admin.')->group(base_path('routes/web-admin.php'));
             Route::middleware(['api', 'api-admin'])->prefix('api.admin')->name('api.admin.')->group(base_path('routes/api-admin.php'));
@@ -71,5 +70,5 @@ return Application::configure(basePath: dirname(__DIR__))
     //     $schedule->command('app:partnertrashdelete')->daily();
     // })
     ->withExceptions(function (Exceptions $exceptions) {
-       
+
     })->create();
