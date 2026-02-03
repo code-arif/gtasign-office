@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
 use App\Http\Controllers\Api\Frontend\CMS\AboutPageController;
 use App\Http\Controllers\Api\User\Profile\CertificateController;
 use App\Http\Controllers\Api\User\Profile\EducationController;
+use App\Http\Controllers\Api\User\Profile\UserExperienceController;
 
 // health check
 Route::get('/health-check', function () {
@@ -81,13 +82,20 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
         Route::delete('/delete/{id}', [EducationController::class, 'destroy']);
     });
 
-
-    // Education
+    // Certificate
     Route::group(['prefix' => 'certifications'], function () {
         Route::get('/', [CertificateController::class, 'index']);
         Route::post('/store', [CertificateController::class, 'store']);
         Route::post('/update/{id}', [CertificateController::class, 'update']);
         Route::delete('/delete/{id}', [CertificateController::class, 'destroy']);
+    });
+
+    // Skills and Expertise
+    Route::group(['prefix' => 'skills'], function () {
+        Route::get('/', [UserExperienceController::class, 'index']);
+        Route::post('/store', [UserExperienceController::class, 'store']);
+        Route::post('/update/{id}', [UserExperienceController::class, 'update']);
+        Route::delete('/delete/{id}', [UserExperienceController::class, 'destroy']);
     });
 });
 
