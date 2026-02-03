@@ -1,9 +1,9 @@
 @import url(https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&amp;display=swap);
 @charset "UTF-8";
 :root {
-   --primary-bg-color: #00AEEF;;
-   --primary-bg-hover: #82c035;
-   --primary-bg-border: #00AEEF;
+   --primary-bg-color: #05402e;;
+   --primary-bg-hover: #05402e;
+   --primary-bg-border: #05402e;
    --dark-body: #2c2f3e;
    --dark-theme: rgba(0, 0, 0, 0.3);
    --dark-bg: rgba(0, 0, 0, 0.2);

@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Frontend\CMS\HomePageController;
 use App\Http\Controllers\Api\Frontend\NotificationController;
 use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
 use App\Http\Controllers\Api\Frontend\CMS\AboutPageController;
+use App\Http\Controllers\Api\User\Profile\EducationController;
 
 // health check
 Route::get('/health-check', function () {
@@ -65,6 +66,13 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'v1'], function ($router) 
     Route::post('/change-password', [UserController::class, 'changePassword']); // done
 });
 
+Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(function () {
+    // Education
+    Route::get('/educations', [EducationController::class, 'index']);
+    Route::post('/store/educations', [EducationController::class, 'store']);
+    Route::post('/update/educations/{id}', [EducationController::class, 'update']);
+    Route::delete('/delete/educations/{id}', [EducationController::class, 'destroy']);
+});
 
 
 

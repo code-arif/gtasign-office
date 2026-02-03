@@ -80,9 +80,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(Profile::class);
     }
 
-
-
     /**
-     * Relationship: OTP or Security token
+     * Relationship: Educations Table
      */
+    public function educations()
+    {
+        return $this->hasMany(Education::class);
+    }
 }
