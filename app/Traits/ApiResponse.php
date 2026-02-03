@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Illuminate\Http\JsonResponse;
+
 
 trait ApiResponse
 {
@@ -58,5 +60,30 @@ trait ApiResponse
         int $code = 422
     ) {
         return $this->respond(false, $message, null, $errors, $code);
+    }
+
+
+    /**
+     * Not found response
+     */
+    protected function notFound(string $message = 'Resource not found'): JsonResponse
+    {
+        return $this->error(null, $message, 404);
+    }
+
+    /**
+     * Unauthorized response
+     */
+    protected function unauthorized(string $message = 'Unauthorized'): JsonResponse
+    {
+        return $this->error(null, $message, 401);
+    }
+
+    /**
+     * Forbidden response
+     */
+    protected function forbidden(string $message = 'Forbidden'): JsonResponse
+    {
+        return $this->error(null, $message, 403);
     }
 }

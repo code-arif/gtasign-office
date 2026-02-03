@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\Gig\GigController;
 use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\LogoutController;
@@ -13,10 +14,10 @@ use App\Http\Controllers\Api\Frontend\SettingsController;
 use App\Http\Controllers\Api\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\Frontend\CMS\HomePageController;
 use App\Http\Controllers\Api\Frontend\NotificationController;
-use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
 use App\Http\Controllers\Api\Frontend\CMS\AboutPageController;
-use App\Http\Controllers\Api\User\Profile\CertificateController;
+use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
 use App\Http\Controllers\Api\User\Profile\EducationController;
+use App\Http\Controllers\Api\User\Profile\CertificateController;
 use App\Http\Controllers\Api\User\Profile\UserExperienceController;
 
 // health check
@@ -96,6 +97,51 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
         Route::post('/store', [UserExperienceController::class, 'store']);
         Route::post('/update/{id}', [UserExperienceController::class, 'update']);
         Route::delete('/delete/{id}', [UserExperienceController::class, 'destroy']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Gig API Routes
+    |--------------------------------------------------------------------------
+    */
+
+    // Public routes
+    Route::prefix('gigs')->group(function () {
+        // Browse active gigs
+        Route::get('/', [GigController::class, 'index']);
+        Route::get('/active', [GigController::class, 'active']);
+        Route::get('/search', [GigController::class, 'search']);
+        Route::get('/{id}', [GigController::class, 'show']);
+
+        // Track analytics
+        Route::post('/{id}/track-click', [GigController::class, 'trackClick']);
+    });
+
+    // Protected routes (Expert only)
+    Route::prefix('gigs')->group(function () {
+        // My gigs
+        Route::get('/my/list', [GigController::class, 'myGigs']);
+
+        // Create gig (step by step)
+        Route::post('/create/overview', [GigController::class, 'createOverview']);
+        Route::put('/{id}/pricing', [GigController::class, 'updatePricing']);
+        Route::put('/{id}/requirements', [GigController::class, 'updateRequirements']);
+        Route::post('/{id}/gallery', [GigController::class, 'updateGallery']);
+
+        // Manage gallery
+        Route::delete('/{id}/image', [GigController::class, 'deleteImage']);
+        Route::delete('/{id}/document', [GigController::class, 'deleteDocument']);
+
+        // Publish & manage
+        Route::post('/{id}/publish', [GigController::class, 'publish']);
+        Route::put('/{id}', [GigController::class, 'update']);
+        Route::delete('/{id}', [GigController::class, 'destroy']);
+    });
+
+    // Admin routes
+    Route::middleware(['auth:api', 'role:admin'])->prefix('admin/gigs')->group(function () {
+        Route::post('/{id}/approve', [GigController::class, 'approve']);
+        Route::post('/{id}/reject', [GigController::class, 'reject']);
     });
 });
 

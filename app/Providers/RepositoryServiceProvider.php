@@ -2,20 +2,25 @@
 
 namespace App\Providers;
 
-use App\Repositories\Interfaces\CategoryRepositoryInterface;
-use App\Repositories\CategoryRepository;
-use App\Repositories\Interfaces\ProjectRepositoryInterface;
-use App\Repositories\Interfaces\SubCategoryRepositoryInterface;
-use App\Repositories\ProjectRepository;
-use App\Repositories\SubCategoryRepository;
+use App\Repositories\GigRepository;
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\Interfaces\GigRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
-    public function register()
+    /**
+     * Register services.
+     */
+    public function register(): void
     {
-        $this->app->bind(SubCategoryRepositoryInterface::class, SubCategoryRepository::class);
-        $this->app->bind(CategoryRepositoryInterface::class, CategoryRepository::class);
-        $this->app->bind(ProjectRepositoryInterface::class, ProjectRepository::class);
+        $this->app->bind(GigRepositoryInterface::class, GigRepository::class);
+    }
+
+    /**
+     * Bootstrap services.
+     */
+    public function boot(): void
+    {
+        //
     }
 }
