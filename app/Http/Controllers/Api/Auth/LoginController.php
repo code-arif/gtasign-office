@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Models\UserSecurityToken;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
@@ -39,8 +40,15 @@ class LoginController extends Controller
         }
 
         try {
-            // Fetch user
-            $user = User::where('email', strtolower($request->email))->first();
+            // Fetch user WITH profile relationship
+            $user = User::with('profile')
+                ->where('email', strtolower($request->email))
+                ->first();
+
+            // Check if user exists
+            if (!$user) {
+                return $this->error(null, 'Invalid credentials', 422);
+            }
 
             // Check if user is active
             if ($user->status !== 'active') {
@@ -50,6 +58,11 @@ class LoginController extends Controller
             // Check password
             if (!Hash::check($request->password, $user->password)) {
                 return $this->error(null, 'Invalid credentials', 422);
+            }
+
+            // Check email verification (optional, uncomment if needed)
+            if (is_null($user->email_verified_at)) {
+                return $this->error(null, 'Please verify your email first', 403);
             }
 
             // Generate JWT token
@@ -67,6 +80,7 @@ class LoginController extends Controller
                 ]
             );
         } catch (Exception $e) {
+            Log::error('Login error: ' . $e->getMessage());
             return $this->error(['exception' => $e->getMessage()], 'Login failed', 500);
         }
     }
@@ -80,42 +94,28 @@ class LoginController extends Controller
         try {
             $refreshToken = auth('api')->refresh();
             $expiresIn = auth('api')->factory()->getTTL() * 60;
-            $user = auth('api')->user();
+
+            // Load profile relationship
+            $user = auth('api')->user()->load('profile');
 
             return $this->success(
                 'Access token refreshed successfully',
                 [
+                    'user'       => new UserResource($user),
                     'token'      => $refreshToken,
                     'token_type' => 'bearer',
                     'expires_in' => $expiresIn,
-                    'user'       => $user->only([
-                        'id',
-                        'email',
-                        'username',
-                        'first_name',
-                        'last_name',
-                        'avatar',
-                        'role',
-                        'status'
-                    ]),
                 ]
             );
         } catch (Exception $e) {
-            return $this->error(['exception' => $e->getMessage()], 'Failed to refresh token', 401);
-        }
-    }
+            Log::error('Token refresh error: ' . $e->getMessage());
 
-    /**
-     * Logout user
-     * Invalidates the current JWT token
-     */
-    public function logout()
-    {
-        try {
-            auth('api')->logout();
-            return $this->success('Logged out successfully', null, 200);
-        } catch (Exception $e) {
-            return $this->error(['exception' => $e->getMessage()], 'Logout failed', 500);
+            // Correct order: message first, then errors
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                'Failed to refresh token',
+                401
+            );
         }
     }
 }

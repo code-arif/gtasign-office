@@ -2,147 +2,146 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use Stripe\Stripe;
-use Stripe\Account;
 use App\Models\User;
-use App\Models\Artist;
 use App\Helpers\Helper;
-use App\Models\Festival;
 use App\Traits\ApiResponse;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Resources\MyalbumResource;
-use App\Http\Resources\AllAlbumResource;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Resources\AlbumForUserResource;
+use Exception;
 
 class UserController extends Controller
 {
     use ApiResponse;
 
-    public $select;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->select = ['id', 'first_name', 'last_name', 'username', 'address', 'slug',  'email', 'avatar'];
-    }
-
     /**
-     * Get User Details
+     * Get User Profile
      */
-    public function me()
+    public function profile()
     {
-        $user = auth('api')->user();
+        try {
+            $user = auth('api')->user()->load('profile');
 
-        if (!$user) {
-            return $this->error('User not found', 404);
+            if (!$user) {
+                return $this->error(
+                    null,
+                    'User not found',
+                    404
+                );
+            }
+
+            return $this->success(
+                'User profile retrieved successfully',
+                new UserResource($user)
+            );
+        } catch (Exception $e) {
+            Log::error('Get profile error: ' . $e->getMessage());
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                'Failed to retrieve profile',
+                500
+            );
         }
-
-        // Base response
-        $response = [
-            'id'         => $user->id,
-            'first_name' => $user->first_name,
-            'last_name'  => $user->last_name,
-            'username'   => $user->username,
-            'email'      => $user->email,
-            'phone'      => $user->phone,
-            'address'    => $user->address,
-            'biography'  => $user->biography,
-            'avatar'     => $user->avatar
-                ? asset($user->avatar)
-                : asset('default/profile.jpg'),
-            'slug'       => $user->slug,
-            'role'       => $user->role,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-        ];
-
-        // Extra data only for referee
-        if ($user->role === 'referee') {
-
-            $avgScore10 = $user->evaluations()
-                ->where('status', 'submitted')
-                ->whereNotNull('average_score')
-                ->avg('average_score'); // 1–10 scale
-
-            $rating5 = $avgScore10
-                ? round($avgScore10 / 2, 1) // convert to 5 scale
-                : 0;
-
-            $response['referee'] = [
-                'checkin_camp' => $user->refereeCheckins()->count(),
-                'total_game'   => $user->evaluations()
-                    ->where('status', 'submitted')
-                    ->count(),
-                'rating'       => $rating5,
-            ];
-        }
-
-        return $this->success(
-            'User details fetched successfully',
-            $response,
-            200
-        );
     }
 
 
     /**
-     * Update User Profile
+     * Update profile
      */
     public function updateProfile(Request $request)
     {
-        $validatedData = $request->validate([
-            'first_name' => 'nullable|string|max:100',
-            'last_name'  => 'nullable|string|max:100',
-            'biography'  => 'nullable|string|max:2500',
-            'phone'      => 'required|string|max:150|unique:users,phone,' . auth('api')->id(),
-            'address'    => 'required|string',
-        ]);
+        try {
+            $user = auth('api')->user()->load('profile');
 
-        $user = auth('api')->user();
+            if (!$user) {
+                return $this->error(
+                    null,
+                    'User not found',
+                    404
+                );
+            }
 
-        /**
-         * Username generator:
-         * username will be generated only if username is empty
-         */
-        if (!$user->username) {
-            $generated = strtolower(($validatedData['first_name'] ?? 'user')) . '_' . $this->randomAlphaNum(4);
-            $validatedData['username'] = $generated;
+            // Validation
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'nullable|string|max:100',
+                'last_name'  => 'nullable|string|max:100',
+                'biography'  => 'nullable|string|max:2500',
+                'tagline'    => 'nullable|string|max:255',
+                'phone'      => 'nullable|string|max:150|unique:users,phone,' . $user->id,
+                'address'    => 'nullable|string|max:500',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->validationError(
+                    $validator->errors()->toArray(),
+                    'Validation failed',
+                    422
+                );
+            }
+
+            $validatedData = $validator->validated();
+
+            // Update user table fields (phone)
+            if (isset($validatedData['phone'])) {
+                $user->update(['phone' => $validatedData['phone']]);
+            }
+
+            // Update or create profile
+            if (!$user->profile) {
+                // Create profile if doesn't exist
+                $profileData = [
+                    'first_name' => $validatedData['first_name'] ?? null,
+                    'last_name'  => $validatedData['last_name'] ?? null,
+                    'biography'  => $validatedData['biography'] ?? null,
+                    'tagline'    => $validatedData['tagline'] ?? null,
+                    'address'    => $validatedData['address'] ?? null,
+                    'username'   => $this->generateUsername($validatedData['first_name'] ?? 'user'),
+                    'slug'       => $this->generateSlug($validatedData['first_name'] ?? 'user'),
+                ];
+
+                $user->profile()->create($profileData);
+            } else {
+                // Update existing profile
+                $profileData = [];
+
+                if (isset($validatedData['first_name'])) {
+                    $profileData['first_name'] = $validatedData['first_name'];
+                }
+                if (isset($validatedData['last_name'])) {
+                    $profileData['last_name'] = $validatedData['last_name'];
+                }
+                if (isset($validatedData['biography'])) {
+                    $profileData['biography'] = $validatedData['biography'];
+                }
+                if (isset($validatedData['tagline'])) {
+                    $profileData['tagline'] = $validatedData['tagline'];
+                }
+                if (isset($validatedData['address'])) {
+                    $profileData['address'] = $validatedData['address'];
+                }
+
+                $user->profile->update($profileData);
+            }
+
+            // Reload user with profile
+            $user->refresh()->load('profile');
+
+            return $this->success(
+                'Profile updated successfully',
+                new UserResource($user)
+            );
+        } catch (Exception $e) {
+            Log::error('Update profile error: ' . $e->getMessage());
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                'Failed to update profile',
+                500
+            );
         }
-
-        $user->update($validatedData);
-
-        $response = [
-            'id' => $user->id,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'username' => $user->username,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'address' => $user->address,
-            'biography' => $user->biography,
-            'avatar' => $user->avatar
-                ? asset($user->avatar)
-                : asset('default/profile.jpg'),
-            'slug' => $user->slug,
-            'role' => $user->role,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-        ];
-
-        return Helper::jsonResponse(true, 'Profile updated successfully', 200, $response);
-    }
-
-    /**
-     * Generate random alphanumeric string
-     */
-    private function randomAlphaNum($length = 4)
-    {
-        return substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, $length);
     }
 
     /**
@@ -150,75 +149,213 @@ class UserController extends Controller
      */
     public function updateAvatar(Request $request)
     {
-        $validatedData = $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
-        ]);
-        $user = auth('api')->user();
-        if (!empty($user->avatar)) {
-            Helper::fileDelete(public_path($user->getRawOriginal('avatar')));
+        try {
+            $user = auth('api')->user()->load('profile');
+
+            if (!$user) {
+                return $this->error(
+                    null,
+                    'User not found',
+                    404
+                );
+            }
+
+            // Validation
+            $validator = Validator::make($request->all(), [
+                'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB
+            ]);
+
+            if ($validator->fails()) {
+                return $this->validationError(
+                    $validator->errors()->toArray(),
+                    'Validation failed',
+                    422
+                );
+            }
+
+            // Ensure profile exists
+            if (!$user->profile) {
+                return $this->error(
+                    null,
+                    'Profile not found. Please update your profile first.',
+                    404
+                );
+            }
+
+            // Delete old avatar if exists
+            if (!empty($user->profile->avatar) && file_exists(public_path($user->profile->avatar))) {
+                Helper::fileDelete(public_path($user->profile->avatar));
+            }
+
+            // Upload new avatar
+            $avatarPath = Helper::fileUpload($request->file('avatar'),'user/avatar');
+
+            // Update profile avatar
+            $user->profile->update(['avatar' => $avatarPath]);
+
+            // Reload user with profile
+            $user->refresh()->load('profile');
+
+            return $this->success(
+                'Avatar updated successfully',
+                new UserResource($user)
+            );
+        } catch (Exception $e) {
+            Log::error('Update avatar error: ' . $e->getMessage());
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                'Failed to update avatar',
+                500
+            );
         }
-        $validatedData['avatar'] = Helper::fileUpload($request->file('avatar'), 'user/avatar', getFileName($request->file('avatar')));
-
-        $user->update($validatedData);
-
-        $response = [
-            'id' => $user->id,
-            'avatar' => $user->avatar
-                ? asset($user->avatar)
-                : asset('default/profile.jpg'),
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-        ];
-
-        return Helper::jsonResponse(true, 'Avatar updated successfully', 200, $response);
     }
 
     /**
      * Delete User Profile
+     * @method DELETE
+     * @route /api/auth/delete-profile
+     * @middleware auth:api
      */
     public function destroy()
     {
-        $user = User::findOrFail(auth('api')->id());
-        if (!empty($user->avatar) && file_exists(public_path($user->avatar))) {
-            Helper::fileDelete(public_path($user->avatar));
-        }
-        Auth::logout('api');
-        $user->forceDelete();
-        return $this->success('User profile deleted successfully', [], 200);
-    }
+        try {
+            $user = auth('api')->user()->load('profile');
 
+            if (!$user) {
+                return $this->error(
+                    null,
+                    'User not found',
+                    404
+                );
+            }
+
+            // Delete avatar file if exists
+            if ($user->profile && !empty($user->profile->avatar) && file_exists(public_path($user->profile->avatar))) {
+                Helper::fileDelete(public_path($user->profile->avatar));
+            }
+
+            // Logout user
+            auth('api')->logout();
+
+            // Force delete user (this will cascade delete profile due to foreign key)
+            $user->forceDelete();
+
+            return $this->success(
+                'User profile deleted successfully',
+                null
+            );
+        } catch (Exception $e) {
+            Log::error('Delete profile error: ' . $e->getMessage());
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                'Failed to delete profile',
+                500
+            );
+        }
+    }
 
     /**
      * Change User Password
+     * @method POST
+     * @route /api/auth/change-password
+     * @middleware auth:api
      */
     public function changePassword(Request $request)
     {
-        $user = auth()->guard('api')->user();
+        try {
+            $user = auth('api')->user();
 
-        if (!$user) {
-            return $this->error([], 'User not found', 404);
+            if (!$user) {
+                return $this->error(
+                    null,
+                    'User not found',
+                    404
+                );
+            }
+
+            // Validation
+            $validator = Validator::make($request->all(), [
+                'old_password'     => 'required|string',
+                'new_password'     => 'required|string|min:6|max:50',
+                'confirm_password' => 'required|string|same:new_password',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->validationError(
+                    $validator->errors()->toArray(),
+                    'Validation failed',
+                    422
+                );
+            }
+
+            // Check if old password is correct
+            if (!Hash::check($request->old_password, $user->password)) {
+                return $this->error(
+                    null,
+                    'Old password does not match',
+                    400
+                );
+            }
+
+            // Update with new password
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return $this->success(
+                'Password changed successfully',
+                null
+            );
+        } catch (Exception $e) {
+            Log::error('Change password error: ' . $e->getMessage());
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                'Failed to change password',
+                500
+            );
+        }
+    }
+
+    /**
+     * Generate unique username
+     */
+    private function generateUsername($firstName)
+    {
+        $baseUsername = strtolower(str_replace(' ', '_', $firstName));
+        $username = $baseUsername . '_' . $this->randomAlphaNum(4);
+
+        // Check if username exists, regenerate if needed
+        while (\App\Models\Profile::where('username', $username)->exists()) {
+            $username = $baseUsername . '_' . $this->randomAlphaNum(4);
         }
 
-        // Validate input
-        $validator = Validator::make($request->all(), [
-            'old_password'      => 'required',
-            'new_password'      => 'required|min:6',
-            'confirm_password'  => 'required|same:new_password',
-        ]);
+        return $username;
+    }
 
-        if ($validator->fails()) {
-            return $this->error($validator->errors(), 'Validation failed', 422);
+    /**
+     * Generate unique slug
+     */
+    private function generateSlug($firstName)
+    {
+        $baseSlug = strtolower(str_replace(' ', '-', $firstName));
+        $slug = $baseSlug . '-' . $this->randomAlphaNum(6);
+
+        // Check if slug exists, regenerate if needed
+        while (\App\Models\Profile::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $this->randomAlphaNum(6);
         }
 
-        // Check if old password is correct
-        if (!Hash::check($request->old_password, $user->password)) {
-            return $this->error([], 'Old password does not match', 400);
-        }
+        return $slug;
+    }
 
-        // Update with new password
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        return $this->success('Password changed successfully', [], 200);
+    /**
+     * Generate random alphanumeric string
+     */
+    private function randomAlphaNum($length = 4)
+    {
+        return substr(
+            str_shuffle('abcdefghijklmnopqrstuvwxyz0123456789'),
+            0,
+            $length
+        );
     }
 }

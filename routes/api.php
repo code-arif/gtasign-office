@@ -54,10 +54,11 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
 | User Profile and After Auth Route
 |--------------------------------------------------------------------------
 */
-Route::group(['middleware' => ['auth:api', 'api-otp']], function ($router) {
-    Route::get('/refresh-token', [LoginController::class, 'refreshToken']);
+Route::group(['middleware' => 'auth:api', 'prefix' => 'v1'], function ($router) {
+    Route::post('/refresh-token', [LoginController::class, 'refreshToken']); // done
     Route::post('/logout', [LogoutController::class, 'logout']); // done
-    Route::get('/user-details', [UserController::class, 'me']); // done
+
+    Route::get('/profile', [UserController::class, 'profile']); // done
     Route::post('/update-profile', [UserController::class, 'updateProfile']); // done
     Route::post('/update-avatar', [UserController::class, 'updateAvatar']); // done
     Route::delete('/delete-profile', [UserController::class, 'destroy']); // done

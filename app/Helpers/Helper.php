@@ -3,40 +3,49 @@
 namespace App\Helpers;
 
 use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Kreait\Firebase\Factory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 
 class Helper
 {
     /**
-     * Upload file
+     * Upload file using Laravel Storage (public disk)
      */
-    public static function fileUpload($file, $folder): ?string
+    public static function fileUpload($file, string $folder): ?string
     {
-        if (!$file->isValid()) {
+        if (!$file || !$file->isValid()) {
             return null;
         }
 
-        $imageName = time() . '-' . Str::random(5) . '.' . $file->getClientOriginalExtension();
-        $path      = public_path('uploads/' . $folder);
-        if (!file_exists($path)) {
-            mkdir($path, 0777, true);
-        }
-        $file->move($path, $imageName);
-        return 'uploads/' . $folder . '/' . $imageName;
+        // Generate unique filename
+        $fileName = time() . '-' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+
+        // Store file in: storage/app/public/{folder}
+        $path = $file->storeAs(
+            'uploads/' . trim($folder, '/'),
+            $fileName,
+            'public'
+        );
+
+        // Return path usable in frontend
+        return $path; // ex: uploads/avatars/abc123.png
     }
 
     /**
-     * Delete file
+     * Delete file from Laravel Storage (public disk)
+     *
+     * @param string|null $path
+     * @return void
      */
-    public static function fileDelete(string $path): void
+    public static function fileDelete(?string $path): void
     {
-        if (file_exists($path)) {
-            unlink($path);
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
     }
 

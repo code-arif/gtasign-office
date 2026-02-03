@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+
 trait ApiResponse
 {
     /**
@@ -36,27 +37,26 @@ trait ApiResponse
 
     /**
      * Error Response
+     * @param mixed $errors - Error details (array or string)
+     * @param string|null $message - Error message
+     * @param int $code - HTTP status code
      */
     protected function error(
-        ?string $message = null,
         mixed $errors = null,
+        ?string $message = null,
         int $code = 500
     ) {
         return $this->respond(false, $message, null, $errors, $code);
     }
 
-
-    /*
-    * Validation error
-    */
-    public function validationError($errors, $message = 'Validation failed', $code = 422)
-    {
-        return response()->json([
-            'success' => false,
-            'message' => $message,
-            'data'    => [],
-            'errors'  => $errors,
-            'code'    => $code
-        ], $code);
+    /**
+     * Validation Error Response
+     */
+    protected function validationError(
+        mixed $errors,
+        ?string $message = 'Validation failed',
+        int $code = 422
+    ) {
+        return $this->respond(false, $message, null, $errors, $code);
     }
 }

@@ -24,13 +24,15 @@ class UserResource extends JsonResource
             'created_at' => $this->created_at->toDateTimeString(),
 
             // Profile info
-            'profile' => $this->whenLoaded('profile', function() {
+            'profile' => $this->whenLoaded('profile', function () {
                 return [
                     'first_name' => $this->profile->first_name,
                     'last_name'  => $this->profile->last_name,
                     'username'   => $this->profile->username,
                     'slug'       => $this->profile->slug,
-                    'avatar'     => $this->profile->avatar,
+                    'avatar' => $this->profile->avatar
+                        ? asset('storage/' . $this->profile->avatar)
+                        : asset('default/profile.jpg'),
                     'tagline'    => $this->profile->tagline,
                     'biography'  => $this->profile->biography,
                     'address'    => $this->profile->address,
