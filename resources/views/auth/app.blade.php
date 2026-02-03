@@ -12,15 +12,9 @@ $settings = \App\Models\Setting::first();
     <meta charset="UTF-8">
     <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=0'>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<<<<<<< HEAD
     <meta name="description" content="{!! strip_tags($settings->description ?? '') !!}">
     <meta name="author" content="{{ $settings->author ?? '' }}">
     <meta name="keywords" content="{!! strip_tags($settings->keywords ?? '') !!}">
-=======
-    <meta name="description" content="{!! strip_tags($settings?->description) ?? '' !!}">
-    <meta name="author" content="{{ $settings->author ?? '' }}">
-    <meta name="keywords" content="{!! strip_tags($settings?->keywords) ?? '' !!}">
->>>>>>> 7ad60917571d7a5f37e452e0a0d43bef9b511182
 
     <!-- TITLE -->
     <title>{{ config('app.name') }} - {{ $title ?? $settings->title ?? '' }}</title>
