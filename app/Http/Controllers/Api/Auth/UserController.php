@@ -188,7 +188,7 @@ class UserController extends Controller
             }
 
             // Upload new avatar
-            $avatarPath = Helper::fileUpload($request->file('avatar'),'user/avatar');
+            $avatarPath = Helper::fileUpload($request->file('avatar'), 'user/avatar');
 
             // Update profile avatar
             $user->profile->update(['avatar' => $avatarPath]);
@@ -213,51 +213,54 @@ class UserController extends Controller
     /**
      * Delete User Profile
      * @method DELETE
-     * @route /api/auth/delete-profile
+     * @route /api/v1/delete-profile
      * @middleware auth:api
      */
-    public function destroy()
+    public function destroy(Request $request)
     {
+        $request->validate([
+            'password' => 'required|string'
+        ]);
+
         try {
             $user = auth('api')->user()->load('profile');
 
             if (!$user) {
-                return $this->error(
-                    null,
-                    'User not found',
-                    404
-                );
+                return $this->error(null, 'User not found', 404);
             }
 
-            // Delete avatar file if exists
-            if ($user->profile && !empty($user->profile->avatar) && file_exists(public_path($user->profile->avatar))) {
-                Helper::fileDelete(public_path($user->profile->avatar));
+            // Confirm password
+            if (!Hash::check($request->password, $user->password)) {
+                return $this->error(null, 'Invalid password', 403);
+            }
+
+            // Delete avatar from storage
+            if ($user->profile?->avatar) {
+                Helper::fileDelete($user->profile->avatar);
             }
 
             // Logout user
             auth('api')->logout();
 
-            // Force delete user (this will cascade delete profile due to foreign key)
+            // Permanently delete user (profile auto deleted)
             $user->forceDelete();
 
-            return $this->success(
-                'User profile deleted successfully',
-                null
-            );
+            return $this->success('Account deleted successfully');
         } catch (Exception $e) {
             Log::error('Delete profile error: ' . $e->getMessage());
             return $this->error(
                 ['exception' => $e->getMessage()],
-                'Failed to delete profile',
+                'Failed to delete account',
                 500
             );
         }
     }
 
+
     /**
      * Change User Password
      * @method POST
-     * @route /api/auth/change-password
+     * @route /api/v1/change-password
      * @middleware auth:api
      */
     public function changePassword(Request $request)
