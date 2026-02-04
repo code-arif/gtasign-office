@@ -351,7 +351,7 @@ class UserController extends Controller
     }
 
     /**
-     * Generate random alphanumeric string
+     * Generate random alphanumeric strings
      */
     private function randomAlphaNum($length = 4)
     {
