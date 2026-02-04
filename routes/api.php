@@ -83,7 +83,6 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
         Route::delete('/delete/{id}', [EducationController::class, 'destroy']);
     });
 
-    // Certificate
     Route::group(['prefix' => 'certifications'], function () {
         Route::get('/', [CertificateController::class, 'index']);
         Route::post('/store', [CertificateController::class, 'store']);
