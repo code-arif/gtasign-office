@@ -75,7 +75,6 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'v1'], function ($router) 
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(function () {
-    // Education
     Route::group(['prefix' => 'educations'], function () {
         Route::get('/', [EducationController::class, 'index']);
         Route::post('/store', [EducationController::class, 'store']);
