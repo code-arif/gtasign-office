@@ -63,6 +63,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'http://localhost:5173/*',
             'http://localhost:5173/',
             'http://localhost:5173',
+            'https://gtasign.thewarriors.team/api',
+            'https://gtasign.thewarriors.team/api/',
+            'https://gtasign.thewarriors.team/api/*',
+            '*',
         ]);
         $middleware->api([
             StartSession::class,
