@@ -2,16 +2,17 @@
 
 namespace App\Services;
 
-use App\Repositories\Interfaces\GigRepositoryInterface;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Exception;
+use Illuminate\Support\Facades\DB;
+use App\Repositories\GigRepository;
+use Illuminate\Support\Facades\Storage;
+use App\Repositories\Interfaces\GigRepositoryInterface;
 
 class GigService
 {
     protected $gigRepository;
 
-    public function __construct(GigRepositoryInterface $gigRepository)
+    public function __construct(GigRepository $gigRepository)
     {
         $this->gigRepository = $gigRepository;
     }

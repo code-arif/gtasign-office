@@ -42,12 +42,24 @@ class GigController extends Controller
             ];
 
             $perPage = $request->input('per_page', 15);
+
+            // Service call returns LengthAwarePaginator
             $gigs = $this->gigService->getAllGigs(array_filter($filters), $perPage);
 
-            return $this->success(
-                'Gigs retrieved successfully',
-                GigListResource::collection($gigs)->response()->getData(true)
-            );
+            // Wrap paginated data in resource
+            $gigResources = GigListResource::collection($gigs);
+
+            $data = [
+                'gigs' => $gigResources,
+                'pagination' => [
+                    'total' => $gigs->total(),
+                    'per_page' => $gigs->perPage(),
+                    'current_page' => $gigs->currentPage(),
+                    'last_page' => $gigs->lastPage(),
+                ]
+            ];
+
+            return $this->success('Gigs retrieved successfully', $data);
         } catch (Exception $e) {
             Log::error('Gig index error: ' . $e->getMessage());
 
@@ -76,12 +88,21 @@ class GigController extends Controller
             ];
 
             $perPage = $request->input('per_page', 15);
-            $gigs = $this->gigService->getUserGigs($user->id, array_filter($filters), $perPage);
 
-            return $this->success(
-                'Your gigs retrieved successfully',
-                GigListResource::collection($gigs)->response()->getData(true)
-            );
+            $gigs = $this->gigService->getUserGigs($user->id, array_filter($filters), $perPage);
+            $gigResources = GigListResource::collection($gigs);
+
+            $data = [
+                'gigs' => $gigResources,
+                'pagination' => [
+                    'total' => $gigs->total(),
+                    'per_page' => $gigs->perPage(),
+                    'current_page' => $gigs->currentPage(),
+                    'last_page' => $gigs->lastPage(),
+                ]
+            ];
+
+            return $this->success('Gigs retrieved successfully', $data);
         } catch (Exception $e) {
             Log::error('My gigs error: ' . $e->getMessage());
 

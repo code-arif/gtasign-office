@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Frontend\CMS\HomePageController;
 use App\Http\Controllers\Api\Frontend\NotificationController;
 use App\Http\Controllers\Api\Frontend\CMS\AboutPageController;
 use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
+use App\Http\Controllers\Api\Gig\GigCategoryController;
 use App\Http\Controllers\Api\User\Profile\EducationController;
 use App\Http\Controllers\Api\User\Profile\CertificateController;
 use App\Http\Controllers\Api\User\Profile\UserExperienceController;
@@ -51,6 +52,25 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
 
     //social login
     Route::post('/social-login', [SocialLoginController::class, 'SocialLogin']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Public route
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('gigs')->group(function () {
+        // Browse active gigs
+        Route::get('/', [GigController::class, 'index']);
+        Route::get('/active', [GigController::class, 'active']);
+        Route::get('/search', [GigController::class, 'search']);
+        Route::get('/{id}', [GigController::class, 'show']);
+
+        // Track analytics
+        Route::post('/{id}/track-click', [GigController::class, 'trackClick']);
+
+        // Gig cageroires
+        Route::get('/gig-categories', [GigCategoryController::class, 'index']);
+    });
 });
 
 /*
@@ -75,6 +95,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'v1'], function ($router) 
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(function () {
+    // Education
     Route::group(['prefix' => 'educations'], function () {
         Route::get('/', [EducationController::class, 'index']);
         Route::post('/store', [EducationController::class, 'store']);
@@ -104,22 +125,10 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
     |--------------------------------------------------------------------------
     */
 
-    // Public routes
-    Route::prefix('gigs')->group(function () {
-        // Browse active gigs
-        Route::get('/', [GigController::class, 'index']);
-        Route::get('/active', [GigController::class, 'active']);
-        Route::get('/search', [GigController::class, 'search']);
-        Route::get('/{id}', [GigController::class, 'show']);
-
-        // Track analytics
-        Route::post('/{id}/track-click', [GigController::class, 'trackClick']);
-    });
-
     // Protected routes (Expert only)
     Route::prefix('gigs')->group(function () {
         // My gigs
-        Route::get('/my/list', [GigController::class, 'myGigs']);
+        Route::get('/my/list', [GigController::class, 'myGigs']); // done
 
         // Create gig (step by step)
         Route::post('/create/overview', [GigController::class, 'createOverview']);

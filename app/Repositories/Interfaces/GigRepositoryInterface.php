@@ -11,12 +11,12 @@ interface GigRepositoryInterface
     /**
      * Get all gigs with filters
      */
-    public function getAllGigs(array $filters = [], int $perPage = 15): LengthAwarePaginator;
+    // public function getAllGigs(array $filters = [], int $perPage = 15);
 
     /**
      * Get user gigs
      */
-    public function getUserGigs(int $userId, array $filters = [], int $perPage = 15): LengthAwarePaginator;
+    // public function getUserGigs(int $userId, array $filters = [], int $perPage = 15);
 
     /**
      * Get gig by id

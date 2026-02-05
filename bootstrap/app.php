@@ -57,7 +57,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission'    => RoleOrPermissionMiddleware::class
         ]);
         $middleware->validateCsrfTokens(except: [
-            '*/'
+            'http://localhost:5174/*',
+            'http://localhost:5174/',
+            'http://localhost:5174',
+            'http://localhost:5173/*',
+            'http://localhost:5173/',
+            'http://localhost:5173',
         ]);
         $middleware->api([
             StartSession::class,

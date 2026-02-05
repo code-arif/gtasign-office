@@ -27,8 +27,8 @@ return new class extends Migration
             $table->text('scope')->nullable(); // Detailed description of services
 
             // Pricing & delivery
-            $table->decimal('price', 10, 2);
-            $table->unsignedSmallInteger('delivery_days'); // Delivery timeline in days
+            $table->decimal('price', 10, 2)->nullable();
+            $table->unsignedSmallInteger('delivery_days')->nullable(); // Delivery timeline in days
 
             // Requirements (kept as JSON for flexibility)
             $table->json('system_questions')->nullable(); // Auto-generated questions

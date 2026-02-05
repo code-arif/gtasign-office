@@ -19,7 +19,7 @@ class GigRepository implements GigRepositoryInterface
     /**
      * Get all gigs with filters
      */
-    public function getAllGigs(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getAllGigs(array $filters = [], int $perPage = 15)
     {
         $query = $this->model->with(['user', 'category', 'subCategory']);
 
@@ -32,7 +32,7 @@ class GigRepository implements GigRepositoryInterface
     /**
      * Get user gigs
      */
-    public function getUserGigs(int $userId, array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getUserGigs(int $userId, array $filters = [], int $perPage = 15)
     {
         $query = $this->model->with(['category', 'subCategory'])
             ->where('user_id', $userId);
