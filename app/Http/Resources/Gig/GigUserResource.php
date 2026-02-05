@@ -5,14 +5,14 @@ namespace App\Http\Resources\Gig;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class GigDocumentResource extends JsonResource
+class GigUserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
-            'name' => basename($this->path),
-            'url' => asset('storage/' . $this->path),
+            'email' => $this->email,
+            'phone' => $this->phone,
         ];
     }
 }
