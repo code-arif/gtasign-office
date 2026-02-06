@@ -117,7 +117,7 @@ class RegisterController extends Controller
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
                     'otp' => $otp,
-                    'is_agreed' => $user->is_agreed
+                    // 'is_agreed' => $user->is_agreed
                 ],
                 201
             );
