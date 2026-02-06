@@ -122,7 +122,7 @@ class RegisterController extends Controller
             );
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->error('User registration failed', ['exception' => $e->getMessage()], 500);
+            // return $this->error('User registration failed', ['exception' => $e->getMessage()], 500);
         }
     }
 
