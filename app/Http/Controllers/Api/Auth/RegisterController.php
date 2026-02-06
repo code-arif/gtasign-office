@@ -105,7 +105,7 @@ class RegisterController extends Controller
             // }
 
             // // Send OTP email
-            // Mail::to($user->email)->queue(new OtpMail($otp, $user, 'Verify Your Email Address'));
+            Mail::to($user->email)->send(new OtpMail($otp, $user, 'Verify Your Email Address'));
 
             DB::commit();
 
