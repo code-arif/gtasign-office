@@ -41,7 +41,7 @@ class RegisterController extends Controller
             'last_name'  => 'nullable|string|max:100',
             'email'      => 'required|string|email|max:150|unique:users',
             'password'   => 'required|string|min:6|confirmed',
-            'agree'      => 'required|in:true',
+            'agree'      => 'required',
             'role'       => 'required|in:2,3', // 2=expert, 3=client
         ]);
 
