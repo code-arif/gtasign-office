@@ -8,12 +8,16 @@ use App\Services\GigService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Gig\GigResource;
 use App\Http\Resources\Gig\GigListResource;
 use App\Http\Requests\Gig\GigGalleryRequest;
 use App\Http\Requests\Gig\GigPricingRequest;
+use App\Http\Resources\Gig\GigImageResource;
 use App\Http\Requests\Gig\GigOverviewRequest;
+use App\Http\Resources\Gig\GigPricingResource;
 use App\Http\Requests\Gig\GigRequirementsRequest;
+use App\Http\Resources\Gig\GigDetailResource;
+use App\Http\Resources\Gig\GigRequirementResource;
+use App\Http\Resources\Gig\GigResource;
 
 class GigController extends Controller
 {
@@ -256,7 +260,7 @@ class GigController extends Controller
 
             return $this->success(
                 'Gig pricing updated successfully',
-                new GigResource($gig)
+                new GigPricingResource($gig)
             );
         } catch (Exception $e) {
             Log::error('Gig update pricing error: ' . $e->getMessage());
@@ -284,7 +288,7 @@ class GigController extends Controller
 
             return $this->success(
                 'Gig requirements updated successfully',
-                new GigResource($gig)
+                new GigRequirementResource($gig)
             );
         } catch (Exception $e) {
             Log::error('Gig update requirements error: ' . $e->getMessage());
@@ -333,67 +337,45 @@ class GigController extends Controller
         }
     }
 
-    /**
-     * Delete gig image
-     */
     public function deleteImage(Request $request, $id)
     {
         try {
             $user = auth('api')->user();
             if (!$user) {
-                return $this->error(null, 'User not found', 404);
+                return $this->error(null, 'Unauthorized', 401);
             }
 
             $request->validate([
-                'image_path' => 'required|string',
+                'image_id' => 'required|integer|exists:gig_images,id',
             ]);
 
-            $gig = $this->gigService->deleteImage($id, $user->id, $request->input('image_path'));
+            $gig = $this->gigService->deleteImage($id, $user->id, $request->input('image_id'));
 
-            return $this->success(
-                'Image deleted successfully',
-                new GigResource($gig)
-            );
+            return $this->success('Image deleted successfully', new GigResource($gig));
         } catch (Exception $e) {
             Log::error('Gig delete image error: ' . $e->getMessage());
-
-            return $this->error(
-                ['exception' => $e->getMessage()],
-                $e->getMessage() === 'Gig not found' ? 'Gig not found' : 'Failed to delete image',
-                $e->getMessage() === 'Gig not found' ? 404 : 500
-            );
+            return $this->error(['exception' => $e->getMessage()], $e->getMessage(), 500);
         }
     }
 
-    /**
-     * Delete gig document
-     */
     public function deleteDocument(Request $request, $id)
     {
         try {
             $user = auth('api')->user();
             if (!$user) {
-                return $this->error(null, 'User not found', 404);
+                return $this->error(null, 'Unauthorized', 401);
             }
 
             $request->validate([
-                'document_path' => 'required|string',
+                'document_id' => 'required|integer|exists:gig_documents,id',
             ]);
 
-            $gig = $this->gigService->deleteDocument($id, $user->id, $request->input('document_path'));
+            $gig = $this->gigService->deleteDocument($id, $user->id, $request->input('document_id'));
 
-            return $this->success(
-                'Document deleted successfully',
-                new GigResource($gig)
-            );
+            return $this->success('Document deleted successfully', new GigResource($gig));
         } catch (Exception $e) {
             Log::error('Gig delete document error: ' . $e->getMessage());
-
-            return $this->error(
-                ['exception' => $e->getMessage()],
-                $e->getMessage() === 'Gig not found' ? 'Gig not found' : 'Failed to delete document',
-                $e->getMessage() === 'Gig not found' ? 404 : 500
-            );
+            return $this->error(['exception' => $e->getMessage()], $e->getMessage(), 500);
         }
     }
 
@@ -412,7 +394,7 @@ class GigController extends Controller
 
             return $this->success(
                 'Gig submitted for approval successfully',
-                new GigResource($gig)
+                new GigDetailResource($gig)
             );
         } catch (Exception $e) {
             Log::error('Gig publish error: ' . $e->getMessage());
@@ -493,60 +475,6 @@ class GigController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 'Failed to track click',
-                500
-            );
-        }
-    }
-
-    /**
-     * Admin: Approve gig
-     */
-    public function approve($id)
-    {
-        try {
-            $this->gigService->approveGig($id);
-
-            $gig = $this->gigService->getGigById($id);
-
-            return $this->success(
-                'Gig approved successfully',
-                new GigResource($gig)
-            );
-        } catch (Exception $e) {
-            Log::error('Gig approve error: ' . $e->getMessage());
-
-            return $this->error(
-                ['exception' => $e->getMessage()],
-                'Failed to approve gig',
-                500
-            );
-        }
-    }
-
-    /**
-     * Admin: Reject gig
-     */
-    public function reject(Request $request, $id)
-    {
-        try {
-            $request->validate([
-                'reason' => 'required|string|max:1000',
-            ]);
-
-            $this->gigService->rejectGig($id, $request->input('reason'));
-
-            $gig = $this->gigService->getGigById($id);
-
-            return $this->success(
-                'Gig rejected successfully',
-                new GigResource($gig)
-            );
-        } catch (Exception $e) {
-            Log::error('Gig reject error: ' . $e->getMessage());
-
-            return $this->error(
-                ['exception' => $e->getMessage()],
-                'Failed to reject gig',
                 500
             );
         }

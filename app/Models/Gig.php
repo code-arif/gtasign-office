@@ -82,13 +82,10 @@ class Gig extends Model
         return $this->hasMany(GigDocument::class);
     }
 
-    /**
-     * Search tags for discovery and SEO.
-     */
-    public function tags()
-    {
-        return $this->belongsToMany(Tag::class);
-    }
+    // public function orders()
+    // {
+    //     return $this->hasMany(Order::class);
+    // }
 
 
     /**
@@ -149,5 +146,16 @@ class Gig extends Model
     public function incrementCancellations(): void
     {
         $this->increment('cancellations');
+    }
+
+    // Helper Methods
+    public function getPrimaryImage()
+    {
+        return $this->images()->where('is_primary', true)->first();
+    }
+
+    public function isOwnedBy($userId)
+    {
+        return $this->user_id == $userId;
     }
 }

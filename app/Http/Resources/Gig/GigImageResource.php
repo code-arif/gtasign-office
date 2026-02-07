@@ -11,7 +11,10 @@ class GigImageResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'url' => asset('storage/' . $this->path),
+            // 'url' => asset('storage/' . $this->path),
+            'url' => $this->path
+                ? asset('storage/' . $this->path)
+                : asset('default/profile.jpg'),
             'is_primary' => (bool) $this->is_primary,
             'sort_order' => $this->sort_order,
         ];

@@ -22,9 +22,9 @@ class GigPricingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'scope' => ['nullable', 'string', 'max:1000'],
+            'scope' => ['nullable', 'string', 'max:5000'],
             'price' => ['required', 'numeric', 'min:5', 'max:999999.99'],
-            'delivery_days' => ['required', 'integer', Rule::in([1, 2, 3, 4, 5])],
+            'delivery_days' => ['required', 'integer', Rule::in([1, 2, 3, 4, 5, 6, 7])],
         ];
     }
 

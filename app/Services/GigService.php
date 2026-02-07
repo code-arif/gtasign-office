@@ -3,10 +3,9 @@
 namespace App\Services;
 
 use Exception;
+use App\Helpers\Helper;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\GigRepository;
-use Illuminate\Support\Facades\Storage;
-use App\Repositories\Interfaces\GigRepositoryInterface;
 
 class GigService
 {
@@ -17,33 +16,21 @@ class GigService
         $this->gigRepository = $gigRepository;
     }
 
-    /**
-     * Get all gigs
-     */
     public function getAllGigs(array $filters = [], int $perPage = 15)
     {
         return $this->gigRepository->getAllGigs($filters, $perPage);
     }
 
-    /**
-     * Get user gigs
-     */
     public function getUserGigs(int $userId, array $filters = [], int $perPage = 15)
     {
         return $this->gigRepository->getUserGigs($userId, $filters, $perPage);
     }
 
-    /**
-     * Get gig by id
-     */
     public function getGigById(int $id)
     {
         return $this->gigRepository->getGigById($id);
     }
 
-    /**
-     * Create gig - Overview step
-     */
     public function createOverview(int $userId, array $data)
     {
         DB::beginTransaction();
@@ -53,23 +40,24 @@ class GigService
                 'title' => $data['title'],
                 'category_id' => $data['category_id'],
                 'sub_category_id' => $data['sub_category_id'] ?? null,
-                'search_tags' => $data['search_tags'] ?? [],
                 'status' => 'draft',
             ];
 
             $gig = $this->gigRepository->createGig($gigData);
 
+            // Attach tags if provided
+            if (!empty($data['tag_ids'])) {
+                $gig->tags()->sync($data['tag_ids']);
+            }
+
             DB::commit();
-            return $gig;
+            return $gig->load(['category', 'subCategory']);
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }
     }
 
-    /**
-     * Update gig - Pricing step
-     */
     public function updatePricing(int $gigId, int $userId, array $data)
     {
         DB::beginTransaction();
@@ -96,9 +84,6 @@ class GigService
         }
     }
 
-    /**
-     * Update gig - Requirements step
-     */
     public function updateRequirements(int $gigId, int $userId, array $data)
     {
         DB::beginTransaction();
@@ -110,7 +95,7 @@ class GigService
             }
 
             $updateData = [
-                'secaax_questions' => $data['secaax_questions'] ?? [],
+                'system_questions' => $data['system_questions'] ?? [],
                 'custom_questions' => $data['custom_questions'] ?? [],
             ];
 
@@ -124,9 +109,6 @@ class GigService
         }
     }
 
-    /**
-     * Update gig - Gallery step
-     */
     public function updateGallery(int $gigId, int $userId, array $data)
     {
         DB::beginTransaction();
@@ -137,33 +119,35 @@ class GigService
                 throw new Exception('Gig not found');
             }
 
-            $updateData = [];
+            // Upload images
+            if (!empty($data['images']) && is_array($data['images'])) {
+                $existingImagesCount = $gig->images()->count();
 
-            // Handle images upload
-            if (isset($data['images']) && is_array($data['images'])) {
-                $imagePaths = [];
-                foreach ($data['images'] as $image) {
-                    if ($image->isValid()) {
-                        $path = $image->store('gigs/images', 'public');
-                        $imagePaths[] = $path;
+                foreach ($data['images'] as $index => $image) {
+                    $path = Helper::fileUpload($image, 'gigs/images');
+
+                    if ($path) {
+                        $this->gigRepository->addImage($gigId, [
+                            'path' => $path,
+                            'is_primary' => ($existingImagesCount === 0 && $index === 0),
+                            'sort_order' => $existingImagesCount + $index,
+                        ]);
                     }
                 }
-                $updateData['images'] = $imagePaths;
             }
 
-            // Handle documents upload
-            if (isset($data['documents']) && is_array($data['documents'])) {
-                $documentPaths = [];
+            // Upload documents
+            if (!empty($data['documents']) && is_array($data['documents'])) {
                 foreach ($data['documents'] as $document) {
-                    if ($document->isValid()) {
-                        $path = $document->store('gigs/documents', 'public');
-                        $documentPaths[] = $path;
+                    $path = Helper::fileUpload($document, 'gigs/documents');
+
+                    if ($path) {
+                        $this->gigRepository->addDocument($gigId, [
+                            'path' => $path,
+                        ]);
                     }
                 }
-                $updateData['documents'] = $documentPaths;
             }
-
-            $this->gigRepository->updateGig($gigId, $updateData);
 
             DB::commit();
             return $this->gigRepository->getGigById($gigId);
@@ -173,10 +157,7 @@ class GigService
         }
     }
 
-    /**
-     * Delete gig image
-     */
-    public function deleteImage(int $gigId, int $userId, string $imagePath)
+    public function deleteImage(int $gigId, int $userId, int $imageId)
     {
         DB::beginTransaction();
         try {
@@ -186,21 +167,14 @@ class GigService
                 throw new Exception('Gig not found');
             }
 
-            $images = $gig->images ?? [];
-            $key = array_search($imagePath, $images);
+            // Check if image belongs to this gig
+            $image = $gig->images()->where('id', $imageId)->first();
 
-            if ($key !== false) {
-                // Delete from storage
-                if (Storage::disk('public')->exists($imagePath)) {
-                    Storage::disk('public')->delete($imagePath);
-                }
-
-                // Remove from array
-                unset($images[$key]);
-                $images = array_values($images); // Re-index array
-
-                $this->gigRepository->updateGig($gigId, ['images' => $images]);
+            if (!$image) {
+                throw new Exception('Image not found');
             }
+
+            $this->gigRepository->deleteImage($imageId);
 
             DB::commit();
             return $this->gigRepository->getGigById($gigId);
@@ -210,10 +184,7 @@ class GigService
         }
     }
 
-    /**
-     * Delete gig document
-     */
-    public function deleteDocument(int $gigId, int $userId, string $documentPath)
+    public function deleteDocument(int $gigId, int $userId, int $documentId)
     {
         DB::beginTransaction();
         try {
@@ -223,21 +194,14 @@ class GigService
                 throw new Exception('Gig not found');
             }
 
-            $documents = $gig->documents ?? [];
-            $key = array_search($documentPath, $documents);
+            // Check if document belongs to this gig
+            $document = $gig->documents()->where('id', $documentId)->first();
 
-            if ($key !== false) {
-                // Delete from storage
-                if (Storage::disk('public')->exists($documentPath)) {
-                    Storage::disk('public')->delete($documentPath);
-                }
-
-                // Remove from array
-                unset($documents[$key]);
-                $documents = array_values($documents); // Re-index array
-
-                $this->gigRepository->updateGig($gigId, ['documents' => $documents]);
+            if (!$document) {
+                throw new Exception('Document not found');
             }
+
+            $this->gigRepository->deleteDocument($documentId);
 
             DB::commit();
             return $this->gigRepository->getGigById($gigId);
@@ -247,36 +211,6 @@ class GigService
         }
     }
 
-    /**
-     * Publish gig
-     */
-    public function publishGig(int $gigId, int $userId)
-    {
-        DB::beginTransaction();
-        try {
-            $gig = $this->gigRepository->getGigByIdAndUser($gigId, $userId);
-
-            if (!$gig) {
-                throw new Exception('Gig not found');
-            }
-
-            // Validate gig is complete
-            $this->validateGigForPublish($gig);
-
-            // Update status to pending approval
-            $this->gigRepository->updateStatus($gigId, 'pending_approval');
-
-            DB::commit();
-            return $this->gigRepository->getGigById($gigId);
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
-
-    /**
-     * Update gig (complete update)
-     */
     public function updateGig(int $gigId, int $userId, array $data)
     {
         DB::beginTransaction();
@@ -287,7 +221,24 @@ class GigService
                 throw new Exception('Gig not found');
             }
 
-            $this->gigRepository->updateGig($gigId, $data);
+            // Only allow updating certain fields
+            $allowedFields = [
+                'title',
+                'scope',
+                'price',
+                'delivery_days',
+                'system_questions',
+                'custom_questions'
+            ];
+
+            $updateData = array_intersect_key($data, array_flip($allowedFields));
+
+            $this->gigRepository->updateGig($gigId, $updateData);
+
+            // Update tags if provided
+            if (isset($data['tag_ids'])) {
+                $gig->tags()->sync($data['tag_ids']);
+            }
 
             DB::commit();
             return $this->gigRepository->getGigById($gigId);
@@ -297,10 +248,7 @@ class GigService
         }
     }
 
-    /**
-     * Delete gig
-     */
-    public function deleteGig(int $gigId, int $userId)
+    public function publishGig(int $gigId, int $userId)
     {
         DB::beginTransaction();
         try {
@@ -310,8 +258,27 @@ class GigService
                 throw new Exception('Gig not found');
             }
 
-            // Delete associated files
-            $this->deleteGigFiles($gig);
+            $this->validateGigForPublish($gig);
+
+            $this->gigRepository->updateStatus($gigId, 'active');
+
+            DB::commit();
+            return $this->gigRepository->getGigById($gigId);
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function deleteGig(int $gigId, int $userId)
+    {
+        DB::beginTransaction();
+        try {
+            $gig = $this->gigRepository->getGigByIdAndUser($gigId, $userId);
+
+            if (!$gig) {
+                throw new Exception('Gig not found');
+            }
 
             $this->gigRepository->deleteGig($gigId);
 
@@ -323,57 +290,32 @@ class GigService
         }
     }
 
-    /**
-     * Approve gig (Admin only)
-     */
-    public function approveGig(int $gigId)
-    {
-        return $this->gigRepository->updateStatus($gigId, 'active');
-    }
-
-    /**
-     * Reject gig (Admin only)
-     */
-    public function rejectGig(int $gigId, string $reason)
-    {
-        return $this->gigRepository->updateStatus($gigId, 'rejected', $reason);
-    }
-
-    /**
-     * Get active gigs
-     */
     public function getActiveGigs(array $filters = [], int $perPage = 15)
     {
         return $this->gigRepository->getActiveGigs($filters, $perPage);
     }
 
-    /**
-     * Search gigs
-     */
     public function searchGigs(string $query, array $filters = [], int $perPage = 15)
     {
         return $this->gigRepository->searchGigs($query, $filters, $perPage);
     }
 
-    /**
-     * Track gig impression
-     */
     public function trackImpression(int $gigId)
     {
-        $this->gigRepository->incrementImpressions($gigId);
+        $gig = $this->gigRepository->getGigById($gigId);
+        if ($gig) {
+            $gig->incrementImpressions();
+        }
     }
 
-    /**
-     * Track gig click
-     */
     public function trackClick(int $gigId)
     {
-        $this->gigRepository->incrementClicks($gigId);
+        $gig = $this->gigRepository->getGigById($gigId);
+        if ($gig) {
+            $gig->incrementClicks();
+        }
     }
 
-    /**
-     * Helper: Validate gig for publish
-     */
     protected function validateGigForPublish($gig)
     {
         if (empty($gig->title)) {
@@ -392,32 +334,8 @@ class GigService
             throw new Exception('Delivery timeline is required');
         }
 
-        if (empty($gig->images) || count($gig->images) === 0) {
+        if ($gig->images()->count() === 0) {
             throw new Exception('At least one gig image is required');
-        }
-    }
-
-    /**
-     * Helper: Delete gig files
-     */
-    protected function deleteGigFiles($gig)
-    {
-        // Delete images
-        if ($gig->images && is_array($gig->images)) {
-            foreach ($gig->images as $image) {
-                if (Storage::disk('public')->exists($image)) {
-                    Storage::disk('public')->delete($image);
-                }
-            }
-        }
-
-        // Delete documents
-        if ($gig->documents && is_array($gig->documents)) {
-            foreach ($gig->documents as $document) {
-                if (Storage::disk('public')->exists($document)) {
-                    Storage::disk('public')->delete($document);
-                }
-            }
         }
     }
 }

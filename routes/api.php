@@ -69,7 +69,7 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
         Route::post('/{id}/track-click', [GigController::class, 'trackClick']);
 
         // Gig cageroires
-        Route::get('/gig-categories', [GigCategoryController::class, 'index']);
+        Route::get('/gig-categories', [GigCategoryController::class, 'index']); // done
     });
 });
 
@@ -131,25 +131,19 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
         Route::get('/my/list', [GigController::class, 'myGigs']); // done
 
         // Create gig (step by step)
-        Route::post('/create/overview', [GigController::class, 'createOverview']);
-        Route::put('/{id}/pricing', [GigController::class, 'updatePricing']);
-        Route::put('/{id}/requirements', [GigController::class, 'updateRequirements']);
-        Route::post('/{id}/gallery', [GigController::class, 'updateGallery']);
+        Route::post('/create/overview', [GigController::class, 'createOverview']); // done
+        Route::post('/{id}/pricing', [GigController::class, 'updatePricing']); // done
+        Route::post('/{id}/requirements', [GigController::class, 'updateRequirements']); // done
+        Route::post('/{id}/gallery', [GigController::class, 'updateGallery']); // done
 
         // Manage gallery
-        Route::delete('/{id}/image', [GigController::class, 'deleteImage']);
-        Route::delete('/{id}/document', [GigController::class, 'deleteDocument']);
+        Route::delete('/{id}/image', [GigController::class, 'deleteImage']); // done
+        Route::delete('/{id}/document', [GigController::class, 'deleteDocument']); // done
 
         // Publish & manage
-        Route::post('/{id}/publish', [GigController::class, 'publish']);
+        Route::post('/{id}/publish', [GigController::class, 'publish']); // done
         Route::put('/{id}', [GigController::class, 'update']);
         Route::delete('/{id}', [GigController::class, 'destroy']);
-    });
-
-    // Admin routes
-    Route::middleware(['auth:api', 'role:admin'])->prefix('admin/gigs')->group(function () {
-        Route::post('/{id}/approve', [GigController::class, 'approve']);
-        Route::post('/{id}/reject', [GigController::class, 'reject']);
     });
 });
 

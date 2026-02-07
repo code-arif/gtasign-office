@@ -19,18 +19,27 @@ class GigRequirementsRequest extends FormRequest
      */
     public function rules(): array
     {
+        // return [
+        //     'system_questions' => ['nullable', 'array'],
+        //     'system_questions.*.question' => ['required_with:system_questions', 'string', 'max:500'],
+        //     'system_questions.*.type' => ['required_with:system_questions', 'string', 'in:text,textarea,select,radio,checkbox'],
+        //     'system_questions.*.options' => ['nullable', 'array'],
+        //     'system_questions.*.required' => ['nullable', 'boolean'],
+
+        //     'custom_questions' => ['nullable', 'array'],
+        //     'custom_questions.*.question' => ['required_with:custom_questions', 'string', 'max:500'],
+        //     'custom_questions.*.type' => ['required_with:custom_questions', 'string', 'in:text,textarea,select,radio,checkbox,file'],
+        //     'custom_questions.*.options' => ['nullable', 'array'],
+        //     'custom_questions.*.required' => ['nullable', 'boolean'],
+        // ];
         return [
-            'secaax_questions' => ['nullable', 'array'],
-            'secaax_questions.*.question' => ['required_with:secaax_questions', 'string', 'max:500'],
-            'secaax_questions.*.type' => ['required_with:secaax_questions', 'string', 'in:text,textarea,select,radio,checkbox'],
-            'secaax_questions.*.options' => ['nullable', 'array'],
-            'secaax_questions.*.required' => ['nullable', 'boolean'],
+            'system_questions' => ['nullable', 'array'],
+            'system_questions.*.question' => ['required_with:system_questions', 'string', 'max:500'],
+            'system_questions.*.answer' => ['required_with:system_questions', 'string'],
 
             'custom_questions' => ['nullable', 'array'],
             'custom_questions.*.question' => ['required_with:custom_questions', 'string', 'max:500'],
-            'custom_questions.*.type' => ['required_with:custom_questions', 'string', 'in:text,textarea,select,radio,checkbox,file'],
-            'custom_questions.*.options' => ['nullable', 'array'],
-            'custom_questions.*.required' => ['nullable', 'boolean'],
+            'custom_questions.*.answer' => ['required_with:custom_questions', 'string'],
         ];
     }
 
@@ -40,8 +49,8 @@ class GigRequirementsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'secaax_questions.*.question.max' => 'Question cannot exceed 500 characters',
-            'secaax_questions.*.type.in' => 'Invalid question type',
+            'system_questions.*.question.max' => 'Question cannot exceed 500 characters',
+            'system_questions.*.type.in' => 'Invalid question type',
             'custom_questions.*.question.max' => 'Question cannot exceed 500 characters',
             'custom_questions.*.type.in' => 'Invalid question type',
         ];
