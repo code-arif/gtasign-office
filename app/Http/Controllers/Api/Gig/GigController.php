@@ -134,6 +134,9 @@ class GigController extends Controller
             // Track impression
             $this->gigService->trackImpression($id);
 
+            // Track click
+            $this->gigService->trackClick($id);
+
             return $this->success('Gig retrieved successfully', new GigDetailResource($gig));
         } catch (Exception $e) {
             Log::error('Gig show error: ' . $e->getMessage());
@@ -150,7 +153,7 @@ class GigController extends Controller
             $user = auth('api')->user();
             $gig = $this->gigService->createGig($user->id, $request->validated());
 
-            return $this->success('Gig created successfully', new GigResource($gig), 201);
+            return $this->success('Gig created successfully', new GigDetailResource($gig), 201);
         } catch (Exception $e) {
             Log::error('Gig create error: ' . $e->getMessage());
             return $this->error(['exception' => $e->getMessage()], 'Failed to create gig', 500);
@@ -166,7 +169,7 @@ class GigController extends Controller
             $user = auth('api')->user();
             $gig = $this->gigService->updateGig($id, $user->id, $request->validated());
 
-            return $this->success('Gig updated successfully', new GigResource($gig));
+            return $this->success('Gig updated successfully', new GigDetailResource($gig));
         } catch (Exception $e) {
             Log::error('Gig update error: ' . $e->getMessage());
 

@@ -62,10 +62,10 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
         Route::get('/', [GigController::class, 'index']); // done
         Route::get('/active', [GigController::class, 'active']);
         Route::get('/search', [GigController::class, 'search']); // done
-        Route::get('/details/{id}', [GigController::class, 'show']);
+        Route::get('/details/{id}', [GigController::class, 'show']); // done
 
         // Track analytics
-        Route::post('/{id}/track-click', [GigController::class, 'trackClick']);
+        Route::post('/{id}/track-click', [GigController::class, 'trackClick']); // done (partial)
 
         // Gig cageroires
         Route::get('/gig-categories', [GigCategoryController::class, 'index']); // done
@@ -125,14 +125,14 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
     */
 
     // Protected routes (Expert only)
-    Route::group([], function () {
-        Route::get('/my/list', [GigController::class, 'myGigs']);
-        Route::post('/', [GigController::class, 'store']);
-        Route::put('/{id}', [GigController::class, 'update']);
-        Route::delete('/{id}', [GigController::class, 'destroy']);
-        Route::post('/{id}/publish', [GigController::class, 'publish']);
-        Route::delete('/{id}/image', [GigController::class, 'deleteImage']);
-        Route::delete('/{id}/document', [GigController::class, 'deleteDocument']);
+    Route::group(['prefix' => 'gigs'], function () {
+        Route::get('/my/list', [GigController::class, 'myGigs']); // done
+        Route::post('/store', [GigController::class, 'store']); // done
+        Route::post('/update/{id}', [GigController::class, 'update']); // done
+        Route::delete('delete/{id}', [GigController::class, 'destroy']); // done
+        // Route::post('/{id}/publish', [GigController::class, 'publish']);
+        Route::delete('delete/{id}/image', [GigController::class, 'deleteImage']); // done
+        Route::delete('delete/{id}/document', [GigController::class, 'deleteDocument']); // done
     });
 });
 

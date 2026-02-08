@@ -95,7 +95,7 @@ class GigService
                 'delivery_days' => $data['delivery_days'],
                 'system_questions' => $data['system_questions'] ?? null,
                 'custom_questions' => $data['custom_questions'] ?? null,
-                'status' => 'draft',
+                'status' => 'pending_approval',
             ]);
 
             // Attach tags

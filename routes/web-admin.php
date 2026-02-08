@@ -34,7 +34,7 @@ use App\Http\Controllers\Web\Backend\CMS\AboutPageOurTeamController;
 use App\Http\Controllers\Web\Backend\Settings\MailSettingController;
 use App\Http\Controllers\Web\Backend\SportsType\SportsTypeController;
 use App\Http\Controllers\Web\Backend\CMS\Web\PrivacyTerms\PrivacAndTermsController;
-
+use App\Http\Controllers\Web\Backend\Gig\GigManageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,6 +60,21 @@ Route::group(['prefix' => 'categories', 'as' => 'categories.'], function () {
     Route::delete('/delete/{id}', [CategoryManageController::class, 'destroy'])->name('destroy');
     Route::get('/status/{id}', [CategoryManageController::class, 'status'])->name('status');
     Route::get('/get/{id}', [CategoryManageController::class, 'getCategory'])->name('get');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Gig Management Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('gigs')->name('gigs.')->group(function () {
+    Route::get('/', [GigManageController::class, 'index'])->name('index');
+    Route::get('/data', [GigManageController::class, 'getData'])->name('get.data');
+    Route::get('/{id}', [GigManageController::class, 'show'])->name('show');
+    Route::post('/{id}/change-status', [GigManageController::class, 'changeStatus'])->name('change-status');
+    Route::get('/categories/{categoryId}/sub-categories', [GigManageController::class, 'getSubCategories'])->name('sub-categories');
+    Route::get('/export/csv', [GigManageController::class, 'export'])->name('export');
 });
 
 

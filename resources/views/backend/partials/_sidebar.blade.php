@@ -36,7 +36,7 @@
 
                     <ul class="slide-menu">
                         <li><a href="{{ route('admin.categories.index') }}" class="slide-item"> Manage Category </a></li>
-                        <li><a href="{{ route('admin.cms.privecyandterms.privacy') }}" class="slide-item">Gigs</a></li>
+                        <li><a href="{{ route('admin.gigs.index') }}" class="slide-item">Gigs</a></li>
 
                     </ul>
                 </li>
@@ -187,5 +187,5 @@
         object-fit: contain;
     }
 
-    
+
 </style>

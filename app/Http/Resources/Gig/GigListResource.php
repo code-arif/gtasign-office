@@ -52,6 +52,8 @@ class GigListResource extends JsonResource
             'sub_category' => new CategoryResource($this->whenLoaded('subCategory')),
 
             'price' => (float) $this->price,
+            'impressions' => $this->impressions,
+            'clicks' => $this->clicks,
             'delivery_days' => $this->delivery_days,
             'status' => $this->status,
 
