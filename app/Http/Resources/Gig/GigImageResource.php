@@ -14,7 +14,7 @@ class GigImageResource extends JsonResource
             // 'url' => asset('storage/' . $this->path),
             'url' => $this->path
                 ? asset('storage/' . $this->path)
-                : asset('default/profile.jpg'),
+                : asset('default/no_image.webp'),
             'is_primary' => (bool) $this->is_primary,
             'sort_order' => $this->sort_order,
         ];

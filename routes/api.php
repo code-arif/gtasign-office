@@ -59,10 +59,10 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
     */
     Route::prefix('gigs')->group(function () {
         // Browse active gigs
-        Route::get('/', [GigController::class, 'index']);
+        Route::get('/', [GigController::class, 'index']); // done
         Route::get('/active', [GigController::class, 'active']);
-        Route::get('/search', [GigController::class, 'search']);
-        Route::get('/{id}', [GigController::class, 'show']);
+        Route::get('/search', [GigController::class, 'search']); // done
+        Route::get('/details/{id}', [GigController::class, 'show']);
 
         // Track analytics
         Route::post('/{id}/track-click', [GigController::class, 'trackClick']);
@@ -125,24 +125,14 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
     */
 
     // Protected routes (Expert only)
-    Route::prefix('gigs')->group(function () {
-        // My gigs
-        Route::get('/my/list', [GigController::class, 'myGigs']); // done
-
-        // Create gig (step by step)
-        Route::post('/create/overview', [GigController::class, 'createOverview']); // done
-        Route::post('/{id}/pricing', [GigController::class, 'updatePricing']); // done
-        Route::post('/{id}/requirements', [GigController::class, 'updateRequirements']); // done
-        Route::post('/{id}/gallery', [GigController::class, 'updateGallery']); // done
-
-        // Manage gallery
-        Route::delete('/{id}/image', [GigController::class, 'deleteImage']); // done
-        Route::delete('/{id}/document', [GigController::class, 'deleteDocument']); // done
-
-        // Publish & manage
-        Route::post('/{id}/publish', [GigController::class, 'publish']); // done
+    Route::group([], function () {
+        Route::get('/my/list', [GigController::class, 'myGigs']);
+        Route::post('/', [GigController::class, 'store']);
         Route::put('/{id}', [GigController::class, 'update']);
         Route::delete('/{id}', [GigController::class, 'destroy']);
+        Route::post('/{id}/publish', [GigController::class, 'publish']);
+        Route::delete('/{id}/image', [GigController::class, 'deleteImage']);
+        Route::delete('/{id}/document', [GigController::class, 'deleteDocument']);
     });
 });
 

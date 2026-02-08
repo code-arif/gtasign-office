@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('sub_category_id')->nullable()->constrained('categories')->nullOnDelete();
 
             // Gig overview
-            $table->string('title', 100);
+            $table->string('title', 200);
             $table->text('scope')->nullable(); // Detailed description of services
 
             // Pricing & delivery

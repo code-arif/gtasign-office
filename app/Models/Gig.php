@@ -87,6 +87,19 @@ class Gig extends Model
     //     return $this->hasMany(Order::class);
     // }
 
+    /**
+     * Tags attached to the gig
+     */
+    public function tags()
+    {
+        return $this->belongsToMany(
+            Tag::class,
+            'gig_tags',   // pivot table
+            'gig_id',     // foreign key on pivot
+            'tag_id'      // related key on pivot
+        );
+    }
+
 
     /**
      * Scopes

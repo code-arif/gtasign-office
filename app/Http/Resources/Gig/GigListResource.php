@@ -56,8 +56,7 @@ class GigListResource extends JsonResource
             'status' => $this->status,
 
             'primary_image' => new GigImageResource(
-                $this->whenLoaded(
-                    'images',
+                $this->whenLoaded('images',
                     fn() =>
                     $this->images->where('is_primary', true)->first()
                 )
