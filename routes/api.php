@@ -45,10 +45,9 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
     Route::post('/login', [LoginController::class, 'login']); // done
 
     //forgot password
-    Route::post('/forgot-password', [ResetPasswordController::class, 'forgotPassword']); // done
-    Route::post('/forgot-password/resend-otp', [ResetPasswordController::class, 'resendOtp']); // done
-    Route::post('/otp-token', [ResetPasswordController::class, 'MakeOtpToken']); // done
-    Route::post('/reset-password', [ResetPasswordController::class, 'ResetPassword']); // done
+    Route::post('/forgot-password', [ResetPasswordController::class, 'sendOtp']); // done
+    Route::post('/verify-otp', [ResetPasswordController::class, 'verifyOtp']); // done
+    Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']); // done
 
     //social login
     Route::post('/social-login', [SocialLoginController::class, 'SocialLogin']);
