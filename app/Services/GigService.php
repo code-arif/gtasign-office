@@ -40,7 +40,7 @@ class GigService
                 'title' => $data['title'],
                 'category_id' => $data['category_id'],
                 'sub_category_id' => $data['sub_category_id'] ?? null,
-                'status' => 'draft',
+                'status' => 'pending_approval',
             ];
 
             $gig = $this->gigRepository->createGig($gigData);
