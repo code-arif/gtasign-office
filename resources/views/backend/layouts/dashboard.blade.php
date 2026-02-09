@@ -13,7 +13,7 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="row g-3 mb-4">
+        {{-- <div class="row g-3 mb-4">
             <!-- Experts Stats -->
             <div class="col-md-3">
                 <div class="card border-0 shadow-sm">
@@ -97,9 +97,9 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
-        <div class="row g-3">
+        {{-- <div class="row g-3">
             <!-- Recent Experts -->
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm">
@@ -208,10 +208,10 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Pending Gigs -->
-        @if ($pendingGigs->isNotEmpty())
+        {{-- @if ($pendingGigs->isNotEmpty())
             <div class="row mt-3">
                 <div class="col-12">
                     <div class="card border-0 shadow-sm">
@@ -252,7 +252,7 @@
                     </div>
                 </div>
             </div>
-        @endif
+        @endif --}}
     </div>
 @endsection
 
