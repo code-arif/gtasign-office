@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             // RoleSeeder::class,
             SettingSeeder::class,
+            CategoriesSeeder::class,
+            TagsSeeder::class,
         ]);
 
         // optional: show output

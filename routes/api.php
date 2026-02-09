@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\Frontend\NotificationController;
 use App\Http\Controllers\Api\Frontend\CMS\AboutPageController;
 use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
 use App\Http\Controllers\Api\Gig\GigCategoryController;
+use App\Http\Controllers\Api\Gig\GigTagController;
 use App\Http\Controllers\Api\User\Profile\EducationController;
 use App\Http\Controllers\Api\User\Profile\CertificateController;
 use App\Http\Controllers\Api\User\Profile\UserExperienceController;
@@ -69,6 +70,7 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
 
         // Gig cageroires
         Route::get('/gig-categories', [GigCategoryController::class, 'index']); // done
+        Route::get('/gig-tags', [GigTagController::class, 'index']); // done
     });
 });
 
