@@ -2,47 +2,50 @@
 
 namespace App\Http\Controllers\Web\Backend;
 
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Models\Gig;
+use App\Models\User;
 use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        try {
-            return view('backend.layouts.dashboard');
-        } catch (\Exception $e) {
-            // Log the error
-            Log::error('Dashboard Error: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+        $stats = [
+            'total_experts' => User::role('expert')->count(),
+            'active_experts' => User::role('expert')->active()->count(),
+            'total_clients' => User::role('client')->count(),
+            'active_clients' => User::role('client')->active()->count(),
+            'total_gigs' => Gig::count(),
+            'active_gigs' => Gig::active()->count(),
+            'pending_gigs' => Gig::where('status', 'pending_approval')->count(),
+            // 'total_orders' => Order::count(),
+            // 'active_orders' => Order::active()->count(),
+            // 'completed_orders' => Order::completed()->count(),
+            // 'total_revenue' => Order::completed()->sum('platform_fee'),
+        ];
 
-            // Return error view or redirect
-            return back()->with('error', 'Dashboard loading failed: ' . $e->getMessage());
-        }
-    }
+        $recentExperts = User::role('expert')
+            ->with('profile')
+            ->latest()
+            ->take(5)
+            ->get();
 
-    /**
-     * Get user count by role name safely
-     */
-    private function getUserCountByRole($roleName)
-    {
-        try {
-            $roleExists = DB::table('roles')->where('name', $roleName)->exists();
+        // $recentOrders = Order::with(['gig', 'buyer', 'seller'])
+        //     ->latest()
+        //     ->take(10)
+        //     ->get();
 
-            if (!$roleExists) {
-                return 0;
-            }
+        $pendingGigs = Gig::with(['user', 'category'])
+            ->where('status', 'pending_approval')
+            ->latest()
+            ->take(5)
+            ->get();
 
-            return DB::table('users')
-                ->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-                ->where('roles.name', $roleName)
-                ->where('model_has_roles.model_type', 'App\Models\User')
-                ->count();
-        } catch (\Exception $e) {
-            return 0;
-        }
+        return view('backend.layouts.dashboard', compact(
+            'stats',
+            'recentExperts',
+            'recentOrders',
+            'pendingGigs'
+        ));
     }
 }

@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Mail;
 class ResetPasswordController extends Controller
 {
     use ApiResponse;
-    public $select;
+    public $select; // select all field
 
     /**
      * Send OTP to user email for password reset.
@@ -33,7 +33,6 @@ class ResetPasswordController extends Controller
         try {
             $user = User::where('email', $request->email)->first();
 
-            // Check existing active OTP
             $existingOtp = UserSecurityToken::where('user_id', $user->id)
                 ->where('type', 'password_reset')
                 ->whereNull('used_at')
@@ -42,11 +41,21 @@ class ResetPasswordController extends Controller
                 ->first();
 
             if ($existingOtp) {
-                return $this->error(
-                    'An OTP has already been sent. Please check your email or try again later.',
-                    null,
-                    429
-                );
+
+                $resendAvailableAt = $existingOtp->created_at->addSeconds(150); // 2.5 min
+
+                if (now()->lessThan($resendAvailableAt)) {
+                    return $this->error(
+                        'OTP already sent. Please wait before requesting again.',
+                        null,
+                        429
+                    );
+                }
+
+                // Cooldown passed → invalidate old OTP
+                $existingOtp->update([
+                    'used_at' => now(),
+                ]);
             }
 
             $otp = rand(1000, 9999);

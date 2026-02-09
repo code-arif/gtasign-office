@@ -26,6 +26,23 @@
                     </a>
                 </li>
 
+                {{-- Manage Users --}}
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.setting.*') ? 'has-link active' : '' }}"
+                        data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fa-solid fa-users"></i>
+                        <span class="side-menu__label">Manage Users</span>
+                        <i class="angle fa fa-angle-right"></i>
+                    </a>
+
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.categories.index') }}" class="slide-item"> Experts </a></li>
+                        <li><a href="{{ route('admin.gigs.index') }}" class="slide-item">Clients</a></li>
+
+                    </ul>
+                </li>
+
+                {{-- Manage gigs --}}
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.setting.*') ? 'has-link active' : '' }}"
                         data-bs-toggle="slide" href="#">
