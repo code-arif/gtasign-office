@@ -11,11 +11,10 @@ class Language extends Model
         'display_name',
     ];
 
-    public function profiles()
+    public function users()
     {
-        return $this->belongsToMany(Profile::class, 'profiles_languages')
-            ->withPivot(['proficiency_level'])
+        return $this->belongsToMany(User::class, 'user_languages')
+            ->withPivot('proficiency')
             ->withTimestamps();
     }
 }
-

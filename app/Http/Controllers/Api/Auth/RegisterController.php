@@ -105,7 +105,7 @@ class RegisterController extends Controller
             // }
 
             // // Send OTP email
-            Mail::to($user->email)->send(new OtpMail($otp, $user, 'Verify Your Email Address'));
+            // Mail::to($user->email)->send(new OtpMail($otp, $user, 'Verify Your Email Address'));
 
             DB::commit();
 
@@ -117,13 +117,13 @@ class RegisterController extends Controller
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
                     'otp' => $otp,
-                    // 'is_agreed' => $user->is_agreed
+                    'is_agreed' => $user->is_agreed
                 ],
                 201
             );
         } catch (Exception $e) {
             DB::rollBack();
-            // return $this->error('User registration failed', ['exception' => $e->getMessage()], 500);
+            return $this->error('User registration failed: ' . $e->getMessage(), 500);
         }
     }
 

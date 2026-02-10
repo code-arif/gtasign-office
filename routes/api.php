@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Auth\Client\ClientAuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\Gig\GigController;
@@ -95,15 +96,14 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'v1'], function ($router) 
 | User Profile and After Auth Route (Client role)
 |--------------------------------------------------------------------------
 */
-Route::group(['middleware' => 'auth:api', 'prefix' => 'v1', 'role:client'], function ($router) {
-    Route::post('/refresh-token', [LoginController::class, 'refreshToken']); // done
-
-    Route::get('/profile', [UserController::class, 'profile']); // done
-    Route::post('/update-profile', [UserController::class, 'updateProfile']); // done
-    Route::post('/update-avatar', [UserController::class, 'updateAvatar']); // done
-    Route::delete('/delete-profile', [UserController::class, 'destroy']); // done
-    Route::post('/change-password', [UserController::class, 'changePassword']); // done
+Route::group(['prefix' => 'v1/client','middleware' => ['auth:api', 'role:client'],], function () {
+    Route::get('/profile', [ClientAuthController::class, 'profile']); // done
+    Route::post('/update-profile', [ClientAuthController::class, 'updateProfile']);
+    Route::post('/update-overview', [ClientAuthController::class, 'updateOverview']);
+    Route::delete('/delete-profile', [ClientAuthController::class, 'destroy']);
+    Route::post('/change-password', [ClientAuthController::class, 'changePassword']);
 });
+
 
 /*
 |--------------------------------------------------------------------------

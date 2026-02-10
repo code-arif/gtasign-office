@@ -1,27 +1,22 @@
 <?php
 
-use App\Helpers\Helper;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Middleware\ApiAdminMiddleware;
 use App\Http\Middleware\WebAdminMiddleware;
-use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Auth\AuthenticationException;
 use App\Http\Middleware\ApiCustomerMiddleware;
-use App\Http\Middleware\ApiRetailerMiddleware;
-use Illuminate\Validation\ValidationException;
 use App\Http\Middleware\WebAuthCheckMiddleware;
 use App\Http\Middleware\WebDeveloperMiddleware;
 use Illuminate\Session\Middleware\StartSession;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use App\Http\Middleware\ApiOtpVerifiedMiddleware;
 use App\Http\Middleware\WebOtpVerifiedMiddleware;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -72,7 +67,6 @@ return Application::configure(basePath: dirname(__DIR__))
             StartSession::class,
         ]);
     })
-
     // ->withSchedule(function (Schedule $schedule) {
     //     // $schedule->command('app:send-emails')->everySecond();
     //     $schedule->command('notifications:send-special-date')->daily();
@@ -80,4 +74,15 @@ return Application::configure(basePath: dirname(__DIR__))
     // })
     ->withExceptions(function (Exceptions $exceptions) {
 
+        $exceptions->render(function (UnauthorizedException $e, Request $request): JsonResponse {
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'You are not authorized to access this resource.',
+                'data'    => null,
+                'errors'  => [
+                    'role' => 'User does not have the required role.',
+                ],
+            ], 403);
+        });
     })->create();

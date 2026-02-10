@@ -43,7 +43,7 @@ class User extends Authenticatable implements JWTSubject
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'is_agreed' =>'boolean'
+        'is_agreed' => 'boolean'
     ];
 
 
@@ -87,5 +87,23 @@ class User extends Authenticatable implements JWTSubject
     public function educations()
     {
         return $this->hasMany(Education::class);
+    }
+
+    /**
+     * Relationship: Experiences Table
+     */
+    public function experiences()
+    {
+        return $this->hasMany(UserExperience::class);
+    }
+
+    /**
+     * Relationship: Language table
+     */
+    public function languages()
+    {
+        return $this->belongsToMany(Language::class, 'user_languages')
+            ->withPivot('proficiency')
+            ->withTimestamps();
     }
 }
