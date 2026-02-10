@@ -1,25 +1,26 @@
 <?php
 
-use App\Http\Controllers\Api\Auth\Client\ClientAuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\Gig\GigController;
 use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\Gig\GigTagController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\FirebaseTokenController;
+use App\Http\Controllers\Api\Gig\GigCategoryController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
 use App\Http\Controllers\Api\Frontend\ContactController;
 use App\Http\Controllers\Api\Frontend\SettingsController;
 use App\Http\Controllers\Api\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\Frontend\CMS\HomePageController;
 use App\Http\Controllers\Api\Frontend\NotificationController;
+use App\Http\Controllers\Api\Auth\Client\ClientAuthController;
 use App\Http\Controllers\Api\Frontend\CMS\AboutPageController;
 use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
-use App\Http\Controllers\Api\Gig\GigCategoryController;
-use App\Http\Controllers\Api\Gig\GigTagController;
 use App\Http\Controllers\Api\User\Profile\EducationController;
+use App\Http\Controllers\Api\Auth\Client\UserLanguageController;
 use App\Http\Controllers\Api\User\Profile\CertificateController;
 use App\Http\Controllers\Api\User\Profile\UserExperienceController;
 
@@ -96,12 +97,17 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'v1'], function ($router) 
 | User Profile and After Auth Route (Client role)
 |--------------------------------------------------------------------------
 */
-Route::group(['prefix' => 'v1/client','middleware' => ['auth:api', 'role:client'],], function () {
+Route::group(['prefix' => 'v1/client', 'middleware' => ['auth:api', 'role:client'],], function () {
     Route::get('/profile', [ClientAuthController::class, 'profile']); // done
     Route::post('/update-profile', [ClientAuthController::class, 'updateProfile']);
     Route::post('/update-overview', [ClientAuthController::class, 'updateOverview']);
     Route::delete('/delete-profile', [ClientAuthController::class, 'destroy']);
     Route::post('/change-password', [ClientAuthController::class, 'changePassword']);
+
+    // Languages Routes
+    Route::get('/languages', [UserLanguageController::class, 'languages']);
+    Route::post('/add/languages', [UserLanguageController::class, 'updateLanguages']);
+    Route::delete('/remove/languages/{language_id}', [UserLanguageController::class, 'removeLanguage']);
 });
 
 
