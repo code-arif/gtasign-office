@@ -76,12 +76,27 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
 
 /*
 |--------------------------------------------------------------------------
-| User Profile and After Auth Route
+| User Profile and After Auth Route (Expert role)
 |--------------------------------------------------------------------------
 */
 Route::group(['middleware' => 'auth:api', 'prefix' => 'v1'], function ($router) {
     Route::post('/refresh-token', [LoginController::class, 'refreshToken']); // done
     Route::post('/logout', [LogoutController::class, 'logout']); // done
+
+    Route::get('/profile', [UserController::class, 'profile']); // done
+    Route::post('/update-profile', [UserController::class, 'updateProfile']); // done
+    Route::post('/update-avatar', [UserController::class, 'updateAvatar']); // done
+    Route::delete('/delete-profile', [UserController::class, 'destroy']); // done
+    Route::post('/change-password', [UserController::class, 'changePassword']); // done
+});
+
+/*
+|--------------------------------------------------------------------------
+| User Profile and After Auth Route (Client role)
+|--------------------------------------------------------------------------
+*/
+Route::group(['middleware' => 'auth:api', 'prefix' => 'v1', 'role:client'], function ($router) {
+    Route::post('/refresh-token', [LoginController::class, 'refreshToken']); // done
 
     Route::get('/profile', [UserController::class, 'profile']); // done
     Route::post('/update-profile', [UserController::class, 'updateProfile']); // done
@@ -125,7 +140,6 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
     | Gig API Routes
     |--------------------------------------------------------------------------
     */
-
     // Protected routes (Expert only)
     Route::group(['prefix' => 'gigs'], function () {
         Route::get('/my/list', [GigController::class, 'myGigs']); // done

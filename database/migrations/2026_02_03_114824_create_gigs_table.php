@@ -35,7 +35,7 @@ return new class extends Migration
             $table->json('custom_questions')->nullable(); // Seller-defined questions
 
             // Status & moderation
-            $table->enum('status', ['draft','pending_approval','active','rejected'])->default('draft');
+            $table->enum('status', ['draft', 'pending_approval', 'active', 'rejected'])->default('draft');
 
             $table->text('rejection_reason')->nullable();
 
@@ -46,6 +46,8 @@ return new class extends Migration
             $table->unsignedInteger('cancellations')->default(0);
 
             $table->timestamp('published_at')->nullable();
+
+            $table->boolean('is_agreed')->default(false);
 
             $table->softDeletes();
             $table->timestamps();

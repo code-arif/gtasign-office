@@ -31,10 +31,11 @@ class GigService
         $query = Gig::with(['category', 'subCategory', 'images', 'documents'])
             ->where('user_id', $userId);
 
-        $query = $this->applyFilters($query, $filters);
+        $this->applyFilters($query, $filters);
 
         return $query->latest()->paginate($perPage);
     }
+
 
     /**
      * Get active gigs (marketplace)
@@ -96,6 +97,7 @@ class GigService
                 'system_questions' => $data['system_questions'] ?? null,
                 'custom_questions' => $data['custom_questions'] ?? null,
                 'status' => 'pending_approval',
+                'is_agreed' => $data['is_agreed'] ?? false,
             ]);
 
             // Attach tags
@@ -449,6 +451,10 @@ class GigService
 
         if (isset($filters['last_days'])) {
             $query->where('created_at', '>=', now()->subDays($filters['last_days']));
+        }
+
+        if (isset($filters['status']) && $filters['status'] !== '') {
+            $query->where('status', $filters['status']);
         }
 
         return $query;
