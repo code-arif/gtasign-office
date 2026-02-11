@@ -42,6 +42,24 @@
                     </ul>
                 </li>
 
+                {{-- Manage Tags --}}
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.setting.*') ? 'has-link active' : '' }}"
+                        data-bs-toggle="slide" href="#">
+                        {{-- <i class=" fa-solid fa-gem"></i> --}}
+                        <i class="side-menu__icon fa-solid fa-tag"></i>
+                        <span class="side-menu__label">Manage Gigs</span>
+                        <i class="angle fa fa-angle-right"></i>
+                    </a>
+
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.categories.index') }}" class="slide-item"> Gig Tags </a>
+                        </li>
+                        <li><a href="{{ route('admin.gigs.index') }}" class="slide-item"> Gig Categories </a></li>
+                        <li><a href="{{ route('admin.gigs.index') }}" class="slide-item"> Supported Languages </a></li>
+                    </ul>
+                </li>
+
                 {{-- Manage gigs --}}
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.setting.*') ? 'has-link active' : '' }}"
@@ -52,9 +70,9 @@
                     </a>
 
                     <ul class="slide-menu">
-                        <li><a href="{{ route('admin.categories.index') }}" class="slide-item"> Manage Category </a></li>
+                        <li><a href="{{ route('admin.categories.index') }}" class="slide-item"> Manage Category </a>
+                        </li>
                         <li><a href="{{ route('admin.gigs.index') }}" class="slide-item">Gigs</a></li>
-
                     </ul>
                 </li>
 
@@ -203,6 +221,4 @@
         max-height: 100%;
         object-fit: contain;
     }
-
-
 </style>

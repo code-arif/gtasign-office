@@ -312,7 +312,7 @@
                     [20, 50, 100, 200]
                 ],
                 processing: true,
-                responsive: true,
+                responsive: false,
                 serverSide: true,
                 language: {
                     processing: `<div class="text-center">

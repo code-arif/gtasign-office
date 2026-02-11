@@ -15,6 +15,8 @@ use App\Http\Controllers\Web\Backend\CMS\FeaturesController;
 use App\Http\Controllers\Web\Backend\CMS\HomePageController;
 use App\Http\Controllers\Web\Backend\Settings\EnvController;
 use App\Http\Controllers\Web\Backend\CMS\AboutPageController;
+use App\Http\Controllers\Web\Backend\Gig\GigManageController;
+use App\Http\Controllers\Web\Backend\Gig\TagManageController;
 use App\Http\Controllers\Web\Backend\Settings\LogoController;
 use App\Http\Controllers\Web\Backend\Settings\OtherController;
 use App\Http\Controllers\Web\Backend\CMS\TestimonialController;
@@ -34,7 +36,6 @@ use App\Http\Controllers\Web\Backend\CMS\AboutPageOurTeamController;
 use App\Http\Controllers\Web\Backend\Settings\MailSettingController;
 use App\Http\Controllers\Web\Backend\SportsType\SportsTypeController;
 use App\Http\Controllers\Web\Backend\CMS\Web\PrivacyTerms\PrivacAndTermsController;
-use App\Http\Controllers\Web\Backend\Gig\GigManageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +62,20 @@ Route::group(['prefix' => 'categories', 'as' => 'categories.'], function () {
     Route::get('/status/{id}', [CategoryManageController::class, 'status'])->name('status');
     Route::get('/get/{id}', [CategoryManageController::class, 'getCategory'])->name('get');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Tag Management Routes
+|--------------------------------------------------------------------------
+*/
+Route::group(['prefix' => 'tags', 'as' => 'tags.'], function () {
+    Route::get('/', [TagManageController::class, 'index'])->name('index');
+    Route::post('/store', [TagManageController::class, 'store'])->name('store');
+    Route::get('/get/{id}', [TagManageController::class, 'getTag'])->name('get');
+    Route::put('/update/{id}', [TagManageController::class, 'update'])->name('update');
+    Route::delete('/delete/{id}', [TagManageController::class, 'destroy'])->name('destroy');
+});
+
 
 
 /*

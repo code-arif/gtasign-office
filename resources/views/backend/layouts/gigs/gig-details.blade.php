@@ -82,7 +82,7 @@
                                             @endif
                                         </div>
                                         <div class="col-md-6">
-                                            <a href="mailto:{{ $gig->user->email }}" class="btn btn-outline-primary">
+                                            <a href="mailto:{{ $gig?->user?->email }}" class="btn btn-outline-primary">
                                                 <i class="fe fe-mail me-1"></i> Contact Seller
                                             </a>
                                         </div>
@@ -182,7 +182,7 @@
                                                 height="50" style="object-fit: cover;">
                                             <div>
                                                 <div class="fw-semibold">{{ $fullName }}</div>
-                                                <small class="text-muted">{{ $gig->user->email }}</small>
+                                                <small class="text-muted">{{ $gig?->user?->email }}</small>
                                             </div>
                                         </div>
                                         <div class="row g-2 align-items-center">

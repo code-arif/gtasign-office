@@ -9,7 +9,7 @@
 
 @section('content')
     <div class="app-content main-content mt-0">
-        <div class="side-app">
+        <div class="side-app" style="margin-bottom: 50px">
             <div class="main-container container-fluid">
                 <!-- PAGE-HEADER -->
                 <div class="page-header">
@@ -71,7 +71,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="categoryModalLabel">Create Category</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
                 </div>
                 <form id="categoryForm" method="POST">
                     @csrf
