@@ -17,7 +17,6 @@ use App\Http\Controllers\Web\Backend\FaqController;
 use App\Http\Controllers\Web\Backend\Gig\CategoryManageController;
 use App\Http\Controllers\Web\Backend\Gig\GigManageController;
 use App\Http\Controllers\Web\Backend\Gig\TagManageController;
-use App\Http\Controllers\Web\Backend\LivewireController;
 use App\Http\Controllers\Web\Backend\Settings\CaptchaController;
 use App\Http\Controllers\Web\Backend\Settings\EnvController;
 use App\Http\Controllers\Web\Backend\Settings\FirebaseController;
@@ -30,7 +29,6 @@ use App\Http\Controllers\Web\Backend\Settings\SettingController;
 use App\Http\Controllers\Web\Backend\Settings\SignatureController;
 use App\Http\Controllers\Web\Backend\Settings\SocialController;
 use App\Http\Controllers\Web\Backend\Settings\StripeController;
-use App\Http\Controllers\Web\Backend\SportsType\SportsTypeController;
 use App\Http\Controllers\Web\Backend\SubscriberController;
 use App\Http\Controllers\Web\Backend\User\LanguageManageController;
 use App\Http\Controllers\Web\Backend\User\UserManageController;
@@ -105,9 +103,12 @@ Route::group(['prefix' => 'languages', 'as' => 'languages.'], function () {
     Route::delete('/delete/{id}', [LanguageManageController::class, 'destroy'])->name('destroy');
 });
 
-/**
- * User Management Routes
- */
+
+/*
+|--------------------------------------------------------------------------
+| User Management Routes
+|--------------------------------------------------------------------------
+*/
 Route::group(['prefix' => 'users', 'as' => 'users.manage.'], function () {
     Route::get('/manage-list', [UserManageController::class, 'index'])->name('index');
     Route::get('/manage-status/{id}', [UserManageController::class, 'status'])->name('status');

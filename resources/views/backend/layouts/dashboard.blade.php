@@ -13,7 +13,7 @@
         </div>
 
         <!-- Stats Cards -->
-        {{-- <div class="row g-3 mb-4">
+        <div class="row g-3 mb-4">
             <!-- Experts Stats -->
             <div class="col-md-3">
                 <div class="card border-0 shadow-sm">
@@ -84,7 +84,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-muted mb-2">Total Revenue</h6>
-                                <h3 class="mb-0">${{ number_format($stats['total_revenue'], 2) }}</h3>
+                                {{-- <h3 class="mb-0">${{ number_format($stats['total_revenue'], 2) }}</h3> --}}
                                 <small class="text-success">
                                     <i class="bi bi-arrow-up"></i>
                                     Platform fees
@@ -97,162 +97,162 @@
                     </div>
                 </div>
             </div>
-        </div> --}}
+        </div <div class="row g-3">
+        <!-- Recent Experts -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Experts</h5>
+                        {{-- <a href="{{ route('admin.experts.index') }}" class="btn btn-sm btn-outline-primary">
+                            View All
+                        </a> --}}
+                        <a href="/" class="btn btn-sm btn-outline-primary">
+                            View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Expert</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentExperts as $expert)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ $expert->profile?->avatar }}" class="rounded-circle me-2"
+                                                    width="32" height="32" alt="{{ $expert->profile?->first_name }}">
+                                                <span>{{ $expert->profile?->first_name }}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ $expert->email }}</td>
+                                        <td>
+                                            <span
+                                                class="badge bg-{{ $expert->status === 'active' ? 'success' : 'secondary' }}">
+                                                {{ ucfirst($expert->status) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $expert->created_at->format('M d, Y') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            No experts found
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        {{-- <div class="row g-3">
-            <!-- Recent Experts -->
-            <div class="col-md-6">
+        <!-- Recent Orders -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Orders</h5>
+                        <a href="#" class="btn btn-sm btn-outline-primary">
+                            View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            {{-- <tbody>
+                                @forelse($recentOrders as $order)
+                                    <tr>
+                                        <td>
+                                            <a href="#" class="text-decoration-none">
+                                                {{ $order->order_number }}
+                                            </a>
+                                        </td>
+                                        <td>${{ number_format($order->total_amount, 2) }}</td>
+                                        <td>
+                                            <span
+                                                class="badge bg-{{ $order->status === 'completed' ? 'success' : ($order->status === 'active' ? 'primary' : 'secondary') }}">
+                                                {{ ucfirst($order->status) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $order->created_at->format('M d, Y') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            No orders found
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody> --}}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Gigs -->
+    @if ($pendingGigs->isNotEmpty())
+        <div class="row mt-3">
+            <div class="col-12">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-0 py-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Recent Experts</h5>
-                            <a href="{{ route('admin.experts.index') }}" class="btn btn-sm btn-outline-primary">
-                                View All
-                            </a>
-                        </div>
+                        <h5 class="mb-0">Pending Gig Approvals</h5>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>Gig Title</th>
                                         <th>Expert</th>
-                                        <th>Email</th>
-                                        <th>Status</th>
-                                        <th>Joined</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($recentExperts as $expert)
+                                    @foreach ($pendingGigs as $gig)
                                         <tr>
+                                            <td>{{ $gig->title }}</td>
+                                            <td>{{ $gig->user->profile->full_name }}</td>
+                                            <td>{{ $gig->category->name }}</td>
+                                            <td>${{ number_format($gig->price, 2) }}</td>
+                                            <td>{{ $gig->created_at->diffForHumans() }}</td>
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="{{ $expert->profile->avatar_url }}"
-                                                        class="rounded-circle me-2" width="32" height="32"
-                                                        alt="{{ $expert->profile->full_name }}">
-                                                    <span>{{ $expert->profile->full_name }}</span>
-                                                </div>
-                                            </td>
-                                            <td>{{ $expert->email }}</td>
-                                            <td>
-                                                <span
-                                                    class="badge bg-{{ $expert->status === 'active' ? 'success' : 'secondary' }}">
-                                                    {{ ucfirst($expert->status) }}
-                                                </span>
-                                            </td>
-                                            <td>{{ $expert->created_at->format('M d, Y') }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted py-4">
-                                                No experts found
+                                                <a href="#" class="btn btn-sm btn-success">Approve</a>
+                                                <a href="#" class="btn btn-sm btn-danger">Reject</a>
                                             </td>
                                         </tr>
-                                    @endforelse
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Recent Orders -->
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-0 py-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Recent Orders</h5>
-                            <a href="#" class="btn btn-sm btn-outline-primary">
-                                View All
-                            </a>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Order #</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($recentOrders as $order)
-                                        <tr>
-                                            <td>
-                                                <a href="#" class="text-decoration-none">
-                                                    {{ $order->order_number }}
-                                                </a>
-                                            </td>
-                                            <td>${{ number_format($order->total_amount, 2) }}</td>
-                                            <td>
-                                                <span
-                                                    class="badge bg-{{ $order->status === 'completed' ? 'success' : ($order->status === 'active' ? 'primary' : 'secondary') }}">
-                                                    {{ ucfirst($order->status) }}
-                                                </span>
-                                            </td>
-                                            <td>{{ $order->created_at->format('M d, Y') }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted py-4">
-                                                No orders found
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> --}}
-
-        <!-- Pending Gigs -->
-        {{-- @if ($pendingGigs->isNotEmpty())
-            <div class="row mt-3">
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white border-0 py-3">
-                            <h5 class="mb-0">Pending Gig Approvals</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Gig Title</th>
-                                            <th>Expert</th>
-                                            <th>Category</th>
-                                            <th>Price</th>
-                                            <th>Submitted</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($pendingGigs as $gig)
-                                            <tr>
-                                                <td>{{ $gig->title }}</td>
-                                                <td>{{ $gig->user->profile->full_name }}</td>
-                                                <td>{{ $gig->category->name }}</td>
-                                                <td>${{ number_format($gig->price, 2) }}</td>
-                                                <td>{{ $gig->created_at->diffForHumans() }}</td>
-                                                <td>
-                                                    <a href="#" class="btn btn-sm btn-success">Approve</a>
-                                                    <a href="#" class="btn btn-sm btn-danger">Reject</a>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif --}}
+        </div>
+    @endif
     </div>
 @endsection
 
@@ -481,7 +481,7 @@
         });
     </script> --}}
 @endpush
-{{--
+
 @push('styles')
     <style>
         <styl>.stats-card {
@@ -532,4 +532,4 @@
             padding: 1.25rem;
         }
     </style>
-@endpush --}}
+@endpush

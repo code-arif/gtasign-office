@@ -106,4 +106,23 @@ class User extends Authenticatable implements JWTSubject
             ->withPivot('proficiency')
             ->withTimestamps();
     }
+
+    /**
+     * Scope for active users
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    // You can also add inactive/suspended if needed
+    public function scopeInactive($query)
+    {
+        return $query->where('status', 'inactive');
+    }
+
+    public function scopeSuspended($query)
+    {
+        return $query->where('status', 'suspended');
+    }
 }

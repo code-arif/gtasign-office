@@ -18,19 +18,18 @@ class RoleSeeder extends Seeder
 
         // Create roles
         $roles = [
-            'admin',
-            'expert',
-            'client',
+            ['name' => 'admin',  'guard' => 'web'],
+            ['name' => 'expert', 'guard' => 'web'],   // ← add this for admin panel
+            ['name' => 'client', 'guard' => 'web'],   // ← add this
+            ['name' => 'expert', 'guard' => 'api'],   // keep original for API
+            ['name' => 'client', 'guard' => 'api'],   // keep original
         ];
 
-        foreach ($roles as $role) {
-            $guard = match ($role) {
-                'admin' => 'web',
-                'expert', 'client' => 'api',
-                default => 'api'
-            };
-
-            Role::firstOrCreate(['name' => $role, 'guard_name' => $guard]);
+        foreach ($roles as $r) {
+            Role::firstOrCreate(
+                ['name' => $r['name'], 'guard_name' => $r['guard']],
+                ['name' => $r['name'], 'guard_name' => $r['guard']]
+            );
         }
 
         $this->command->info('Roles created successfully!');
