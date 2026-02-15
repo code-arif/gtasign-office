@@ -16,7 +16,8 @@
                     <div>
                         <h1 class="page-title">Categories</h1>
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="javascript:void(0);">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                            <span> &nbsp; >> &nbsp;</span>
                             <li class="breadcrumb-item active" aria-current="page">Categories</li>
                         </ol>
                     </div>

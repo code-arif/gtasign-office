@@ -17,8 +17,7 @@ $settings = \App\Models\Setting::first();
     <meta name="keywords" content="{!! strip_tags($settings->keywords ?? '') !!}">
 
     <!-- TITLE -->
-    <title>{{ config('app.name') }} - {{ $title ?? $settings->title ?? '' }}</title>
-
+    <title> {{ config('app.name') }} - @yield('title')</title>
     <!-- FAVICON -->
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset($settings->favicon ?? 'default/logo.svg') }}" />
 

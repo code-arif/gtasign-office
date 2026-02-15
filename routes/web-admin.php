@@ -1,41 +1,42 @@
 <?php
 
-use Illuminate\Support\Facades\Redis;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
-use App\Http\Controllers\Web\Backend\FaqController;
-use App\Http\Controllers\Web\Backend\ContactController;
-use App\Http\Controllers\Web\Backend\LivewireController;
-use App\Http\Controllers\Web\Backend\DashboardController;
-use App\Http\Controllers\Web\Backend\CMS\SliderController;
-use App\Http\Controllers\Web\Backend\SubscriberController;
+use App\Http\Controllers\Web\Backend\Access\PermissionController;
 use App\Http\Controllers\Web\Backend\Access\RoleController;
 use App\Http\Controllers\Web\Backend\Access\UserController;
-use App\Http\Controllers\Web\Backend\CMS\FeaturesController;
-use App\Http\Controllers\Web\Backend\CMS\HomePageController;
-use App\Http\Controllers\Web\Backend\Settings\EnvController;
 use App\Http\Controllers\Web\Backend\CMS\AboutPageController;
+use App\Http\Controllers\Web\Backend\CMS\AboutPageOurTeamController;
+use App\Http\Controllers\Web\Backend\CMS\FeaturesController;
+use App\Http\Controllers\Web\Backend\CMS\GettingStartedController;
+use App\Http\Controllers\Web\Backend\CMS\HomePageController;
+use App\Http\Controllers\Web\Backend\CMS\SliderController;
+use App\Http\Controllers\Web\Backend\CMS\TestimonialController;
+use App\Http\Controllers\Web\Backend\CMS\Web\PrivacyTerms\PrivacAndTermsController;
+use App\Http\Controllers\Web\Backend\ContactController;
+use App\Http\Controllers\Web\Backend\DashboardController;
+use App\Http\Controllers\Web\Backend\FaqController;
+use App\Http\Controllers\Web\Backend\Gig\CategoryManageController;
 use App\Http\Controllers\Web\Backend\Gig\GigManageController;
 use App\Http\Controllers\Web\Backend\Gig\TagManageController;
-use App\Http\Controllers\Web\Backend\Settings\LogoController;
-use App\Http\Controllers\Web\Backend\Settings\OtherController;
-use App\Http\Controllers\Web\Backend\CMS\TestimonialController;
-use App\Http\Controllers\Web\Backend\Settings\SocialController;
-use App\Http\Controllers\Web\Backend\Settings\StripeController;
-use App\Http\Controllers\Web\Backend\User\UserManageController;
+use App\Http\Controllers\Web\Backend\LivewireController;
 use App\Http\Controllers\Web\Backend\Settings\CaptchaController;
+use App\Http\Controllers\Web\Backend\Settings\EnvController;
+use App\Http\Controllers\Web\Backend\Settings\FirebaseController;
+use App\Http\Controllers\Web\Backend\Settings\GoogleMapController;
+use App\Http\Controllers\Web\Backend\Settings\LogoController;
+use App\Http\Controllers\Web\Backend\Settings\MailSettingController;
+use App\Http\Controllers\Web\Backend\Settings\OtherController;
 use App\Http\Controllers\Web\Backend\Settings\ProfileController;
 use App\Http\Controllers\Web\Backend\Settings\SettingController;
-use App\Http\Controllers\Web\Backend\Access\PermissionController;
-use App\Http\Controllers\Web\Backend\Settings\FirebaseController;
-use App\Http\Controllers\Web\Backend\CMS\GettingStartedController;
-use App\Http\Controllers\Web\Backend\Gig\CategoryManageController;
-use App\Http\Controllers\Web\Backend\Settings\GoogleMapController;
 use App\Http\Controllers\Web\Backend\Settings\SignatureController;
-use App\Http\Controllers\Web\Backend\CMS\AboutPageOurTeamController;
-use App\Http\Controllers\Web\Backend\Settings\MailSettingController;
+use App\Http\Controllers\Web\Backend\Settings\SocialController;
+use App\Http\Controllers\Web\Backend\Settings\StripeController;
 use App\Http\Controllers\Web\Backend\SportsType\SportsTypeController;
-use App\Http\Controllers\Web\Backend\CMS\Web\PrivacyTerms\PrivacAndTermsController;
+use App\Http\Controllers\Web\Backend\SubscriberController;
+use App\Http\Controllers\Web\Backend\User\LanguageManageController;
+use App\Http\Controllers\Web\Backend\User\UserManageController;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,7 +78,6 @@ Route::group(['prefix' => 'tags', 'as' => 'tags.'], function () {
 });
 
 
-
 /*
 |--------------------------------------------------------------------------
 | Gig Management Routes
@@ -92,6 +92,18 @@ Route::prefix('gigs')->name('gigs.')->group(function () {
     Route::get('/export/csv', [GigManageController::class, 'export'])->name('export');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Language Management Routes
+|--------------------------------------------------------------------------
+*/
+Route::group(['prefix' => 'languages', 'as' => 'languages.'], function () {
+    Route::get('/', [LanguageManageController::class, 'index'])->name('index');
+    Route::post('/store', [LanguageManageController::class, 'store'])->name('store');
+    Route::get('/get/{id}', [LanguageManageController::class, 'getLanguage'])->name('get');
+    Route::put('/update/{id}', [LanguageManageController::class, 'update'])->name('update');
+    Route::delete('/delete/{id}', [LanguageManageController::class, 'destroy'])->name('destroy');
+});
 
 /**
  * User Management Routes

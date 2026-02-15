@@ -1,4 +1,4 @@
-@extends('backend.app', ['title' => 'Tags'])
+@extends('backend.app', ['title' => 'Languages'])
 
 @section('content')
     <div class="app-content main-content mt-0">
@@ -7,11 +7,11 @@
                 <!-- PAGE-HEADER -->
                 <div class="page-header">
                     <div>
-                        <h1 class="page-title">Tags</h1>
+                        <h1 class="page-title">Languages</h1>
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                             <span> &nbsp; >> &nbsp;</span>
-                            <li class="breadcrumb-item active" aria-current="page">Tags</li>
+                            <li class="breadcrumb-item active" aria-current="page">Languages</li>
                         </ol>
                     </div>
                 </div>
@@ -22,21 +22,23 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom">
-                                <h3 class="card-title">Tags List</h3>
+                                <h3 class="card-title">Languages List</h3>
                                 <div class="card-options">
                                     <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center"
                                         onclick="openCreateModal()">
-                                        <i class="fe fe-plus me-1"></i> Add Tags
+                                        <i class="fe fe-plus me-1"></i> Add Language
                                     </button>
                                 </div>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered text-nowrap border-bottom w-100" id="tags-table">
+                                    <table class="table table-bordered text-nowrap border-bottom w-100"
+                                        id="languages-table">
                                         <thead>
                                             <tr>
                                                 <th>#</th>
                                                 <th>Name</th>
+                                                <th>Display Name</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -54,21 +56,31 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="tagModal">
+    <div class="modal fade" id="languageModal">
         <div class="modal-dialog">
-            <form id="tagForm">
+            <form id="languageForm">
                 @csrf
-                <input type="hidden" id="tag_id">
+                <input type="hidden" id="language_id">
 
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Create Tag</h5>
+                        <h5 class="modal-title" id="modalTitle">Create Language</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
                     </div>
 
                     <div class="modal-body">
-                        <input type="text" class="form-control" id="name" placeholder="Tag name">
-                        <div class="invalid-feedback" id="name-error"></div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Language Name <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" placeholder="e.g. English, বাংলা">
+                            <div class="invalid-feedback" id="name-error"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="display_name" class="form-label">Display Name (optional)</label>
+                            <input type="text" class="form-control" id="display_name"
+                                placeholder="e.g. English (US), Bangla">
+                        </div>
                     </div>
 
                     <div class="modal-footer">
@@ -84,10 +96,10 @@
 @push('scripts')
     <script>
         $(function() {
-            let table = $('#tags-table').DataTable({
+            let table = $('#languages-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('admin.tags.index') }}",
+                ajax: "{{ route('admin.languages.index') }}",
                 columns: [{
                         data: 'DT_RowIndex',
                         orderable: false
@@ -96,36 +108,40 @@
                         data: 'name'
                     },
                     {
+                        data: 'display_name'
+                    },
+                    {
                         data: 'action',
                         orderable: false,
                         searchable: false
-                    },
+                    }
                 ]
             });
 
             window.openCreateModal = function() {
-                $('#tagForm')[0].reset();
-                $('#tag_id').val('');
-                $('#modalTitle').text('Create Tag');
-                $('#tagModal').modal('show');
+                $('#languageForm')[0].reset();
+                $('#language_id').val('');
+                $('#modalTitle').text('Create Language');
+                $('#languageModal').modal('show');
             };
 
             window.openEditModal = function(id) {
-                $.get("{{ url('admin/tags/get') }}/" + id, function(res) {
-                    $('#tag_id').val(res.tag.id);
-                    $('#name').val(res.tag.name);
-                    $('#modalTitle').text('Edit Tag');
-                    $('#tagModal').modal('show');
+                $.get("{{ url('admin/languages/get') }}/" + id, function(res) {
+                    $('#language_id').val(res.language.id);
+                    $('#name').val(res.language.name);
+                    $('#display_name').val(res.language.display_name || '');
+                    $('#modalTitle').text('Edit Language');
+                    $('#languageModal').modal('show');
                 });
             };
 
-            $('#tagForm').submit(function(e) {
+            $('#languageForm').submit(function(e) {
                 e.preventDefault();
 
-                let id = $('#tag_id').val();
+                let id = $('#language_id').val();
                 let url = id ?
-                    "{{ url('admin/tags/update') }}/" + id :
-                    "{{ route('admin.tags.store') }}";
+                    "{{ url('admin/languages/update') }}/" + id :
+                    "{{ route('admin.languages.store') }}";
 
                 let method = id ? 'PUT' : 'POST';
 
@@ -134,30 +150,36 @@
                     method,
                     data: {
                         _token: "{{ csrf_token() }}",
-                        name: $('#name').val()
+                        name: $('#name').val(),
+                        display_name: $('#display_name').val()
                     },
                     success(res) {
                         if (res.success) {
                             toastr.success(res.message);
-                            $('#tagModal').modal('hide');
+                            $('#languageModal').modal('hide');
                             table.ajax.reload();
                         } else {
                             $('#name').addClass('is-invalid');
-                            $('#name-error').text(res.errors.name[0]);
+                            $('#name-error').text(res.errors.name ? res.errors.name[0] : '');
                         }
+                    },
+                    error(xhr) {
+                        // optional: better error handling
+                        toastr.error('Something went wrong!');
                     }
                 });
             });
 
-            window.deleteTag = function(id) {
+            window.deleteLanguage = function(id) {
                 Swal.fire({
-                    title: 'Delete?',
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
                     icon: 'warning',
                     showCancelButton: true,
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ url('admin/tags/delete') }}/" + id,
+                            url: "{{ url('admin/languages/delete') }}/" + id,
                             type: 'DELETE',
                             data: {
                                 _token: "{{ csrf_token() }}"

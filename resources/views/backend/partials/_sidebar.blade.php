@@ -48,15 +48,14 @@
                         data-bs-toggle="slide" href="#">
                         {{-- <i class=" fa-solid fa-gem"></i> --}}
                         <i class="side-menu__icon fa-solid fa-tag"></i>
-                        <span class="side-menu__label">Manage Gigs</span>
+                        <span class="side-menu__label">Manage Tags</span>
                         <i class="angle fa fa-angle-right"></i>
                     </a>
 
                     <ul class="slide-menu">
-                        <li><a href="{{ route('admin.categories.index') }}" class="slide-item"> Gig Tags </a>
-                        </li>
-                        <li><a href="{{ route('admin.gigs.index') }}" class="slide-item"> Gig Categories </a></li>
-                        <li><a href="{{ route('admin.gigs.index') }}" class="slide-item"> Supported Languages </a></li>
+                        <li><a href="{{ route('admin.tags.index') }}" class="slide-item"> Gig Tags </a> </li>
+                        <li><a href="{{ route('admin.categories.index') }}" class="slide-item"> Gig Categories </a></li>
+                        <li><a href="{{ route('admin.languages.index') }}" class="slide-item"> Supported Languages </a></li>
                     </ul>
                 </li>
 
@@ -70,8 +69,6 @@
                     </a>
 
                     <ul class="slide-menu">
-                        <li><a href="{{ route('admin.categories.index') }}" class="slide-item"> Manage Category </a>
-                        </li>
                         <li><a href="{{ route('admin.gigs.index') }}" class="slide-item">Gigs</a></li>
                     </ul>
                 </li>

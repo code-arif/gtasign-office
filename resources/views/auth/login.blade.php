@@ -1,5 +1,7 @@
 @extends('auth.app')
 
+@section('title', 'Admin Login')
+
 @section('content')
     <div class="container-login100">
         <div class="wrap-login100 p-0">
