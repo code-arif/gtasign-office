@@ -30,6 +30,8 @@ use App\Http\Controllers\Web\Backend\Settings\SignatureController;
 use App\Http\Controllers\Web\Backend\Settings\SocialController;
 use App\Http\Controllers\Web\Backend\Settings\StripeController;
 use App\Http\Controllers\Web\Backend\SubscriberController;
+use App\Http\Controllers\Web\Backend\User\ClientManageController;
+use App\Http\Controllers\Web\Backend\User\ExpertManageController;
 use App\Http\Controllers\Web\Backend\User\LanguageManageController;
 use App\Http\Controllers\Web\Backend\User\UserManageController;
 use Illuminate\Support\Facades\Artisan;
@@ -109,14 +111,34 @@ Route::group(['prefix' => 'languages', 'as' => 'languages.'], function () {
 | User Management Routes
 |--------------------------------------------------------------------------
 */
-Route::group(['prefix' => 'users', 'as' => 'users.manage.'], function () {
-    Route::get('/manage-list', [UserManageController::class, 'index'])->name('index');
-    Route::get('/manage-status/{id}', [UserManageController::class, 'status'])->name('status');
-    Route::get('/manage-show/{id}', [UserManageController::class, 'show'])->name('show');
-    Route::delete('/manage-delete/{id}', [UserManageController::class, 'destroy'])->name('destroy');
+Route::prefix('experts')->name('experts.')->group(function () {
+    Route::get('/', [ExpertManageController::class, 'index'])->name('index');
+    Route::get('/export', [ExpertManageController::class, 'export'])->name('export');
+    Route::get('/{id}', [ExpertManageController::class, 'show'])->name('show');
+    Route::patch('/{id}/status', [ExpertManageController::class, 'updateStatus'])->name('update-status');
+    Route::delete('/{id}', [ExpertManageController::class, 'destroy'])->name('destroy');
+    Route::post('/{id}/restore', [ExpertManageController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/force', [ExpertManageController::class, 'forceDelete'])->name('force-delete');
 
-    Route::post('/export', [UserManageController::class, 'export'])->name('export');
+    // Expert sub-pages
+    Route::get('/{id}/gigs', [ExpertManageController::class, 'gigs'])->name('gigs');
+    Route::get('/{id}/orders', [ExpertManageController::class, 'orders'])->name('orders');
+    Route::get('/{id}/earnings', [ExpertManageController::class, 'earnings'])->name('earnings');
 });
+
+// Clients Management
+Route::prefix('clients')->name('clients.')->group(function () {
+    Route::get('/', [ClientManageController::class, 'index'])->name('index');
+    Route::get('/export', [ClientManageController::class, 'export'])->name('export');
+    Route::get('/{id}', [ClientManageController::class, 'show'])->name('show');
+    Route::patch('/{id}/status', [ClientManageController::class, 'updateStatus'])->name('update-status');
+    Route::delete('/{id}', [ClientManageController::class, 'destroy'])->name('destroy');
+    Route::post('/{id}/restore', [ClientManageController::class, 'restore'])->name('restore');
+
+    // Client sub-pages
+    Route::get('/{id}/orders', [ClientManageController::class, 'orders'])->name('orders');
+});
+
 
 Route::controller(FaqController::class)->prefix('faq')->name('faq.')->group(function () {
     Route::get('/', 'index')->name('index');
