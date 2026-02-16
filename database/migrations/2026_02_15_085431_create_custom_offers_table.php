@@ -19,17 +19,18 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('room_id')->constrained()->cascadeOnDelete();
 
-            $table->string('title');
+            $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
             $table->unsignedSmallInteger('delivery_days');
             $table->unsignedTinyInteger('revisions')->default(1);
 
-            $table->enum('status', ['pending','accepted','rejected','expired','converted_to_order'])->default('pending');
+            $table->enum('status', ['pending','accepted','rejected','expired','withdrawn','converted_to_order'])->default('pending');
 
             $table->timestamp('expires_at');
             $table->timestamp('accepted_at')->nullable();
             $table->timestamp('rejected_at')->nullable();
+            $table->timestamp('withdrawn_at')->nullable();
 
             $table->timestamps();
 

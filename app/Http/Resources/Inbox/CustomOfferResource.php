@@ -23,7 +23,7 @@ class CustomOfferResource extends JsonResource
             ]),
             'expert' => [
                 'id' => $this->expert->id,
-                'name' => $this->expert->profile->full_name,
+                'name' => $this->expert->profile->first_name . ' ' . $this->expert->profile->last_name ?? null,
                 'username' => $this->expert->profile->username,
             ],
             'expires_at' => $this->expires_at->format('Y-m-d H:i:s'),

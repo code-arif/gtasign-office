@@ -178,24 +178,26 @@ Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
     // Custom offers
     Route::prefix('custom-offers')->group(function () {
         Route::post('/create', [CustomOfferController::class, 'create']); // Create offer
+        Route::post('/{offerId}/withdraw', [CustomOfferController::class, 'withdraw']); // Withdraw offer
         Route::post('/{offerId}/accept', [CustomOfferController::class, 'accept']); // Accept offer
         Route::post('/{offerId}/reject', [CustomOfferController::class, 'reject']); // Reject offer
-        Route::get('/room/{roomId}', [CustomOfferController::class, 'roomOffers']); // Room offers
+        // Route::get('/room/{roomId}', [CustomOfferController::class, 'roomOffers']); // Room offers
     });
 
     // Orders
     Route::prefix('orders')->group(function () {
-        Route::post('/create-from-offer/{offerId}', [InboxOrderController::class, 'createFromOffer']); // Order from offer
-        Route::post('/create-from-gig/{gigId}', [InboxOrderController::class, 'createFromGig']); // Order from gig
+        Route::post('/create-from-offer/{offerId}', [InboxOrderController::class, 'createFromOffer']); // DONE: Order from offer
+        Route::post('/create-from-gig/{gigId}', [InboxOrderController::class, 'createFromGig']); // Order from gig (PROBLEM)
         Route::post('/{orderId}/mark-paid', [InboxOrderController::class, 'markPaid']); // Mark as paid
         Route::post('/{orderId}/submit-delivery', [InboxOrderController::class, 'submitDelivery']); // Submit delivery
-        Route::post('/{orderId}/request-extension', [InboxOrderController::class, 'requestExtension']); // Request extension
+
+        Route::post('/{orderId}/request-extension', [InboxOrderController::class, 'requestExtension']); // DONE: Request extension
         Route::post('/{orderId}/request-revision', [InboxOrderController::class, 'requestRevision']); // Request revision
         Route::post('/{orderId}/accept-delivery', [InboxOrderController::class, 'acceptDelivery']); // Accept delivery
         Route::get('/{orderId}', [InboxOrderController::class, 'show']); // Order details
 
         // Extension responses
-        Route::post('/extensions/{extensionId}/respond', [InboxOrderController::class, 'respondToExtension']); // Respond to extension
+        Route::post('/extensions/{extensionId}/respond', [InboxOrderController::class, 'respondToExtension']); // DONE: Respond to extension
     });
 });
 

@@ -21,7 +21,7 @@ class InboxOrderService
     /**
      * Create order from custom offer
      */
-    public function createOrderFromOffer(int $offerId, int $buyerId, array $requirements = [])
+    public function createOrderFromOffer(int $offerId)
     {
         DB::beginTransaction();
         try {
@@ -31,13 +31,16 @@ class InboxOrderService
                 throw new Exception('Custom offer not found');
             }
 
+
             // Validate offer is accepted
             if ($offer->status !== 'accepted') {
                 throw new Exception('Offer must be accepted before creating order');
             }
 
+            $buyerId = $offer->client_id;
+
             // Validate buyer is the client
-            if ($offer->client_id !== $buyerId) {
+            if (!$buyerId) {
                 throw new Exception('Unauthorized to create order from this offer');
             }
 
@@ -60,7 +63,7 @@ class InboxOrderService
                 'delivery_days' => $offer->delivery_days,
                 'expected_delivery_at' => $expectedDeliveryAt,
                 'max_revisions' => $offer->revisions,
-                'requirements' => $requirements,
+                'requirements' => $offer->description,
                 'status' => 'pending_payment',
             ]);
 
@@ -105,9 +108,10 @@ class InboxOrderService
     /**
      * Create order from gig (direct order)
      */
-    public function createOrderFromGig(int $gigId, int $buyerId, array $requirements = [])
+    public function createOrderFromGig(int $gigId, int $buyerId, array $data)
     {
         DB::beginTransaction();
+
         try {
             $gig = Gig::with('user')->find($gigId);
 
@@ -115,12 +119,11 @@ class InboxOrderService
                 throw new Exception('Gig not available');
             }
 
-            // Cannot order own gig
             if ($gig->user_id === $buyerId) {
                 throw new Exception('Cannot order your own gig');
             }
 
-            // Get or create room
+            // Room handling
             $room = Room::betweenUsers($buyerId, $gig->user_id)->first();
 
             if (!$room) {
@@ -130,41 +133,77 @@ class InboxOrderService
                 ]);
             }
 
-            // Calculate pricing
-            $price = $gig->price;
-            $platformFee = $price * 0.10;
-            $sellerEarnings = $price - $platformFee;
-            $expectedDeliveryAt = now()->addDays($gig->delivery_days);
+            /*
+        |--------------------------------------------------------------------------
+        | PRICING CALCULATION
+        |--------------------------------------------------------------------------
+        */
 
-            // Create order
+            $quantity = $data['quantity'];
+            $basePrice = $gig->price * $quantity;
+
+            $deliveryDays = $gig->delivery_days;
+            $extrasCost = 0;
+
+            // Handle Extras (Example: Fast Delivery)
+            if (!empty($data['extras']['fast_delivery'])) {
+
+                // You can later store this in gig_extras table
+                $fastDeliveryCost = 60; // From UI
+                $extrasCost += $fastDeliveryCost;
+
+                $deliveryDays = max(1, $gig->delivery_days - 1); // Faster delivery
+            }
+
+            $totalPrice = $basePrice + $extrasCost;
+
+            $platformFee = round($totalPrice * 0.10, 2);
+            $sellerEarnings = $totalPrice - $platformFee;
+
+            $expectedDeliveryAt = now()->addDays($deliveryDays);
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE ORDER
+            |--------------------------------------------------------------------------
+            */
+
             $order = Order::create([
                 'gig_id' => $gigId,
-                'custom_offer_id' => null,
                 'buyer_id' => $buyerId,
                 'seller_id' => $gig->user_id,
                 'room_id' => $room->id,
-                'price' => $price,
+
+                'price' => $totalPrice,
                 'platform_fee' => $platformFee,
                 'seller_earnings' => $sellerEarnings,
-                'delivery_days' => $gig->delivery_days,
+
+                'delivery_days' => $deliveryDays,
                 'expected_delivery_at' => $expectedDeliveryAt,
-                'max_revisions' => 1, // Default for direct orders
-                'requirements' => $requirements,
+
+                'max_revisions' => 1,
+                'requirements' => $gig->scope,
+
                 'status' => 'pending_payment',
             ]);
 
-            // Send message
+            /*
+            |--------------------------------------------------------------------------
+            | SYSTEM MESSAGE
+            |--------------------------------------------------------------------------
+            */
+
             Chat::create([
                 'sender_id' => $buyerId,
                 'receiver_id' => $gig->user_id,
                 'room_id' => $room->id,
                 'type' => 'order_placed',
                 'order_id' => $order->id,
-                'text' => "Order placed: {$gig->title} - #{$order->order_number}",
+                'text' => "Order placed ({$quantity}x): {$gig->title}",
                 'metadata' => [
-                    'order_id' => $order->id,
-                    'order_number' => $order->order_number,
-                    'price' => $order->price,
+                    'quantity' => $quantity,
+                    'extras_cost' => $extrasCost,
+                    'total_price' => $totalPrice,
                 ],
             ]);
 
@@ -185,6 +224,7 @@ class InboxOrderService
             throw $e;
         }
     }
+
 
     /**
      * Mark order as paid (after payment gateway)

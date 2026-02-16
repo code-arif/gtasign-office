@@ -85,6 +85,50 @@ class CustomOfferService
     }
 
     /**
+     * Withdraw custom offer (Expert withdraws)
+     */
+    public function withdrawOffer(int $offerId, int $expertId)
+    {
+        DB::beginTransaction();
+        try {
+            $offer = CustomOffer::where('id', $offerId)
+                ->where('expert_id', $expertId)
+                ->where('status', 'pending')
+                ->first();
+
+            if (!$offer) {
+                throw new Exception('Offer not found or cannot be withdrawn');
+            }
+
+            // Update offer status
+            $offer->update([
+                'status' => 'withdrawn',
+                'withdrawn_at' => now(),
+            ]);
+
+            // Send withdrawal message
+            Chat::create([
+                'sender_id' => $expertId,
+                'receiver_id' => $offer->client_id,
+                'room_id' => $offer->room_id,
+                'type' => 'offer_withdrawn',
+                'custom_offer_id' => $offer->id,
+                'text' => "Withdrew the custom offer: {$offer->title}",
+            ]);
+
+            // Update room last message time
+            $offer->room->update(['last_message_at' => now()]);
+
+            DB::commit();
+
+            return $offer->fresh(['gig', 'expert.profile', 'client.profile', 'room']);
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * Accept custom offer (Client accepts)
      */
     public function acceptOffer(int $offerId, int $clientId)

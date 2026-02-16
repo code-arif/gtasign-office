@@ -34,7 +34,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('revision_count')->default(0);
 
             // Requirements
-            $table->json('requirements')->nullable();
+            $table->text('requirements')->nullable();
 
             // Order Status
             $table->enum('status', ['pending_payment','active','qa_pending','qa_rejected','delivered','revision_requested','completed','cancelled','disputed'])->default('pending_payment');

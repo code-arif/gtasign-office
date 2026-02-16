@@ -14,19 +14,12 @@ class CreateOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'gig_id' => 'required_without:custom_offer_id|nullable|exists:gigs,id',
-            'custom_offer_id' => 'required_without:gig_id|nullable|exists:custom_offers,id',
-            'requirements' => 'nullable|array',
-            'requirements.*.question' => 'required|string',
-            'requirements.*.answer' => 'required|string',
-        ];
-    }
+            // come form UI
+            'quantity' => 'required|integer|min:1|max:100',
 
-    public function messages(): array
-    {
-        return [
-            'gig_id.required_without' => 'Either gig or custom offer is required',
-            'custom_offer_id.required_without' => 'Either gig or custom offer is required',
+            // optional extras
+            'extras' => 'nullable|array',
+            'extras.fast_delivery' => 'nullable|boolean',
         ];
     }
 }

@@ -58,8 +58,43 @@ class CustomOfferController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 $e->getMessage(),
-                $e->getMessage() === 'Client not found' ? 404 :
-                ($e->getMessage() === 'Cannot send offer to yourself' ? 400 : 500)
+                $e->getMessage() === 'Client not found' ? 404 : ($e->getMessage() === 'Cannot send offer to yourself' ? 400 : 500)
+            );
+        }
+    }
+
+    /**
+     * Withdraw custom offer (Expert withdraws)
+     * DELETE /api/inbox/custom-offers/{offerId}/withdraw
+     */
+    public function withdraw(int $offerId)
+    {
+        try {
+            $user = auth('api')->user();
+
+            // Check if user is expert
+            if (!$user->hasRole('expert')) {
+                return $this->error(
+                    null,
+                    'Only experts can withdraw custom offers',
+                    403
+                );
+            }
+
+            // Withdraw offer
+            $offer = $this->customOfferService->withdrawOffer($offerId, $user->id);
+
+            return $this->success(
+                'Custom offer withdrawn successfully',
+                ['offer' => new CustomOfferResource($offer)]
+            );
+        } catch (Exception $e) {
+            Log::error('Withdraw offer error: ' . $e->getMessage());
+
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                $e->getMessage(),
+                $e->getMessage() === 'Offer not found' ? 404 : ($e->getMessage() === 'Unauthorized to withdraw this offer' ? 400 : 500)
             );
         }
     }
@@ -72,6 +107,14 @@ class CustomOfferController extends Controller
     {
         try {
             $user = auth('api')->user();
+
+            if (!$user->hasRole('client')) {
+                return $this->error(
+                    null,
+                    'Only clients can accept custom offers',
+                    403
+                );
+            }
 
             // Accept offer
             $offer = $this->customOfferService->acceptOffer($offerId, $user->id);
@@ -86,8 +129,7 @@ class CustomOfferController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 $e->getMessage(),
-                $e->getMessage() === 'Offer not found' ? 404 :
-                (in_array($e->getMessage(), ['Unauthorized to accept this offer', 'Offer cannot be accepted (expired or already responded)']) ? 400 : 500)
+                $e->getMessage() === 'Offer not found' ? 404 : (in_array($e->getMessage(), ['Unauthorized to accept this offer', 'Offer cannot be accepted (expired or already responded)']) ? 400 : 500)
             );
         }
     }

@@ -45,7 +45,7 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'requirements' => 'array',
+        'requirements' => 'string',
         'price' => 'decimal:2',
         'platform_fee' => 'decimal:2',
         'seller_earnings' => 'decimal:2',

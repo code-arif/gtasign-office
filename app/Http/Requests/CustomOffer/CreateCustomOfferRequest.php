@@ -16,8 +16,8 @@ class CreateCustomOfferRequest extends FormRequest
         return [
             'gig_id' => 'nullable|exists:gigs,id',
             'client_id' => 'required|exists:users,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:2000',
+            'title' => 'nullable|string|max:255',
+            'description' => 'required|string|max:2000',
             'price' => 'required|numeric|min:5|max:10000',
             'delivery_days' => 'required|integer|min:1|max:90',
             'revisions' => 'nullable|integer|min:0|max:10',

@@ -26,6 +26,7 @@ return new class extends Migration
                 'custom_offer',
                 'offer_accepted',
                 'offer_rejected',
+                'offer_withdrawn',
                 'order_placed',
                 'delivery_submitted',
                 'delivery_approved',

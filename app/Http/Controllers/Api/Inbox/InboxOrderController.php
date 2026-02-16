@@ -29,18 +29,24 @@ class InboxOrderController extends Controller
 
     /**
      * Create order from custom offer
-     * POST /api/inbox/orders/create-from-offer/{offerId}
+     * POST v1/api/inbox/orders/create-from-offer/{offerId}
      */
-    public function createFromOffer(CreateOrderRequest $request, int $offerId)
+    public function createFromOffer(Request $request, int $offerId)
     {
         try {
             $user = auth('api')->user();
 
+            if (!$user->hasRole('expert')) {
+                return $this->error(
+                    null,
+                    'Only clients can create orders from offers',
+                    403
+                );
+            }
+
             // Create order
             $order = $this->inboxOrderService->createOrderFromOffer(
                 $offerId,
-                $user->id,
-                $request->input('requirements', [])
             );
 
             return $this->success(
@@ -61,18 +67,26 @@ class InboxOrderController extends Controller
 
     /**
      * Create order from gig (direct)
-     * POST /api/inbox/orders/create-from-gig/{gigId}
+     * POST v1/api/inbox/orders/create-from-gig/{gigId}
      */
     public function createFromGig(CreateOrderRequest $request, int $gigId)
     {
         try {
             $user = auth('api')->user();
 
+            if (!$user->hasRole('client')) {
+                return $this->error(
+                    null,
+                    'Only clients can create orders from gigs',
+                    403
+                );
+            }
+
             // Create order
             $order = $this->inboxOrderService->createOrderFromGig(
                 $gigId,
                 $user->id,
-                $request->input('requirements', [])
+                $request->validated()
             );
 
             return $this->success(
@@ -160,8 +174,7 @@ class InboxOrderController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 $e->getMessage(),
-                $e->getMessage() === 'Order not found' ? 404 :
-                ($e->getMessage() === 'Unauthorized' ? 403 : 400)
+                $e->getMessage() === 'Order not found' ? 404 : ($e->getMessage() === 'Unauthorized' ? 403 : 400)
             );
         }
     }
@@ -192,8 +205,7 @@ class InboxOrderController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 $e->getMessage(),
-                $e->getMessage() === 'Order not found' ? 404 :
-                ($e->getMessage() === 'Unauthorized' ? 403 : 400)
+                $e->getMessage() === 'Order not found' ? 404 : ($e->getMessage() === 'Unauthorized' ? 403 : 400)
             );
         }
     }
@@ -226,8 +238,7 @@ class InboxOrderController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 $e->getMessage(),
-                $e->getMessage() === 'Extension request not found' ? 404 :
-                ($e->getMessage() === 'Unauthorized' ? 403 : 400)
+                $e->getMessage() === 'Extension request not found' ? 404 : ($e->getMessage() === 'Unauthorized' ? 403 : 400)
             );
         }
     }
@@ -258,8 +269,7 @@ class InboxOrderController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 $e->getMessage(),
-                $e->getMessage() === 'Order not found' ? 404 :
-                ($e->getMessage() === 'Unauthorized' ? 403 : 400)
+                $e->getMessage() === 'Order not found' ? 404 : ($e->getMessage() === 'Unauthorized' ? 403 : 400)
             );
         }
     }
@@ -286,8 +296,7 @@ class InboxOrderController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 $e->getMessage(),
-                $e->getMessage() === 'Order not found' ? 404 :
-                ($e->getMessage() === 'Unauthorized' ? 403 : 400)
+                $e->getMessage() === 'Order not found' ? 404 : ($e->getMessage() === 'Unauthorized' ? 403 : 400)
             );
         }
     }
@@ -314,8 +323,7 @@ class InboxOrderController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 $e->getMessage(),
-                $e->getMessage() === 'Order not found' ? 404 :
-                ($e->getMessage() === 'Unauthorized access to this order' ? 403 : 500)
+                $e->getMessage() === 'Order not found' ? 404 : ($e->getMessage() === 'Unauthorized access to this order' ? 403 : 500)
             );
         }
     }

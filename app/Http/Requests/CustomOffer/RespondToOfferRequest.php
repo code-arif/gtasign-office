@@ -15,8 +15,7 @@ class RespondToOfferRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'action' => ['required', Rule::in(['accept', 'reject'])],
-            'rejection_reason' => 'required_if:action,reject|nullable|string|max:500',
+            'rejection_reason' => 'required|string|max:500',
         ];
     }
 }
