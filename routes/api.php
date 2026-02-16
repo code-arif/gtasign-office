@@ -1,28 +1,31 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\ChatController;
-use App\Http\Controllers\Api\Gig\GigController;
-use App\Http\Controllers\Api\Auth\UserController;
+use App\Http\Controllers\Api\Auth\Client\ClientAuthController;
+use App\Http\Controllers\Api\Auth\Client\UserLanguageController;
 use App\Http\Controllers\Api\Auth\LoginController;
-use App\Http\Controllers\Api\Gig\GigTagController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\RegisterController;
-use App\Http\Controllers\Api\FirebaseTokenController;
-use App\Http\Controllers\Api\Gig\GigCategoryController;
-use App\Http\Controllers\Api\Auth\SocialLoginController;
-use App\Http\Controllers\Api\Frontend\ContactController;
-use App\Http\Controllers\Api\Frontend\SettingsController;
 use App\Http\Controllers\Api\Auth\ResetPasswordController;
-use App\Http\Controllers\Api\Frontend\CMS\HomePageController;
-use App\Http\Controllers\Api\Frontend\NotificationController;
-use App\Http\Controllers\Api\Auth\Client\ClientAuthController;
+use App\Http\Controllers\Api\Auth\SocialLoginController;
+use App\Http\Controllers\Api\Auth\UserController;
+use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\FirebaseTokenController;
 use App\Http\Controllers\Api\Frontend\CMS\AboutPageController;
+use App\Http\Controllers\Api\Frontend\CMS\HomePageController;
+use App\Http\Controllers\Api\Frontend\ContactController;
+use App\Http\Controllers\Api\Frontend\NotificationController;
 use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
-use App\Http\Controllers\Api\User\Profile\EducationController;
-use App\Http\Controllers\Api\Auth\Client\UserLanguageController;
+use App\Http\Controllers\Api\Frontend\SettingsController;
+use App\Http\Controllers\Api\Gig\GigCategoryController;
+use App\Http\Controllers\Api\Gig\GigController;
+use App\Http\Controllers\Api\Gig\GigTagController;
+use App\Http\Controllers\Api\Inbox\CustomOfferController;
+use App\Http\Controllers\Api\Inbox\InboxController;
+use App\Http\Controllers\Api\Inbox\InboxOrderController;
 use App\Http\Controllers\Api\User\Profile\CertificateController;
+use App\Http\Controllers\Api\User\Profile\EducationController;
 use App\Http\Controllers\Api\User\Profile\UserExperienceController;
+use Illuminate\Support\Facades\Route;
 
 // health check
 Route::get('/health-check', function () {
@@ -155,6 +158,44 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
         // Route::post('/{id}/publish', [GigController::class, 'publish']);
         Route::delete('delete/{id}/image', [GigController::class, 'deleteImage']); // done
         Route::delete('delete/{id}/document', [GigController::class, 'deleteDocument']); // done
+    });
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Inbox routes (requires authentication)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
+    // Main inbox
+    Route::get('/', [InboxController::class, 'index']); // Get inbox list
+    Route::get('/conversation/{roomId}', [InboxController::class, 'conversation']); // Get conversation
+    Route::post('/send/{receiverId}', [InboxController::class, 'sendMessage']); // Send message
+    // Route::post('/start/{userId}', [InboxController::class, 'startConversation']); // Start conversation
+    Route::post('/{roomId}/mark-read', [InboxController::class, 'markAsRead']); // Mark as read (PROBLEM)
+
+    // Custom offers
+    Route::prefix('custom-offers')->group(function () {
+        Route::post('/create', [CustomOfferController::class, 'create']); // Create offer
+        Route::post('/{offerId}/accept', [CustomOfferController::class, 'accept']); // Accept offer
+        Route::post('/{offerId}/reject', [CustomOfferController::class, 'reject']); // Reject offer
+        Route::get('/room/{roomId}', [CustomOfferController::class, 'roomOffers']); // Room offers
+    });
+
+    // Orders
+    Route::prefix('orders')->group(function () {
+        Route::post('/create-from-offer/{offerId}', [InboxOrderController::class, 'createFromOffer']); // Order from offer
+        Route::post('/create-from-gig/{gigId}', [InboxOrderController::class, 'createFromGig']); // Order from gig
+        Route::post('/{orderId}/mark-paid', [InboxOrderController::class, 'markPaid']); // Mark as paid
+        Route::post('/{orderId}/submit-delivery', [InboxOrderController::class, 'submitDelivery']); // Submit delivery
+        Route::post('/{orderId}/request-extension', [InboxOrderController::class, 'requestExtension']); // Request extension
+        Route::post('/{orderId}/request-revision', [InboxOrderController::class, 'requestRevision']); // Request revision
+        Route::post('/{orderId}/accept-delivery', [InboxOrderController::class, 'acceptDelivery']); // Accept delivery
+        Route::get('/{orderId}', [InboxOrderController::class, 'show']); // Order details
+
+        // Extension responses
+        Route::post('/extensions/{extensionId}/respond', [InboxOrderController::class, 'respondToExtension']); // Respond to extension
     });
 });
 
