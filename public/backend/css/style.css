@@ -32474,7 +32474,7 @@ body.rtl {
    padding-right: 20px !important;
 }
 .rtl .slide-menu li .slide-item:before {
-   content: "\e0e7";
+   /* content: "\e0e7"; */
 }
 .rtl .sub-slide-menu {
    padding: 0 0 15px 15px;
@@ -50947,7 +50947,7 @@ div.dtr-bs-modal table.table tr:first-child td {
 }
 .closed-leftmenu .slide-menu li .slide-item:before {
    color: #68798b;
-   content: "\e0e7";
+   /* content: "\e0e7"; */
    font-family: typicons;
    font-size: 10px;
    font-style: normal;
@@ -54527,7 +54527,7 @@ div.dtr-bs-modal table.table tr:first-child td {
 }
 .slide-menu li .slide-item:before {
    color: #68798b;
-   content: "\e0e7";
+   /* content: "\e0e7"; */
    font-family: typicons;
    font-size: 13px;
    font-style: normal;
@@ -54900,7 +54900,7 @@ div.dtr-bs-modal table.table tr:first-child td {
    flex: 1 1 auto;
 }
 .slide-menu a:before {
-   content: "\e0e7";
+   /* content: "\e0e7"; */
    font-family: typicons !important;
    font-size: 11px;
    margin-right: 10px;
