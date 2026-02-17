@@ -48,7 +48,7 @@ class CustomOfferService
                 'expert_id' => $expertId,
                 'client_id' => $data['client_id'],
                 'room_id' => $room->id,
-                'title' => $data['title'],
+                'title' => $data['title'] ?? null,
                 'description' => $data['description'] ?? null,
                 'price' => $data['price'],
                 'delivery_days' => $data['delivery_days'],
