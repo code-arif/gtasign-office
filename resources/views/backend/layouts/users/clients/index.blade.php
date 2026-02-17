@@ -1,6 +1,6 @@
 @extends('backend.app')
 
-@section('title', 'Expert Management')
+@section('title', 'Client Management')
 
 @section('content')
     <div class="app-content main-content mt-0">
@@ -10,14 +10,14 @@
                 <!-- PAGE HEADER -->
                 <div class="page-header">
                     <div>
-                        <h1 class="page-title">Expert Management</h1>
-                        <p class="text-muted mb-0">Manage and monitor all experts on the platform</p>
+                        <h1 class="page-title">Client Management</h1>
+                        <p class="text-muted mb-0">Manage and monitor all clients on the platform</p>
                     </div>
                     <div class="ms-auto pageheader-btn">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                             <span>&nbsp; &gt&gt &nbsp;</span>
-                            <li class="breadcrumb-item active" aria-current="page">Experts</li>
+                            <li class="breadcrumb-item active" aria-current="page">Clients</li>
                         </ol>
                     </div>
                 </div>
@@ -25,15 +25,15 @@
                 <!-- STATS CARDS -->
                 <div class="row mb-4">
                     <div class="col-xl col-lg-4 col-md-6 col-sm-6">
-                        <div class="card stats-card" style="border-left:4px solid #6366f1;">
+                        <div class="card stats-card" style="border-left:4px solid #0ea5e9;">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="text-muted mb-1">Total Experts</h6>
-                                        <h3 class="mb-0">{{ $totalExperts }}</h3>
+                                        <h6 class="text-muted mb-1">Total Clients</h6>
+                                        <h3 class="mb-0">{{ $totalClients }}</h3>
                                     </div>
                                     <div class="icon-service p-3 rounded-3"
-                                        style="background:rgba(99,102,241,.12); color:#6366f1;">
+                                        style="background:rgba(14,165,233,.12); color:#0ea5e9;">
                                         <i class="fe fe-users fs-20"></i>
                                     </div>
                                 </div>
@@ -47,7 +47,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted mb-1">Active</h6>
-                                        <h3 class="mb-0">{{ $activeExperts }}</h3>
+                                        <h3 class="mb-0">{{ $activeClients }}</h3>
                                     </div>
                                     <div class="icon-service bg-success-transparent text-success p-3 rounded-3">
                                         <i class="fe fe-check-circle fs-20"></i>
@@ -63,7 +63,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted mb-1">Inactive</h6>
-                                        <h3 class="mb-0">{{ $inactiveExperts }}</h3>
+                                        <h3 class="mb-0">{{ $inactiveClients }}</h3>
                                     </div>
                                     <div class="icon-service bg-secondary-transparent text-secondary p-3 rounded-3">
                                         <i class="fe fe-pause-circle fs-20"></i>
@@ -79,7 +79,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted mb-1">Suspended</h6>
-                                        <h3 class="mb-0">{{ $suspendedExperts }}</h3>
+                                        <h3 class="mb-0">{{ $suspendedClients }}</h3>
                                     </div>
                                     <div class="icon-service bg-danger-transparent text-danger p-3 rounded-3">
                                         <i class="fe fe-slash fs-20"></i>
@@ -90,12 +90,12 @@
                     </div>
                     <div class="col-xl col-lg-4 col-md-6 col-sm-6">
                         <div class="card stats-card" style="border-left:4px solid #17a2b8; cursor:pointer;"
-                            onclick="toggleDeletedExperts()">
+                            onclick="toggleDeletedClients()">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted mb-1">Deleted</h6>
-                                        <h3 class="mb-0">{{ $deletedExperts }}</h3>
+                                        <h3 class="mb-0">{{ $deletedClients }}</h3>
                                     </div>
                                     <div class="icon-service bg-info-transparent text-info p-3 rounded-3">
                                         <i class="fe fe-trash-2 fs-20"></i>
@@ -110,9 +110,8 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="filter-card">
-                            <!-- Filter Header -->
                             <div class="d-flex justify-content-between align-items-center filter-toggle-header"
-                                id="filterToggleBtn" style="cursor:pointer;" onclick="toggleFilterBody()">
+                                style="cursor:pointer;" onclick="toggleFilterBody()">
                                 <div class="d-flex align-items-center gap-2">
                                     <i class="fe fe-filter text-primary fs-16"></i>
                                     <span class="fw-600 text-dark fs-14">Filters & Search</span>
@@ -125,11 +124,10 @@
                                 </div>
                             </div>
 
-                            <!-- Filter Body -->
                             <div id="filterBody" style="display:none; margin-top:16px;">
                                 <hr class="mt-0 mb-3">
                                 <div class="row align-items-end g-3">
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <label class="form-label">Search</label>
                                         <input type="text" id="searchFilter" class="form-control"
                                             placeholder="Search by name, email, username...">
@@ -160,9 +158,9 @@
                                             <i class="fe fe-refresh-cw"></i>
                                         </button>
                                     </div>
-                                    <div class="col-md-2 d-flex align-items-end">
+                                    <div class="col-md-1 d-flex align-items-end">
                                         <label class="deleted-toggle-label mb-0" for="showDeletedFilter"
-                                            style="min-width:unset; padding:4px 12px;">
+                                            style="min-width:unset; padding:8px 12px;">
                                             <input type="checkbox" id="showDeletedFilter" class="deleted-toggle-input">
                                             <span class="deleted-toggle-track">
                                                 <span class="deleted-toggle-thumb"></span>
@@ -176,14 +174,14 @@
                     </div>
                 </div>
 
-                <!-- EXPERT TABLE -->
+                <!-- CLIENT TABLE -->
                 <div class="row mt-3">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header border-bottom d-flex justify-content-between align-items-center">
-                                <h3 class="card-title mb-0">Expert List</h3>
+                                <h3 class="card-title mb-0">Client List</h3>
                                 <button class="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
-                                    onclick="exportExperts()">
+                                    onclick="exportClients()">
                                     <i class="fe fe-download me-1"></i> Export
                                 </button>
                             </div>
@@ -193,9 +191,9 @@
                                         <thead>
                                             <tr>
                                                 <th style="width:50px;">#</th>
-                                                <th style="width:260px;">Expert</th>
+                                                <th style="width:260px;">Client</th>
                                                 <th style="width:220px;">Contact</th>
-                                                <th style="width:220px;" class="text-center">Stats</th>
+                                                <th style="width:240px;" class="text-center">Order Stats</th>
                                                 <th style="width:110px;" class="text-center">Status</th>
                                                 <th style="width:130px;" class="text-center">Joined</th>
                                                 <th style="width:110px;" class="text-center">Action</th>
@@ -213,22 +211,22 @@
         </div>
     </div>
 
-    <!-- Status Change Modal -->
+    <!-- Status Modal -->
     <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Change Expert Status</h5>
+                    <h5 class="modal-title">Change Client Status</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="statusForm">
-                    <input type="hidden" id="expertId">
+                    <input type="hidden" id="clientId">
                     <input type="hidden" id="newStatus">
                     <div class="modal-body">
                         <div id="suspendReasonSection" style="display:none;">
                             <label class="form-label">Suspension Reason <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="suspendReason" rows="4"
-                                placeholder="Provide a reason for suspending this expert..."></textarea>
+                                placeholder="Provide a reason for suspending this client..."></textarea>
                             <div class="invalid-feedback"></div>
                         </div>
                         <div id="confirmMessage" class="alert alert-info mb-0">
@@ -265,7 +263,6 @@
                 format: 'yyyy-mm-dd',
                 autoclose: true
             });
-
             initializeDataTable();
             initSelect2();
         });
@@ -294,7 +291,7 @@
                 pagingType: 'full_numbers',
                 dom: "<'row justify-content-between table-topbar'<'col-md-4 col-sm-3'l><'col-md-5 col-sm-5 px-0'f>>tipr",
                 ajax: {
-                    url: '{{ route('admin.experts.data') }}',
+                    url: '{{ route('admin.clients.data') }}',
                     type: 'GET',
                     dataType: 'json',
                     data: function(d) {
@@ -312,7 +309,7 @@
                         searchable: false
                     },
                     {
-                        data: 'expert_info',
+                        data: 'client_info',
                         name: 'email',
                         orderable: true,
                         searchable: true
@@ -354,7 +351,6 @@
                 ]
             });
 
-            // Filter bindings
             $('#resetFilter').click(function() {
                 $('#statusFilter, #dateFrom, #dateTo').val('').trigger('change');
                 $('#searchFilter').val('');
@@ -377,38 +373,33 @@
 
         function filterByStatus(status) {
             $('#statusFilter').val(status).trigger('change');
-            // Open filter panel if collapsed
-            const body = document.getElementById('filterBody');
-            if (body.style.display === 'none') toggleFilterBody();
+            if (document.getElementById('filterBody').style.display === 'none') toggleFilterBody();
         }
 
-        function toggleDeletedExperts() {
+        function toggleDeletedClients() {
             const cb = $('#showDeletedFilter');
             cb.prop('checked', !cb.is(':checked')).trigger('change');
-            const label = document.querySelector('.deleted-toggle-label');
-            if (label) label.classList.toggle('active', cb.is(':checked'));
-            const body = document.getElementById('filterBody');
-            if (body.style.display === 'none') toggleFilterBody();
+            document.querySelector('.deleted-toggle-label')?.classList.toggle('active', cb.is(':checked'));
+            if (document.getElementById('filterBody').style.display === 'none') toggleFilterBody();
         }
 
-        function changeExpertStatus(expertId, status) {
+        function changeClientStatus(clientId, status) {
             event.preventDefault();
-            $('#expertId').val(expertId);
+            $('#clientId').val(clientId);
             $('#newStatus').val(status);
-
             if (status === 'suspended') {
                 $('#suspendReasonSection').show();
                 $('#confirmMessage').hide();
             } else {
                 $('#suspendReasonSection').hide();
-                $('#confirmMessage').show().text(`Are you sure you want to set this expert as "${status}"?`);
+                $('#confirmMessage').show().text(`Set this client as "${status}"?`);
             }
             $('#statusModal').modal('show');
         }
 
         $('#statusForm').on('submit', function(e) {
             e.preventDefault();
-            const expertId = $('#expertId').val();
+            const clientId = $('#clientId').val();
             const status = $('#newStatus').val();
             const reason = $('#suspendReason').val();
 
@@ -418,14 +409,13 @@
                 return;
             }
             $('#suspendReason').removeClass('is-invalid');
-
             $('#submitStatusBtn').prop('disabled', true);
             $('#submitStatusBtn .btn-text').addClass('d-none');
             $('#submitStatusBtn .spinner-border').removeClass('d-none');
             NProgress.start();
 
             $.ajax({
-                url: `/admin/experts/${expertId}/status`,
+                url: `/admin/clients/${clientId}/status`,
                 type: 'PATCH',
                 data: {
                     status,
@@ -433,7 +423,7 @@
                 },
                 success: function(res) {
                     NProgress.done();
-                    resetStatusBtn();
+                    resetBtn();
                     if (res.success) {
                         toastr.success(res.message);
                         $('#statusModal').modal('hide');
@@ -443,33 +433,31 @@
                 },
                 error: function(xhr) {
                     NProgress.done();
-                    resetStatusBtn();
+                    resetBtn();
                     toastr.error(xhr.responseJSON?.message || 'Failed to update status');
                 }
             });
         });
 
-        function resetStatusBtn() {
+        function resetBtn() {
             $('#submitStatusBtn').prop('disabled', false);
             $('#submitStatusBtn .btn-text').removeClass('d-none');
             $('#submitStatusBtn .spinner-border').addClass('d-none');
         }
 
-        function exportExperts() {
+        function exportClients() {
             const params = new URLSearchParams({
                 status: $('#statusFilter').val(),
                 show_deleted: $('#showDeletedFilter').is(':checked') ? 'true' : 'false'
             });
-            window.location.href = `{{ route('admin.experts.export') }}?${params.toString()}`;
+            window.location.href = `{{ route('admin.clients.export') }}?${params.toString()}`;
         }
 
-        /* -------- Filter Collapse -------- */
         function toggleFilterBody() {
             const body = document.getElementById('filterBody');
             const chevron = document.getElementById('filterChevron');
             const hint = document.getElementById('filterCollapseHint');
             const isOpen = body.style.display !== 'none';
-
             if (isOpen) {
                 $(body).slideUp(250);
                 chevron.style.transform = 'rotate(0deg)';
@@ -481,12 +469,10 @@
             }
         }
 
-        /* -------- Deleted Toggle -------- */
         document.getElementById('showDeletedFilter').addEventListener('change', function() {
             this.closest('.deleted-toggle-label').classList.toggle('active', this.checked);
         });
 
-        /* -------- Active Filter Badge -------- */
         function checkActiveFilters() {
             const hasValue = ['searchFilter', 'statusFilter', 'dateFrom', 'dateTo'].some(id => $('#' + id).val());
             const deleted = $('#showDeletedFilter').is(':checked');
@@ -515,11 +501,6 @@
             margin-bottom: 20px;
             border: 1px solid #e2e8f0;
             box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
-        }
-
-        .filter-toggle-header {
-            padding: 4px 0;
-            user-select: none;
         }
 
         .filter-card .form-label {
@@ -559,7 +540,6 @@
             vertical-align: middle;
         }
 
-        /* Deleted Toggle */
         .deleted-toggle-label {
             display: inline-flex;
             align-items: center;
@@ -629,6 +609,10 @@
 
         .select2-container {
             width: 100% !important;
+        }
+
+        .fw-600 {
+            font-weight: 600;
         }
     </style>
 @endpush

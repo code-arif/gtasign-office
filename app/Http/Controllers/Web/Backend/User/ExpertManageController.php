@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Web\Backend\User;
 
+use Exception;
 use App\Models\User;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
 
 class ExpertManageController extends Controller
 {
@@ -14,75 +18,267 @@ class ExpertManageController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::role('expert')
-            ->with(['profile', 'gigs', 'sellerOrders']);
+        $totalExperts    = User::role('expert')->count();
+        $activeExperts   = User::role('expert')->where('status', 'active')->count();
+        $inactiveExperts = User::role('expert')->where('status', 'inactive')->count();
+        $suspendedExperts = User::role('expert')->where('status', 'suspended')->count();
+        $deletedExperts  = User::role('expert')->onlyTrashed()->count();
 
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhereHas('profile', function ($pq) use ($search) {
-                        $pq->where('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
-                            ->orWhere('username', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        // Status filter
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Date filter
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        $experts = $query->latest()->paginate(20);
-
-        return view('backend.layouts.users.experts.index', compact('experts'));
+        return view('backend.layouts.users.experts.index', compact(
+            'totalExperts',
+            'activeExperts',
+            'inactiveExperts',
+            'suspendedExperts',
+            'deletedExperts'
+        ));
     }
 
     /**
-     * Show expert details
+     * Server-side DataTables data
+     */
+    public function getData(Request $request)
+    {
+        if ($request->ajax() && $request->wantsJson()) {
+
+            $query = User::role('expert', 'web')
+                ->select([
+                    'users.id',
+                    'users.email',
+                    'users.phone',
+                    'users.status',
+                    'users.created_at',
+                    'users.deleted_at',
+                    'users.email_verified_at',
+                ])
+                ->with([
+                    'profile:id,user_id,first_name,last_name,avatar,username',
+                ])
+                ->withCount([
+                    'gigs',                                          // $user->gigs_count
+                    'sellerOrders',                                  // $user->seller_orders_count
+                    'sellerOrders as completed_orders_count' => fn($q) // $user->completed_orders_count
+                    => $q->where('status', 'completed'),
+                ]);
+
+            // Show deleted
+            if ($request->filled('show_deleted') && $request->show_deleted === 'true') {
+                $query->withTrashed();
+            }
+
+            // Status filter
+            if ($request->filled('status')) {
+                $query->where('users.status', $request->status);
+            }
+
+            // Date range
+            if ($request->filled('date_from')) {
+                $query->whereDate('users.created_at', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('users.created_at', '<=', $request->date_to);
+            }
+
+            // Search
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('users.email', 'like', "%{$search}%")
+                        ->orWhere('users.phone', 'like', "%{$search}%")
+                        ->orWhereHas('profile', function ($pq) use ($search) {
+                            $pq->where('first_name', 'like', "%{$search}%")
+                                ->orWhere('last_name', 'like', "%{$search}%")
+                                ->orWhere('username', 'like', "%{$search}%");
+                        });
+                });
+            }
+
+            return DataTables::eloquent($query)
+                ->addIndexColumn()
+                ->filterColumn('email', function ($q, $keyword) {
+                    $q->where('users.email', 'like', "%{$keyword}%");
+                })
+                ->addColumn('expert_info', function ($user) {
+                    $profile  = $user->profile;
+                    $fullName = $profile
+                        ? trim($profile->first_name . ' ' . ($profile->last_name ?? ''))
+                        : 'N/A';
+                    $username = $profile->username ?? '';
+                    $avatar   = $profile && $profile->avatar
+                        ? asset($profile->avatar)
+                        : 'https://ui-avatars.com/api/?name=' . urlencode($fullName) . '&background=6366f1&color=fff&size=64';
+
+                    $deletedBadge = $user->deleted_at
+                        ? '<span class="badge bg-danger ms-2">Deleted</span>' : '';
+                    $verifiedIcon = $user->email_verified_at
+                        ? '<i class="fe fe-check-circle text-success ms-1" title="Email Verified"></i>' : '';
+
+                    return '
+                        <div class="d-flex align-items-center">
+                            <img src="' . $avatar . '" alt="avatar" class="rounded-circle me-3 flex-shrink-0"
+                                 width="44" height="44" style="object-fit:cover; border:2px solid #e9ecef;">
+                            <div>
+                                <div class="fw-semibold">' . e($fullName) . $deletedBadge . '</div>
+                                <small class="text-muted">@' . e($username) . $verifiedIcon . '</small>
+                            </div>
+                        </div>';
+                })
+                ->addColumn('contact', function ($user) {
+                    return '
+                        <div>
+                            <div class="small"><i class="fe fe-mail me-1 text-muted"></i>' . e($user->email) . '</div>
+                            <div class="small text-muted"><i class="fe fe-phone me-1"></i>' . e($user->phone ?? '—') . '</div>
+                        </div>';
+                })
+                ->addColumn('stats', function ($user) {
+                    $earnings = Order::where('seller_id', $user->id)
+                        ->where('status', 'completed')
+                        ->sum('seller_earnings');
+
+                    return '
+                    <div class="d-flex gap-3 justify-content-center">
+                        <div class="text-center">
+                            <div class="fw-bold text-primary">' . ($user->gigs_count ?? 0) . '</div>
+                            <small class="text-muted">Gigs</small>
+                        </div>
+                        <div class="text-center">
+                            <div class="fw-bold text-info">' . ($user->seller_orders_count ?? 0) . '</div>
+                            <small class="text-muted">Orders</small>
+                        </div>
+                        <div class="text-center">
+                            <div class="fw-bold text-success">$' . number_format($earnings, 0) . '</div>
+                            <small class="text-muted">Earned</small>
+                        </div>
+                    </div>';
+                })
+                ->addColumn('status', function ($user) {
+                    $map = [
+                        'active'    => 'success',
+                        'inactive'  => 'secondary',
+                        'suspended' => 'danger',
+                    ];
+                    $color = $map[$user->status] ?? 'secondary';
+                    return '<span class="badge bg-' . $color . ' p-2">' . ucfirst($user->status) . '</span>';
+                })
+                ->addColumn('joined_at', function ($user) {
+                    return '<small>' . $user->created_at->format('M d, Y') . '<br>'
+                        . $user->created_at->format('h:i A') . '</small>';
+                })
+                ->addColumn('action', function ($user) {
+                    $viewBtn = '<a href="' . route('admin.experts.show', $user->id) . '"
+                        class="btn btn-primary btn-sm me-1" title="View Profile">
+                        <i class="fe fe-eye"></i>
+                    </a>';
+
+                    $statusBtn = '';
+                    if (!$user->deleted_at) {
+                        $statusBtn = '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-info btn-sm dropdown-toggle"
+                                    data-bs-toggle="dropdown" title="Change Status">
+                                <i class="fe fe-settings"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#"
+                                    onclick="changeExpertStatus(' . $user->id . ', \'active\')">
+                                    <i class="fe fe-check-circle text-success me-2"></i>Set Active</a></li>
+                                <li><a class="dropdown-item" href="#"
+                                    onclick="changeExpertStatus(' . $user->id . ', \'inactive\')">
+                                    <i class="fe fe-pause-circle text-secondary me-2"></i>Set Inactive</a></li>
+                                <li><a class="dropdown-item" href="#"
+                                    onclick="changeExpertStatus(' . $user->id . ', \'suspended\')">
+                                    <i class="fe fe-slash text-danger me-2"></i>Suspend</a></li>
+                            </ul>
+                        </div>';
+                    }
+
+                    return '<div class="d-flex">' . $viewBtn . $statusBtn . '</div>';
+                })
+                ->rawColumns(['expert_info', 'contact', 'stats', 'status', 'joined_at', 'action'])
+                ->make(true);
+        }
+    }
+
+    /**
+     * Show expert details — full dashboard
      */
     public function show($id)
     {
         $expert = User::role('expert')
+            ->withTrashed()
             ->with([
                 'profile',
-                'education',
+                'educations',
                 'certifications',
                 'experiences',
-                'gigs' => function ($query) {
-                    $query->latest();
-                },
-                'sellerOrders' => function ($query) {
-                    $query->latest();
-                },
-                'reviews'
             ])
             ->findOrFail($id);
 
+        // Core stats
         $stats = [
-            'total_gigs' => $expert->gigs()->count(),
-            'active_gigs' => $expert->gigs()->active()->count(),
-            'total_orders' => $expert->sellerOrders()->count(),
-            'active_orders' => $expert->sellerOrders()->active()->count(),
-            'completed_orders' => $expert->sellerOrders()->completed()->count(),
-            'total_earnings' => $expert->sellerOrders()->completed()->sum('seller_earnings'),
-            'average_rating' => $expert->getAverageRating(),
-            'total_reviews' => $expert->getTotalReviews(),
+            'total_gigs'       => $expert->gigs()->count(),
+            'active_gigs'      => $expert->gigs()->where('status', 'active')->count(),
+            'pending_gigs'     => $expert->gigs()->where('status', 'pending_approval')->count(),
+            'total_orders'     => Order::where('seller_id', $id)->count(),
+            'active_orders'    => Order::where('seller_id', $id)->whereIn('status', ['active', 'delivered', 'revision_requested'])->count(),
+            'completed_orders' => Order::where('seller_id', $id)->where('status', 'completed')->count(),
+            'cancelled_orders' => Order::where('seller_id', $id)->where('status', 'cancelled')->count(),
+            'total_earnings'   => Order::where('seller_id', $id)->where('status', 'completed')->sum('seller_earnings'),
+            'pending_earnings' => Order::where('seller_id', $id)->whereIn('status', ['active', 'delivered'])->sum('seller_earnings'),
+            'avg_rating'       => DB::table('order_reviews')->where('reviewed_user_id', $id)->avg('rating') ?? 0,
+            'total_reviews'    => DB::table('order_reviews')->where('reviewed_user_id', $id)->count(),
         ];
 
-        return view('admin.experts.show', compact('expert', 'stats'));
+        // Recent gigs (last 5)
+        $recentGigs = $expert->gigs()
+            ->with(['category', 'subCategory'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Recent orders (last 8)
+        $recentOrders = Order::where('seller_id', $id)
+            ->with(['gig:id,title', 'buyer:id'])
+            ->latest()
+            ->take(8)
+            ->get();
+
+        // Recent reviews (last 5)
+        $recentReviews = DB::table('order_reviews')
+            ->join('users as reviewers', 'order_reviews.reviewer_id', '=', 'reviewers.id')
+            ->join('gigs', 'order_reviews.gig_id', '=', 'gigs.id')
+            ->where('order_reviews.reviewed_user_id', $id)
+            ->select(
+                'order_reviews.*',
+                'reviewers.email as reviewer_email',
+                'gigs.title as gig_title'
+            )
+            ->latest('order_reviews.created_at')
+            ->take(5)
+            ->get();
+
+        // Orders per month (last 6 months) — for chart
+        $ordersChart = Order::where('seller_id', $id)
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total, SUM(seller_earnings) as earnings")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Order status breakdown — for doughnut chart
+        $statusBreakdown = Order::where('seller_id', $id)
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
+        return view('backend.layouts.users.experts.show', compact(
+            'expert',
+            'stats',
+            'recentGigs',
+            'recentOrders',
+            'recentReviews',
+            'ordersChart',
+            'statusBreakdown'
+        ));
     }
 
     /**
@@ -90,190 +286,126 @@ class ExpertManageController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
-            'status' => 'required|in:active,inactive,suspended',
-            'reason' => 'required_if:status,suspended|nullable|string|max:500',
-        ]);
+        try {
+            $request->validate([
+                'status' => 'required|in:active,inactive,suspended',
+                'reason' => 'required_if:status,suspended|nullable|string|max:500',
+            ]);
 
-        $expert = User::role('expert')->findOrFail($id);
+            $expert = User::role('expert')->findOrFail($id);
+            $expert->update(['status' => $request->status]);
 
-        $expert->update([
-            'status' => $request->status,
-        ]);
-
-        // If suspended, you might want to log the reason
-        if ($request->status === 'suspended' && $request->filled('reason')) {
-            // Log suspension reason (you can create a separate table for this)
-            activity()
-                ->performedOn($expert)
-                ->causedBy(auth()->user())
-                ->withProperties(['reason' => $request->reason])
-                ->log('Expert suspended');
+            return response()->json([
+                'success' => true,
+                'message' => 'Expert status updated successfully',
+                'status'  => $request->status,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Expert status update error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update status: ' . $e->getMessage(),
+            ], 500);
         }
-
-        return redirect()
-            ->back()
-            ->with('success', 'Expert status updated successfully');
     }
 
     /**
-     * Delete expert
+     * Soft delete
      */
     public function destroy($id)
     {
         $expert = User::role('expert')->findOrFail($id);
 
-        // Check if expert has active orders
-        if ($expert->sellerOrders()->active()->exists()) {
-            return redirect()
-                ->back()
-                ->with('error', 'Cannot delete expert with active orders');
+        if (Order::where('seller_id', $id)->whereIn('status', ['active', 'delivered', 'revision_requested'])->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete expert with active orders',
+            ], 422);
         }
 
-        // Soft delete
         $expert->delete();
-
-        return redirect()
-            ->route('admin.experts.index')
-            ->with('success', 'Expert deleted successfully');
+        return response()->json(['success' => true, 'message' => 'Expert deleted successfully']);
     }
 
     /**
-     * Restore deleted expert
+     * Restore soft-deleted expert
      */
     public function restore($id)
     {
         $expert = User::role('expert')->onlyTrashed()->findOrFail($id);
         $expert->restore();
-
-        return redirect()
-            ->back()
-            ->with('success', 'Expert restored successfully');
+        return response()->json(['success' => true, 'message' => 'Expert restored successfully']);
     }
 
     /**
-     * Permanently delete expert
+     * Force delete
      */
     public function forceDelete($id)
     {
         $expert = User::role('expert')->onlyTrashed()->findOrFail($id);
-
-        // This will cascade delete all related data
         $expert->forceDelete();
-
-        return redirect()
-            ->route('admin.experts.index')
-            ->with('success', 'Expert permanently deleted');
+        return response()->json(['success' => true, 'message' => 'Expert permanently deleted']);
     }
 
     /**
-     * Export experts
+     * Export experts CSV
      */
     public function export(Request $request)
     {
-        $query = User::role('expert')->with('profile');
+        try {
+            $query = User::role('expert')->with('profile');
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $experts = $query->get();
-
-        $filename = 'experts_' . date('Y-m-d_His') . '.csv';
-
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ];
-
-        $callback = function () use ($experts) {
-            $file = fopen('php://output', 'w');
-
-            // Headers
-            fputcsv($file, [
-                'ID',
-                'Name',
-                'Email',
-                'Phone',
-                'Username',
-                'Status',
-                'Total Gigs',
-                'Total Orders',
-                'Total Earnings',
-                'Joined Date'
-            ]);
-
-            // Data
-            foreach ($experts as $expert) {
-                fputcsv($file, [
-                    $expert->id,
-                    $expert->profile->full_name ?? 'N/A',
-                    $expert->email,
-                    $expert->phone ?? 'N/A',
-                    $expert->profile->username ?? 'N/A',
-                    $expert->status,
-                    $expert->gigs()->count(),
-                    $expert->sellerOrders()->count(),
-                    number_format($expert->sellerOrders()->completed()->sum('seller_earnings'), 2),
-                    $expert->created_at->format('Y-m-d'),
-                ]);
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+            if ($request->filled('show_deleted') && $request->show_deleted === 'true') {
+                $query->withTrashed();
             }
 
-            fclose($file);
-        };
+            $experts  = $query->get();
+            $filename = 'experts_' . date('Y-m-d_His') . '.csv';
+            $headers  = [
+                'Content-Type'        => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            ];
 
-        return response()->stream($callback, 200, $headers);
+            $callback = function () use ($experts) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, ['ID', 'Name', 'Email', 'Phone', 'Username', 'Status', 'Total Gigs', 'Total Orders', 'Total Earnings', 'Joined Date', 'Deleted']);
+                foreach ($experts as $expert) {
+                    $profile = $expert->profile;
+                    fputcsv($file, [
+                        $expert->id,
+                        $profile ? trim($profile->first_name . ' ' . ($profile->last_name ?? '')) : 'N/A',
+                        $expert->email,
+                        $expert->phone ?? 'N/A',
+                        $profile->username ?? 'N/A',
+                        $expert->status,
+                        $expert->gigs()->count(),
+                        Order::where('seller_id', $expert->id)->count(),
+                        number_format(Order::where('seller_id', $expert->id)->where('status', 'completed')->sum('seller_earnings'), 2),
+                        $expert->created_at->format('Y-m-d'),
+                        $expert->deleted_at ? 'Yes' : 'No',
+                    ]);
+                }
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        } catch (Exception $e) {
+            Log::error('Expert export error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to export experts');
+        }
     }
 
-    /**
-     * Show expert's gigs
-     */
+    // Sub-page methods (gigs, orders, earnings) remain in their respective views via DataTables
     public function gigs($id)
-    {
-        $expert = User::role('expert')->findOrFail($id);
-
-        $gigs = $expert->gigs()
-            ->with(['category', 'subCategory'])
-            ->latest()
-            ->paginate(20);
-
-        return view('admin.experts.gigs', compact('expert', 'gigs'));
+    { /* handled in show dashboard */
     }
-
-    /**
-     * Show expert's orders
-     */
     public function orders($id)
-    {
-        $expert = User::role('expert')->findOrFail($id);
-
-        $orders = $expert->sellerOrders()
-            ->with(['gig', 'buyer'])
-            ->latest()
-            ->paginate(20);
-
-        return view('admin.experts.orders', compact('expert', 'orders'));
+    { /* handled in show dashboard */
     }
-
-    /**
-     * Show expert's earnings
-     */
     public function earnings($id)
-    {
-        $expert = User::role('expert')->findOrFail($id);
-
-        $earnings = $expert->earnings()
-            ->with('order.gig')
-            ->latest()
-            ->paginate(20);
-
-        $stats = [
-            'total_earnings' => $expert->earnings()->sum('net_amount'),
-            'available_balance' => $expert->available_balance,
-            'pending_clearance' => $expert->pending_clearance,
-            'withdrawn' => $expert->earnings()->where('status', 'withdrawn')->sum('net_amount'),
-        ];
-
-        return view('admin.experts.earnings', compact('expert', 'earnings', 'stats'));
+    { /* handled in show dashboard */
     }
 }

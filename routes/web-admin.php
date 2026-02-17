@@ -33,7 +33,6 @@ use App\Http\Controllers\Web\Backend\SubscriberController;
 use App\Http\Controllers\Web\Backend\User\ClientManageController;
 use App\Http\Controllers\Web\Backend\User\ExpertManageController;
 use App\Http\Controllers\Web\Backend\User\LanguageManageController;
-use App\Http\Controllers\Web\Backend\User\UserManageController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
@@ -113,6 +112,7 @@ Route::group(['prefix' => 'languages', 'as' => 'languages.'], function () {
 */
 Route::prefix('experts')->name('experts.')->group(function () {
     Route::get('/', [ExpertManageController::class, 'index'])->name('index');
+    Route::get('/data', [ExpertManageController::class, 'getData'])->name('data');
     Route::get('/export', [ExpertManageController::class, 'export'])->name('export');
     Route::get('/{id}', [ExpertManageController::class, 'show'])->name('show');
     Route::patch('/{id}/status', [ExpertManageController::class, 'updateStatus'])->name('update-status');
@@ -129,14 +129,16 @@ Route::prefix('experts')->name('experts.')->group(function () {
 // Clients Management
 Route::prefix('clients')->name('clients.')->group(function () {
     Route::get('/', [ClientManageController::class, 'index'])->name('index');
+    Route::get('/data', [ClientManageController::class, 'getData'])->name('data');
     Route::get('/export', [ClientManageController::class, 'export'])->name('export');
     Route::get('/{id}', [ClientManageController::class, 'show'])->name('show');
     Route::patch('/{id}/status', [ClientManageController::class, 'updateStatus'])->name('update-status');
     Route::delete('/{id}', [ClientManageController::class, 'destroy'])->name('destroy');
     Route::post('/{id}/restore', [ClientManageController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/force', [ClientManageController::class, 'forceDelete'])->name('force-delete');
 
     // Client sub-pages
-    Route::get('/{id}/orders', [ClientManageController::class, 'orders'])->name('orders');
+    Route::get('/{id}/orders', [ClientManageController::class, 'orders'])->name('orders'); // NOT WORKING, NEEDS FIXING
 });
 
 

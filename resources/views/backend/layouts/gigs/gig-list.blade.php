@@ -17,6 +17,7 @@
                         <ol class="breadcrumb">
                             {{-- <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li> --}}
                             <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                            <span>&nbsp; &gt&gt &nbsp;</span>
                             <li class="breadcrumb-item active" aria-current="page">Gigs</li>
                         </ol>
                     </div>
@@ -125,75 +126,110 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="filter-card">
-                            <div class="row align-items-end g-3">
-                                <div class="col-md-3">
-                                    <label class="form-label">Search</label>
-                                    <input type="text" id="searchFilter" class="form-control"
-                                        placeholder="Search by title, seller...">
+
+                            {{-- Filter Header (Toggle Button) --}}
+                            <div class="d-flex justify-content-between align-items-center filter-toggle-header"
+                                id="filterToggleBtn" style="cursor:pointer;" onclick="toggleFilterBody()">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fe fe-filter text-primary fs-16"></i>
+                                    <span class="fw-600 text-dark fs-14">Filters & Search</span>
+                                    <span id="activeFilterBadge" class="badge bg-primary d-none">Active</span>
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Category</label>
-                                    <select class="form-select select3" id="categoryFilter">
-                                        <option value="">All Categories</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Sub-Category</label>
-                                    <select class="form-select select3" id="subCategoryFilter">
-                                        <option value="">All Sub-Categories</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Status</label>
-                                    <select class="form-select select3" id="statusFilter">
-                                        <option value="">All Status</option>
-                                        <option value="draft">Draft</option>
-                                        <option value="pending_approval">Pending Approval</option>
-                                        <option value="active">Active</option>
-                                        <option value="rejected">Rejected</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Price Range</label>
-                                    <div class="input-group">
-                                        <input type="number" id="minPrice" class="form-control" placeholder="Min">
-                                        <input type="number" id="maxPrice" class="form-control" placeholder="Max">
-                                    </div>
-                                </div>
-                                <div class="col-md-1">
-                                    <button type="button" class="btn btn-secondary w-100" id="resetFilter">
-                                        <i class="fe fe-refresh-cw"></i>
-                                    </button>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted fs-12" id="filterCollapseHint">Click to expand</span>
+                                    <i class="fe fe-chevron-down text-muted fs-18 filter-chevron" id="filterChevron"
+                                        style="transition: transform 0.3s ease;"></i>
                                 </div>
                             </div>
-                            <div class="row mt-3 align-items-end g-3">
-                                <div class="col-md-2">
-                                    <label class="form-label">Max Delivery Days</label>
-                                    <input type="number" id="maxDeliveryDays" class="form-control"
-                                        placeholder="e.g., 7">
+
+                            {{-- Collapsible Body --}}
+                            <div id="filterBody" style="display:none; margin-top: 16px;">
+                                <hr class="mt-0 mb-3">
+
+                                {{-- Row 1 --}}
+                                <div class="row align-items-end g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Search</label>
+                                        <input type="text" id="searchFilter" class="form-control"
+                                            placeholder="Search by title, seller...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Category</label>
+                                        <select class="form-select select3" id="categoryFilter">
+                                            <option value="">All Categories</option>
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Sub-Category</label>
+                                        <select class="form-select select3" id="subCategoryFilter">
+                                            <option value="">All Sub-Categories</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Status</label>
+                                        <select class="form-select select3" id="statusFilter">
+                                            <option value="">All Status</option>
+                                            <option value="draft">Draft</option>
+                                            <option value="pending_approval">Pending Approval</option>
+                                            <option value="active">Active</option>
+                                            <option value="rejected">Rejected</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Price Range</label>
+                                        <div class="input-group">
+                                            <input type="number" id="minPrice" class="form-control" placeholder="Min">
+                                            <input type="number" id="maxPrice" class="form-control" placeholder="Max">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <label class="form-label d-block">&nbsp;</label>
+                                        <button type="button"
+                                            class="btn btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center p-2"
+                                            id="resetFilter" title="Reset Filters">
+                                            <i class="fe fe-refresh-cw"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Date From</label>
-                                    <input type="text" class="form-control datepicker2" id="dateFrom"
-                                        placeholder="Created from...">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Date To</label>
-                                    <input type="text" class="form-control datepicker2" id="dateTo"
-                                        placeholder="Created to...">
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="showDeletedFilter">
-                                        <label class="form-check-label" for="showDeletedFilter">
-                                            Show Deleted Gigs
+
+                                {{-- Row 2 --}}
+                                <div class="row mt-3 align-items-end g-3">
+                                    <div class="col-md-2">
+                                        <label class="form-label">Max Delivery Days</label>
+                                        <input type="number" id="maxDeliveryDays" class="form-control"
+                                            placeholder="e.g., 7">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Date From</label>
+                                        <input type="text" class="form-control datepicker2" id="dateFrom"
+                                            placeholder="Created from...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Date To</label>
+                                        <input type="text" class="form-control datepicker2" id="dateTo"
+                                            placeholder="Created to...">
+                                    </div>
+
+                                    {{-- Show Deleted Gigs - Big Toggle Style --}}
+                                    <div class="col-md-4">
+                                        <label class="form-label d-block">Deleted Gigs</label>
+                                        <label class="deleted-toggle-label" for="showDeletedFilter">
+                                            <input type="checkbox" id="showDeletedFilter" class="deleted-toggle-input">
+                                            <span class="deleted-toggle-track">
+                                                <span class="deleted-toggle-thumb"></span>
+                                            </span>
+                                            <span class="deleted-toggle-text">
+                                                <i class="fe fe-trash-2 me-1"></i>
+                                                <span id="deletedToggleText">Show Deleted Gigs</span>
+                                            </span>
                                         </label>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -455,7 +491,7 @@
             } else {
                 $('#rejectionReasonSection').hide();
                 $('#confirmMessage').show().text(
-                `Are you sure you want to change status to "${status.replace('_', ' ')}"?`);
+                    `Are you sure you want to change status to "${status.replace('_', ' ')}"?`);
             }
 
             $('#statusModal').modal('show');
@@ -533,6 +569,65 @@
             }
         }
     </script>
+
+    <script>
+        /* ---------- Filter Collapse ---------- */
+        function toggleFilterBody() {
+            const body = document.getElementById('filterBody');
+            const chevron = document.getElementById('filterChevron');
+            const hint = document.getElementById('filterCollapseHint');
+            const isOpen = body.style.display !== 'none';
+
+            if (isOpen) {
+                $(body).slideUp(250);
+                chevron.classList.remove('open');
+                hint.textContent = 'Click to expand';
+            } else {
+                $(body).slideDown(250);
+                chevron.classList.add('open');
+                hint.textContent = 'Click to collapse';
+            }
+        }
+
+        /* ---------- Deleted Toggle Styling ---------- */
+        document.getElementById('showDeletedFilter').addEventListener('change', function() {
+            const label = this.closest('.deleted-toggle-label');
+            const text = document.getElementById('deletedToggleText');
+
+            if (this.checked) {
+                label.classList.add('active');
+                text.textContent = 'Hiding Deleted Gigs'; // visually confirm OFF
+                // keep the original wording if preferred:
+                text.textContent = 'Show Deleted Gigs';
+            } else {
+                label.classList.remove('active');
+                text.textContent = 'Show Deleted Gigs';
+            }
+        });
+
+        /* ---------- Active Filter Badge ---------- */
+        function checkActiveFilters() {
+            const filters = ['searchFilter', 'categoryFilter', 'subCategoryFilter',
+                'statusFilter', 'minPrice', 'maxPrice', 'maxDeliveryDays',
+                'dateFrom', 'dateTo'
+            ];
+            const hasValue = filters.some(id => $('#' + id).val());
+            const deleted = $('#showDeletedFilter').is(':checked');
+            const badge = document.getElementById('activeFilterBadge');
+            badge.classList.toggle('d-none', !hasValue && !deleted);
+        }
+
+        // Watch filter changes for badge
+        $('#searchFilter').on('keyup', checkActiveFilters);
+        $('#categoryFilter, #subCategoryFilter, #statusFilter, #minPrice, #maxPrice, #maxDeliveryDays, #dateFrom, #dateTo, #showDeletedFilter')
+            .on('change', checkActiveFilters);
+
+        $('#resetFilter').on('click', function() {
+            document.getElementById('activeFilterBadge').classList.add('d-none');
+            document.querySelector('.deleted-toggle-label').classList.remove('active');
+            document.getElementById('deletedToggleText').textContent = 'Show Deleted Gigs';
+        });
+    </script>
 @endpush
 
 @push('styles')
@@ -591,6 +686,114 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+    </style>
+@endpush
+
+{{-- ==================== STYLES ==================== --}}
+@push('styles')
+    <style>
+        /* ---- Filter Card ---- */
+        .filter-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px 20px;
+            /* margin-bottom: 10px; */
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .filter-toggle-header {
+            padding: 4px 0;
+            user-select: none;
+        }
+
+        .filter-toggle-header:hover .fe-chevron-down {
+            color: #007bff !important;
+        }
+
+        .filter-chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .filter-card .form-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #495057;
+            margin-bottom: 6px;
+        }
+
+        /* ---- Show Deleted Toggle Switch ---- */
+        .deleted-toggle-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 5px 16px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            background: #f8f9fa;
+            transition: border-color 0.25s, background 0.25s;
+            user-select: none;
+            min-width: 220px;
+        }
+
+        .deleted-toggle-label:hover {
+            border-color: #adb5bd;
+            background: #f1f3f5;
+        }
+
+        .deleted-toggle-input {
+            display: none;
+        }
+
+        /* Track */
+        .deleted-toggle-track {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: #ced4da;
+            border-radius: 50px;
+            flex-shrink: 0;
+            transition: background 0.25s;
+        }
+
+        /* Thumb */
+        .deleted-toggle-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+            transition: left 0.25s;
+        }
+
+        /* Checked state */
+        .deleted-toggle-input:checked~.deleted-toggle-track {
+            background: #17a2b8;
+        }
+
+        .deleted-toggle-input:checked~.deleted-toggle-track .deleted-toggle-thumb {
+            left: 25px;
+        }
+
+        /* Label is sibling of input — use JS to handle checked class on label */
+        .deleted-toggle-label.active {
+            border-color: #17a2b8;
+            background: #e8f7f9;
+        }
+
+        .deleted-toggle-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .deleted-toggle-label.active .deleted-toggle-text {
+            color: #17a2b8;
         }
     </style>
 @endpush

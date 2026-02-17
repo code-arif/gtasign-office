@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en" dir="ltr">
+
 <head>
     <!-- META DATA -->
     <meta charset="UTF-8">
@@ -15,13 +16,13 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset(settings()->favicon ?? 'default/favicon.png') }}" />
 
     <!-- TITLE -->
-    <title>{{ config('app.name') }} - {{ $title ?? settings()->title ?? '' }}</title>
+    {{-- <title>{{ config('app.name') }} - {{ $title ?? settings()->title ?? '' }}</title> --}}
+    <title> {{ config('app.name') }} - @yield('title')</title>
     <!-- Scripts -->
 
     <script>
-
-    window.authUserId = {{ auth()->id() ?? 'null' }};
-</script>
+        window.authUserId = {{ auth()->id() ?? 'null' }};
+    </script>
 
     @vite(['resources/js/app.js'])
 

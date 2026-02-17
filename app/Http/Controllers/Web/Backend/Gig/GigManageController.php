@@ -139,7 +139,7 @@ class GigManageController extends Controller
                 ->addColumn('gig_info', function ($data) {
                     $primaryImage = $data->images->first();
                     $imageUrl = $primaryImage
-                        ? asset('storage/' . $primaryImage->path)
+                        ? asset('/' . $primaryImage->path)
                         : asset('default/no_image.webp');
 
                     $isDeleted = $data->deleted_at ? '<span class="badge bg-danger ms-2">Deleted</span>' : '';

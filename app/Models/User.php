@@ -90,6 +90,14 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * Relationship: Certifications Table
+     */
+    public function certifications()
+    {
+        return $this->hasMany(Certification::class);
+    }
+
+    /**
      * Relationship: Experiences Table
      */
     public function experiences()
@@ -124,5 +132,21 @@ class User extends Authenticatable implements JWTSubject
     public function scopeSuspended($query)
     {
         return $query->where('status', 'suspended');
+    }
+
+    // Relationships
+    public function gigs()
+    {
+        return $this->hasMany(Gig::class, 'user_id');
+    }
+
+    public function sellerOrders()
+    {
+        return $this->hasMany(Order::class, 'seller_id');
+    }
+
+    public function buyerOrders()
+    {
+        return $this->hasMany(Order::class, 'buyer_id');
     }
 }

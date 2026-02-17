@@ -15,7 +15,9 @@
                             <ol class="breadcrumb">
                                 {{-- <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li> --}}
                                 <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <span>&nbsp; &gt&gt &nbsp;</span>
                                 <li class="breadcrumb-item"><a href="{{ route('admin.gigs.index') }}">Gigs</a></li>
+                                <span>&nbsp; &gt&gt &nbsp;</span>
                                 <li class="breadcrumb-item active" aria-current="page">Details</li>
                             </ol>
                         </nav>
@@ -286,10 +288,10 @@
                                         @foreach ($gig->images as $image)
                                             <div class="col-md-3 col-sm-6">
                                                 <div class="gig-image-wrapper">
-                                                    <img src="{{ asset('storage/' . $image->path) }}"
+                                                    <img src="{{ asset('/' . $image->path) }}"
                                                         class="img-fluid rounded-1 gig-thumbnail" alt="Gig Image"
                                                         data-bs-toggle="modal" data-bs-target="#imageModal"
-                                                        onclick="showImageModal('{{ asset('storage/' . $image->path) }}')">
+                                                        onclick="showImageModal('{{ asset('/' . $image->path) }}')">
                                                     @if ($image->is_primary)
                                                         <span class="badge bg-success primary-badge">Primary</span>
                                                     @endif

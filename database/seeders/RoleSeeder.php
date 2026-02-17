@@ -8,52 +8,54 @@ use Spatie\Permission\Models\Permission;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create roles
+        // Create roles for BOTH guards
         $roles = [
-            ['name' => 'admin',  'guard' => 'web'],
-            ['name' => 'expert', 'guard' => 'web'],   // ← add this for admin panel
-            ['name' => 'client', 'guard' => 'web'],   // ← add this
-            ['name' => 'expert', 'guard' => 'api'],   // keep original for API
-            ['name' => 'client', 'guard' => 'api'],   // keep original
+            // Web guard — admin panel use করে
+            ['name' => 'admin',  'guard_name' => 'web'],
+            ['name' => 'expert', 'guard_name' => 'web'],
+            ['name' => 'client', 'guard_name' => 'web'],
+
+            // API guard — mobile/API use করে
+            ['name' => 'expert', 'guard_name' => 'api'],
+            ['name' => 'client', 'guard_name' => 'api'],
         ];
 
-        foreach ($roles as $r) {
+        foreach ($roles as $role) {
             Role::firstOrCreate(
-                ['name' => $r['name'], 'guard_name' => $r['guard']],
-                ['name' => $r['name'], 'guard_name' => $r['guard']]
+                ['name' => $role['name'], 'guard_name' => $role['guard_name']]
             );
         }
 
-        $this->command->info('Roles created successfully!');
+        $this->command->info('✅ Roles created for web & api guards.');
 
-        // Optional: Create some basic permissions
+        // Permissions (web guard only — admin panel এ লাগবে)
         $permissions = [
-            // User Management
             'view users',
             'create users',
             'edit users',
             'delete users',
+            'view gigs',
+            'edit gigs',
+            'delete gigs',
+            'view orders',
+            'manage orders',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        $this->command->info('Permissions created successfully!');
+        $this->command->info('✅ Permissions created.');
 
-        // Assign permissions to roles
-        $admin = Role::findByName('admin');
-        $admin->givePermissionTo(Permission::all());
+        // Admin কে সব permission দাও
+        $admin = Role::where('name', 'admin')->where('guard_name', 'web')->first();
+        $admin->syncPermissions(Permission::where('guard_name', 'web')->get());
 
-
-        $this->command->info('Permissions assigned to roles successfully!');
+        $this->command->info('✅ All permissions assigned to admin role.');
     }
 }
