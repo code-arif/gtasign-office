@@ -47,7 +47,7 @@ class ExpertManageController extends Controller
 
         $experts = $query->latest()->paginate(20);
 
-        return view('admin.experts.index', compact('experts'));
+        return view('backend.layouts.users.experts.index', compact('experts'));
     }
 
     /**
