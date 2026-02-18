@@ -1,22 +1,23 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Foundation\Application;
 use App\Http\Middleware\ApiAdminMiddleware;
-use App\Http\Middleware\WebAdminMiddleware;
 use App\Http\Middleware\ApiCustomerMiddleware;
+use App\Http\Middleware\ApiOtpVerifiedMiddleware;
+use App\Http\Middleware\WebAdminMiddleware;
 use App\Http\Middleware\WebAuthCheckMiddleware;
 use App\Http\Middleware\WebDeveloperMiddleware;
-use Illuminate\Session\Middleware\StartSession;
-use Spatie\Permission\Middleware\RoleMiddleware;
-use App\Http\Middleware\ApiOtpVerifiedMiddleware;
 use App\Http\Middleware\WebOtpVerifiedMiddleware;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Spatie\Permission\Middleware\PermissionMiddleware;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schedule;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -85,4 +86,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 ],
             ], 403);
         });
-    })->create();
+    })
+    // ->withSchedule(function (Schedule $schedule) {
+    //     $schedule->command('orders:auto-complete')->everyMinute();
+    //     $schedule->command('escrow:release')->everyMinute();
+    // })
+    ->withCommands([
+        // Register custom commands directory
+        __DIR__ . '/../app/Console/Commands',
+    ])
+    ->create();

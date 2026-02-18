@@ -17,6 +17,7 @@ use App\Http\Controllers\Web\Backend\FaqController;
 use App\Http\Controllers\Web\Backend\Gig\CategoryManageController;
 use App\Http\Controllers\Web\Backend\Gig\GigManageController;
 use App\Http\Controllers\Web\Backend\Gig\TagManageController;
+use App\Http\Controllers\Web\Backend\QA\QaManageController;
 use App\Http\Controllers\Web\Backend\Settings\CaptchaController;
 use App\Http\Controllers\Web\Backend\Settings\EnvController;
 use App\Http\Controllers\Web\Backend\Settings\FirebaseController;
@@ -139,6 +140,17 @@ Route::prefix('clients')->name('clients.')->group(function () {
 
     // Client sub-pages
     Route::get('/{id}/orders', [ClientManageController::class, 'orders'])->name('orders'); // NOT WORKING, NEEDS FIXING
+});
+
+// ────────────────────────────────────────────────────────────────
+// ADMIN — QA PANEL
+// ────────────────────────────────────────────────────────────────
+Route::prefix('qa')->name('qa.')->group(function () {
+    Route::get('/',[QaManageController::class, 'index'])->name('index');
+    Route::get('/data',[QaManageController::class, 'getData'])->name('data');
+    Route::get('/{reviewId}',[QaManageController::class, 'show'])->name('show');
+    Route::post('/{reviewId}/approve',[QaManageController::class, 'approve'])->name('approve');
+    Route::post('/{reviewId}/reject',[QaManageController::class, 'reject'])->name('reject');
 });
 
 

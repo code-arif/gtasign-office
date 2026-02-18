@@ -80,6 +80,31 @@
                     </ul>
                 </li>
 
+                {{-- Manage Order --}}
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.qa.*') ? 'has-link active' : '' }}"
+                        data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fa-brands fa-first-order"></i>
+                        <span class="side-menu__label">Manage Order</span>
+                        <i class="angle fa fa-angle-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.qa.index') }}"
+                                class="slide-item {{ request()->routeIs('admin.qa.index') ? 'active' : '' }}"> QA
+                                Request
+                            </a>
+                        </li>
+                        <li><a href="{{ route('admin.qa.index') }}"
+                                class="slide-item {{ request()->routeIs('admin.qa.index') ? 'active' : '' }}"> All Orders
+                            </a>
+                        </li>
+                        <li><a href="{{ route('admin.qa.index') }}"
+                                class="slide-item {{ request()->routeIs('admin.qa.index') ? 'active' : '' }}"> Extension Requests
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.cms.privecyandterms.*') ? 'has-link active' : '' }}"
                         data-bs-toggle="slide" href="#">

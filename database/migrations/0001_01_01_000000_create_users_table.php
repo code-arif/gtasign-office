@@ -23,6 +23,9 @@ return new class extends Migration
             $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
             $table->timestamp('email_verified_at')->nullable();
 
+            $table->decimal('available_balance', 10, 2)->default(0);
+            $table->decimal('pending_clearance', 10, 2)->default(0);
+
             $table->boolean('is_agreed')->default(false);
 
             $table->rememberToken();

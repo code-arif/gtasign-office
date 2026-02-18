@@ -440,7 +440,7 @@
                                         <div class="flex-grow-1 overflow-hidden">
                                             <div class="fw-semibold text-truncate">{{ $eName }}</div>
                                             <small class="text-muted">
-                                                @{{ $ep ? - > username ?? Str::before($expert - > email, '@') }}
+                                                {{ $ep?->username ?? Str::before($expert->email, '@') }}
                                             </small>
                                         </div>
                                         <div class="text-end flex-shrink-0">

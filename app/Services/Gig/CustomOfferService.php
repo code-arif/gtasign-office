@@ -2,11 +2,14 @@
 
 namespace App\Services\Gig;
 
-use Exception;
-use App\Models\Room;
 use App\Models\Chat;
-use App\Models\User;
 use App\Models\CustomOffer;
+use App\Models\Order;
+use App\Models\OrderActivity;
+use App\Models\Room;
+use App\Models\User;
+use App\Services\Payment\StripePaymentService;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class CustomOfferService
@@ -131,11 +134,72 @@ class CustomOfferService
     /**
      * Accept custom offer (Client accepts)
      */
-    public function acceptOffer(int $offerId, int $clientId)
+    // public function acceptOffer(int $offerId, int $clientId)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $offer = CustomOffer::with(['expert', 'client', 'room'])
+    //             ->where('id', $offerId)
+    //             ->where(function ($q) use ($clientId) {
+    //                 $q->where('expert_id', $clientId)->orWhere('client_id', $clientId);
+    //             })
+    //             ->first();
+
+    //         if (!$offer) {
+    //             throw new Exception('Offer not found');
+    //         }
+
+    //         // Validate client is the recipient
+    //         if ($offer->client_id !== $clientId) {
+    //             throw new Exception('Unauthorized to accept this offer');
+    //         }
+
+    //         // Check if offer can be accepted
+    //         if (!$offer->canAccept()) {
+    //             throw new Exception('Offer cannot be accepted (expired or already responded)');
+    //         }
+
+    //         // Update offer status
+    //         $offer->update([
+    //             'status' => 'accepted',
+    //             'accepted_at' => now(),
+    //         ]);
+
+    //         // Send acceptance message
+    //         Chat::create([
+    //             'sender_id' => $clientId,
+    //             'receiver_id' => $offer->expert_id,
+    //             'room_id' => $offer->room_id,
+    //             'type' => 'offer_accepted',
+    //             'custom_offer_id' => $offer->id,
+    //             'text' => "Accepted your custom offer: {$offer->title}",
+    //         ]);
+
+    //         // Update room
+    //         $offer->room->update(['last_message_at' => now()]);
+
+    //         DB::commit();
+
+    //         return $offer->fresh(['gig', 'expert.profile', 'client.profile', 'room']);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         throw $e;
+    //     }
+    // }
+
+
+    /**
+     * Accept custom offer — creates the order and Stripe checkout in one step.
+     *
+     * Returns array with offer, order details, and Stripe checkout URL.
+     * The order stays in 'pending_payment' until Stripe webhook confirms payment.
+     */
+    public function acceptOffer(int $offerId, int $clientId): array
     {
         DB::beginTransaction();
         try {
-            $offer = CustomOffer::with(['expert', 'client', 'room'])
+            // ── 1. Load and validate offer ────────────────────────────────
+            $offer = CustomOffer::with(['expert', 'client', 'room', 'gig'])
                 ->where('id', $offerId)
                 ->where(function ($q) use ($clientId) {
                     $q->where('expert_id', $clientId)->orWhere('client_id', $clientId);
@@ -146,43 +210,87 @@ class CustomOfferService
                 throw new Exception('Offer not found');
             }
 
-            // Validate client is the recipient
             if ($offer->client_id !== $clientId) {
                 throw new Exception('Unauthorized to accept this offer');
             }
 
-            // Check if offer can be accepted
             if (!$offer->canAccept()) {
                 throw new Exception('Offer cannot be accepted (expired or already responded)');
             }
 
-            // Update offer status
+            // ── 2. Mark offer as accepted ─────────────────────────────────
             $offer->update([
-                'status' => 'accepted',
+                'status'      => 'accepted',
                 'accepted_at' => now(),
             ]);
 
-            // Send acceptance message
-            Chat::create([
-                'sender_id' => $clientId,
-                'receiver_id' => $offer->expert_id,
-                'room_id' => $offer->room_id,
-                'type' => 'offer_accepted',
-                'custom_offer_id' => $offer->id,
-                'text' => "Accepted your custom offer: {$offer->title}",
+            // ── 3. Create order in pending_payment state ──────────────────
+            $price          = $offer->price;
+            $platformFee    = round($price * 0.10, 2);
+            $sellerEarnings = $price - $platformFee;
+
+            $order = Order::create([
+                'gig_id'              => $offer->gig_id,
+                'custom_offer_id'     => $offer->id,
+                'buyer_id'            => $clientId,
+                'seller_id'           => $offer->expert_id,
+                'room_id'             => $offer->room_id,
+                'price'               => $price,
+                'platform_fee'        => $platformFee,
+                'seller_earnings'     => $sellerEarnings,
+                'delivery_days'       => $offer->delivery_days,
+                'expected_delivery_at' => now()->addDays($offer->delivery_days),
+                'max_revisions'       => $offer->revisions,
+                'requirements'        => $offer->description,
+                'status'              => 'pending_payment',
             ]);
 
-            // Update room
+            // Mark offer as converted
+            $offer->update(['status' => 'converted_to_order']);
+
+            // ── 4. Chat message (order placed) ────────────────────────────
+            Chat::create([
+                'sender_id'   => $clientId,
+                'receiver_id' => $offer->expert_id,
+                'room_id'     => $offer->room_id,
+                'type'        => 'order_placed',
+                'order_id'    => $order->id,
+                'text'        => "Order placed from custom offer: {$offer->title} — #{$order->order_number}",
+                'metadata'    => [
+                    'order_id'     => $order->id,
+                    'order_number' => $order->order_number,
+                    'price'        => $order->price,
+                ],
+            ]);
+
             $offer->room->update(['last_message_at' => now()]);
+
+            OrderActivity::create([
+                'order_id'    => $order->id,
+                'user_id'     => $clientId,
+                'type'        => 'order_placed',
+                'description' => 'Order created from accepted custom offer. Awaiting payment.',
+            ]);
+
+            // ── 5. Create Stripe Checkout Session ─────────────────────────
+            $stripeService = app(StripePaymentService::class);
+            $checkout      = $stripeService->createCheckoutSession($order);
 
             DB::commit();
 
-            return $offer->fresh(['gig', 'expert.profile', 'client.profile', 'room']);
+            return [
+                'offer'        => $offer->fresh(['gig', 'expert.profile', 'client.profile', 'room']),
+                'order_id'     => $order->id,
+                'order_number' => $order->order_number,
+                'checkout_url' => $checkout['checkout_url'],
+                'expires_at'   => $checkout['expires_at'],
+            ];
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }
     }
+
 
     /**
      * Reject custom offer

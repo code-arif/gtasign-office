@@ -22,9 +22,11 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('avatar')->nullable();
 
+            $table->string('stripe_account_id')->nullable();
+            $table->timestamp('stripe_onboarded_at')->nullable();
+
             $table->timestamps();
         });
-
     }
 
     public function down(): void

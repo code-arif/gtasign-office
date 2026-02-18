@@ -2,22 +2,25 @@
 
 namespace App\Services\Gig;
 
-use Exception;
-use App\Models\Gig;
-use App\Models\Room;
-use App\Models\Chat;
-use App\Models\Order;
 use App\Helpers\Helper;
+use App\Models\Chat;
 use App\Models\CustomOffer;
+use App\Models\ExtensionRequest;
+use App\Models\Gig;
+use App\Models\Order;
 use App\Models\OrderActivity;
 use App\Models\OrderDelivery;
-use App\Models\SellerEarning;
 use App\Models\OrderQaReview;
-use App\Models\ExtensionRequest;
+use App\Models\Room;
+use App\Models\SellerEarning;
+use App\Services\Payment\EscrowService;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class InboxOrderService
 {
+    public function __construct(protected EscrowService $escrowService) {}
+
     /**
      * Create order from custom offer
      */
@@ -602,11 +605,97 @@ class InboxOrderService
     /**
      * Accept delivery (Client - after QA approval)
      */
-    public function acceptDelivery(int $orderId, int $buyerId)
+    // public function acceptDelivery(int $orderId, int $buyerId)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $order = Order::with(['room', 'latestDelivery', 'earning', 'seller'])->find($orderId);
+
+    //         if (!$order) {
+    //             throw new Exception('Order not found');
+    //         }
+
+    //         if (!$order->isOwnedByBuyer($buyerId)) {
+    //             throw new Exception('Unauthorized');
+    //         }
+
+    //         if (!$order->canAccept()) {
+    //             throw new Exception('Cannot accept delivery');
+    //         }
+
+    //         // Update latest delivery
+    //         $latestDelivery = $order->latestDelivery;
+    //         if ($latestDelivery) {
+    //             $latestDelivery->update([
+    //                 'status' => 'accepted',
+    //                 'client_reviewed_at' => now(),
+    //             ]);
+    //         }
+
+    //         // Update order
+    //         $order->update([
+    //             'status' => 'completed',
+    //             'completed_at' => now(),
+    //         ]);
+
+    //         // Move earning to clearing (14 days hold)
+    //         $earning = $order->earning;
+    //         if ($earning) {
+    //             $availableAt = now()->addDays(14);
+
+    //             $earning->update([
+    //                 'status' => 'clearing',
+    //                 'available_at' => $availableAt,
+    //             ]);
+
+    //             // Update seller pending clearance
+    //             $order->seller->increment('pending_clearance', $earning->net_amount);
+    //         }
+
+    //         // Send message
+    //         Chat::create([
+    //             'sender_id' => $buyerId,
+    //             'receiver_id' => $order->seller_id,
+    //             'room_id' => $order->room_id,
+    //             'type' => 'order_completed',
+    //             'order_id' => $orderId,
+    //             'text' => "Order completed successfully - #{$order->order_number}",
+    //         ]);
+
+    //         $order->room->update(['last_message_at' => now()]);
+
+    //         // Check if room has other active orders
+    //         $hasActiveOrders = Order::where('room_id', $order->room_id)
+    //             ->whereIn('status', ['active', 'qa_pending', 'delivered'])
+    //             ->exists();
+
+    //         $order->room->update(['has_active_order' => $hasActiveOrders]);
+
+    //         OrderActivity::create([
+    //             'order_id' => $orderId,
+    //             'user_id' => $buyerId,
+    //             'type' => 'order_completed',
+    //             'description' => 'Order completed by buyer',
+    //         ]);
+
+    //         DB::commit();
+
+    //         return $order->fresh(['gig', 'buyer.profile', 'seller.profile', 'room', 'latestDelivery']);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         throw $e;
+    //     }
+    // }
+
+    /**
+     * Accept delivery (Client — after QA approval)
+     * UPDATED to use EscrowService for proper escrow handling
+     */
+    public function acceptDelivery(int $orderId, int $buyerId): Order
     {
         DB::beginTransaction();
         try {
-            $order = Order::with(['room', 'latestDelivery', 'earning', 'seller'])->find($orderId);
+            $order = Order::with(['room', 'latestDelivery', 'seller'])->find($orderId);
 
             if (!$order) {
                 throw new Exception('Order not found');
@@ -616,52 +705,45 @@ class InboxOrderService
                 throw new Exception('Unauthorized');
             }
 
+            // Order must be in 'delivered' status (QA approved → sent to client)
             if (!$order->canAccept()) {
-                throw new Exception('Cannot accept delivery');
+                throw new Exception('Cannot accept delivery — order must be in delivered status');
             }
 
-            // Update latest delivery
+            // Update delivery
             $latestDelivery = $order->latestDelivery;
             if ($latestDelivery) {
                 $latestDelivery->update([
-                    'status' => 'accepted',
+                    'status'             => 'accepted',
                     'client_reviewed_at' => now(),
                 ]);
             }
 
-            // Update order
+            // Complete the order
             $order->update([
-                'status' => 'completed',
-                'completed_at' => now(),
+                'status'           => 'completed',
+                'completed_at'     => now(),
+                'auto_complete_at' => null,
             ]);
 
-            // Move earning to clearing (14 days hold)
-            $earning = $order->earning;
-            if ($earning) {
-                $availableAt = now()->addDays(14);
+            // ── Start 14-day escrow clearing via EscrowService ───────────
+            $holdDays = config('orders.escrow_hold_days', 14);
+            $this->escrowService->startClearingPeriod($order->id, $holdDays);
+            // ─────────────────────────────────────────────────────────────
 
-                $earning->update([
-                    'status' => 'clearing',
-                    'available_at' => $availableAt,
-                ]);
-
-                // Update seller pending clearance
-                $order->seller->increment('pending_clearance', $earning->net_amount);
-            }
-
-            // Send message
+            // System message
             Chat::create([
-                'sender_id' => $buyerId,
+                'sender_id'   => $buyerId,
                 'receiver_id' => $order->seller_id,
-                'room_id' => $order->room_id,
-                'type' => 'order_completed',
-                'order_id' => $orderId,
-                'text' => "Order completed successfully - #{$order->order_number}",
+                'room_id'     => $order->room_id,
+                'type'        => 'order_completed',
+                'order_id'    => $orderId,
+                'text'        => "Order #{$order->order_number} completed successfully! Payment will be released to expert in {$holdDays} days.",
             ]);
 
             $order->room->update(['last_message_at' => now()]);
 
-            // Check if room has other active orders
+            // Check for other active orders in this room
             $hasActiveOrders = Order::where('room_id', $order->room_id)
                 ->whereIn('status', ['active', 'qa_pending', 'delivered'])
                 ->exists();
@@ -669,10 +751,10 @@ class InboxOrderService
             $order->room->update(['has_active_order' => $hasActiveOrders]);
 
             OrderActivity::create([
-                'order_id' => $orderId,
-                'user_id' => $buyerId,
-                'type' => 'order_completed',
-                'description' => 'Order completed by buyer',
+                'order_id'    => $orderId,
+                'user_id'     => $buyerId,
+                'type'        => 'order_completed',
+                'description' => 'Order accepted by client. Escrow period started.',
             ]);
 
             DB::commit();

@@ -101,7 +101,45 @@ class CustomOfferController extends Controller
 
     /**
      * Accept custom offer (Client accepts)
+     * POST v1/api/inbox/custom-offers/{offerId}/accept
+     */
+    // public function accept(int $offerId)
+    // {
+    //     try {
+    //         $user = auth('api')->user();
+
+    //         if (!$user->hasRole('client')) {
+    //             return $this->error(
+    //                 null,
+    //                 'Only clients can accept custom offers',
+    //                 403
+    //             );
+    //         }
+
+    //         // Accept offer
+    //         $offer = $this->customOfferService->acceptOffer($offerId, $user->id);
+
+    //         return $this->success(
+    //             'Custom offer accepted successfully',
+    //             ['offer' => new CustomOfferResource($offer)]
+    //         );
+    //     } catch (Exception $e) {
+    //         Log::error('Accept offer error: ' . $e->getMessage());
+
+    //         return $this->error(
+    //             ['exception' => $e->getMessage()],
+    //             $e->getMessage(),
+    //             $e->getMessage() === 'Offer not found' ? 404 : (in_array($e->getMessage(), ['Unauthorized to accept this offer', 'Offer cannot be accepted (expired or already responded)']) ? 400 : 500)
+    //         );
+    //     }
+    // }
+
+    /**
+     * Accept custom offer — creates order + returns Stripe checkout URL
      * POST /api/inbox/custom-offers/{offerId}/accept
+     *
+     * Response gives frontend the checkout_url to redirect the client to Stripe.
+     * After payment, webhook activates the order automatically.
      */
     public function accept(int $offerId)
     {
@@ -109,28 +147,33 @@ class CustomOfferController extends Controller
             $user = auth('api')->user();
 
             if (!$user->hasRole('client')) {
-                return $this->error(
-                    null,
-                    'Only clients can accept custom offers',
-                    403
-                );
+                return $this->error(null, 'Only clients can accept custom offers', 403);
             }
 
-            // Accept offer
-            $offer = $this->customOfferService->acceptOffer($offerId, $user->id);
+            // 1. Accept the offer + auto-create order + get checkout URL
+            $result = $this->customOfferService->acceptOffer($offerId, $user->id);
 
             return $this->success(
-                'Custom offer accepted successfully',
-                ['offer' => new CustomOfferResource($offer)]
+                'Offer accepted. Please complete payment to activate your order.',
+                [
+                    'offer'        => new CustomOfferResource($result['offer']),
+                    'order_id'     => $result['order_id'],
+                    'order_number' => $result['order_number'],
+                    'checkout_url' => $result['checkout_url'],   // ← Redirect client here
+                    'expires_at'   => $result['expires_at'],     // Checkout session expiry
+                ]
             );
         } catch (Exception $e) {
             Log::error('Accept offer error: ' . $e->getMessage());
 
-            return $this->error(
-                ['exception' => $e->getMessage()],
-                $e->getMessage(),
-                $e->getMessage() === 'Offer not found' ? 404 : (in_array($e->getMessage(), ['Unauthorized to accept this offer', 'Offer cannot be accepted (expired or already responded)']) ? 400 : 500)
-            );
+            $status = match ($e->getMessage()) {
+                'Offer not found'                                         => 404,
+                'Unauthorized to accept this offer',
+                'Offer cannot be accepted (expired or already responded)' => 400,
+                default                                                   => 500,
+            };
+
+            return $this->error(['exception' => $e->getMessage()], $e->getMessage(), $status);
         }
     }
 

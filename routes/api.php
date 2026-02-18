@@ -22,6 +22,8 @@ use App\Http\Controllers\Api\Gig\GigTagController;
 use App\Http\Controllers\Api\Inbox\CustomOfferController;
 use App\Http\Controllers\Api\Inbox\InboxController;
 use App\Http\Controllers\Api\Inbox\InboxOrderController;
+use App\Http\Controllers\Api\Payment\PaymentController;
+use App\Http\Controllers\Api\Payment\StripeConnectController;
 use App\Http\Controllers\Api\User\Profile\CertificateController;
 use App\Http\Controllers\Api\User\Profile\EducationController;
 use App\Http\Controllers\Api\User\Profile\UserExperienceController;
@@ -177,10 +179,12 @@ Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
 
     // Custom offers
     Route::prefix('custom-offers')->group(function () {
-        Route::post('/create', [CustomOfferController::class, 'create']); // Create offer
-        Route::post('/{offerId}/withdraw', [CustomOfferController::class, 'withdraw']); // Withdraw offer
-        Route::post('/{offerId}/accept', [CustomOfferController::class, 'accept']); // Accept offer
-        Route::post('/{offerId}/reject', [CustomOfferController::class, 'reject']); // Reject offer
+        Route::post('/create', [CustomOfferController::class, 'create']); // DONE: Create offer
+        Route::post('/{offerId}/withdraw', [CustomOfferController::class, 'withdraw']); // DONE: Withdraw offer
+
+        // Client actions on received offers
+        Route::post('/{offerId}/accept', [CustomOfferController::class, 'accept']); // DONE: Accept offer
+        Route::post('/{offerId}/reject', [CustomOfferController::class, 'reject']); // DONE: Reject offer
         // Route::get('/room/{roomId}', [CustomOfferController::class, 'roomOffers']); // Room offers
     });
 
@@ -199,6 +203,36 @@ Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
         // Extension responses
         Route::post('/extensions/{extensionId}/respond', [InboxOrderController::class, 'respondToExtension']); // DONE: Respond to extension
     });
+});
+
+// ────────────────────────────────────────────────────────────────
+// PAYMENTS (Client-facing)
+// ────────────────────────────────────────────────────────────────
+Route::prefix('v1/payment')->group(function () {
+    // Create checkout session for an order → returns Stripe URL
+    // Route::post('/checkout/{orderId}', [PaymentController::class, 'createCheckout']);
+
+    // Verify payment success (called after Stripe redirect)
+    Route::post('/verify', [PaymentController::class, 'verifyPayment']);
+
+    // LOCAL TEST ONLY (disabled in production)
+    Route::post('/test/simulate-success/{orderId}', [PaymentController::class, 'simulatePaymentSuccess']);
+});
+
+
+// ────────────────────────────────────────────────────────────────
+// EXPERT — STRIPE CONNECT + WALLET
+// ────────────────────────────────────────────────────────────────
+Route::prefix('v1/expert')->group(function () {
+    // Stripe Connect onboarding
+    Route::post('/stripe/connect', [StripeConnectController::class, 'connect']);
+    Route::get('/stripe/status', [StripeConnectController::class, 'status']);
+    Route::get('/stripe/dashboard', [StripeConnectController::class, 'dashboard']);
+
+    // Wallet & Withdrawals
+    Route::get('/wallet', [StripeConnectController::class, 'wallet']);
+    Route::post('/wallet/withdraw', [StripeConnectController::class, 'withdraw']);
+    Route::get('/wallet/withdrawals', [StripeConnectController::class, 'withdrawalHistory']);
 });
 
 
