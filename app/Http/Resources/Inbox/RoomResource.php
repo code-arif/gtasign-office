@@ -17,6 +17,8 @@ class RoomResource extends JsonResource
                 'username' => $this->other_user?->profile?->username,
                 'avatar' => $this->other_user?->profile?->avatar ? asset('storage/' . $this->other_user?->profile?->avatar) : asset('default/profile.jpg'),
                 // 'is_online' => $this->other_user->isOnline(),
+                'is_online' => false, // TODO: Implement online status
+                'pinned' => false, // TODO: Implement pinned status 
             ],
             'has_active_order' => $this->has_active_order,
             'unread_count' => $this->unread_count,

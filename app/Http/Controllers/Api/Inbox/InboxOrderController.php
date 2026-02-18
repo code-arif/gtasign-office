@@ -109,35 +109,43 @@ class InboxOrderController extends Controller
      * Mark order as paid (called after payment gateway success)
      * POST /api/inbox/orders/{orderId}/mark-paid
      */
-    public function markPaid(Request $request, int $orderId)
-    {
-        try {
-            $user = auth('api')->user();
+    // public function markPaid(Request $request, int $orderId)
+    // {
+    //     try {
+    //         $user = auth('api')->user();
 
-            // This should be called from payment webhook/callback
-            // For now, accepting payment data from request
-            $paymentData = [
-                'payment_method' => $request->input('payment_method', 'stripe'),
-                'payment_intent_id' => $request->input('payment_intent_id'),
-            ];
+    //         if (!$user->hasRole('client')) {
+    //             return $this->error(
+    //                 null,
+    //                 'Only clients can mark orders as paid',
+    //                 403
+    //             );
+    //         }
 
-            // Mark as paid
-            $order = $this->inboxOrderService->markOrderAsPaid($orderId, $paymentData);
+    //         // This should be called from payment webhook/callback
+    //         // For now, accepting payment data from request
+    //         $paymentData = [
+    //             'payment_method' => $request->input('payment_method', 'stripe'),
+    //             'payment_intent_id' => $request->input('payment_intent_id'),
+    //         ];
 
-            return $this->success(
-                'Payment successful. Order is now active.',
-                ['order' => new OrderInboxResource($order)]
-            );
-        } catch (Exception $e) {
-            Log::error('Mark order paid error: ' . $e->getMessage());
+    //         // Mark as paid
+    //         $order = $this->inboxOrderService->markOrderAsPaid($orderId, $paymentData);
 
-            return $this->error(
-                ['exception' => $e->getMessage()],
-                $e->getMessage(),
-                $e->getMessage() === 'Order not found' ? 404 : 400
-            );
-        }
-    }
+    //         return $this->success(
+    //             'Payment successful. Order is now active.',
+    //             ['order' => new OrderInboxResource($order)]
+    //         );
+    //     } catch (Exception $e) {
+    //         Log::error('Mark order paid error: ' . $e->getMessage());
+
+    //         return $this->error(
+    //             ['exception' => $e->getMessage()],
+    //             $e->getMessage(),
+    //             $e->getMessage() === 'Order not found' ? 404 : 400
+    //         );
+    //     }
+    // }
 
     /**
      * Submit delivery for QA review (Expert)

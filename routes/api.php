@@ -171,9 +171,9 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
 */
 Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
     // Main inbox
-    Route::get('/', [InboxController::class, 'index']); // Get inbox list
-    Route::get('/conversation/{roomId}', [InboxController::class, 'conversation']); // Get conversation
-    Route::post('/send/{receiverId}', [InboxController::class, 'sendMessage']); // Send message
+    Route::get('/', [InboxController::class, 'index']); // DONE: Get inbox list
+    Route::get('/conversation/{roomId}', [InboxController::class, 'conversation']); // DONE: Get conversation
+    Route::post('/send/{receiverId}', [InboxController::class, 'sendMessage']); // DONE: Send message
     // Route::post('/start/{userId}', [InboxController::class, 'startConversation']); // Start conversation
     Route::post('/{roomId}/mark-read', [InboxController::class, 'markAsRead']); // Mark as read (PROBLEM)
 
@@ -190,19 +190,28 @@ Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
 
     // Orders
     Route::prefix('orders')->group(function () {
-        Route::post('/create-from-offer/{offerId}', [InboxOrderController::class, 'createFromOffer']); // DONE: Order from offer
-        Route::post('/create-from-gig/{gigId}', [InboxOrderController::class, 'createFromGig']); // Order from gig (PROBLEM)
-        Route::post('/{orderId}/mark-paid', [InboxOrderController::class, 'markPaid']); // Mark as paid
+        // Route::post('/create-from-offer/{offerId}', [InboxOrderController::class, 'createFromOffer']); // DONE: Order from offer
+        // Route::post('/{orderId}/mark-paid', [InboxOrderController::class, 'markPaid']); // Mark as paid
         Route::post('/{orderId}/submit-delivery', [InboxOrderController::class, 'submitDelivery']); // Submit delivery
 
-        Route::post('/{orderId}/request-extension', [InboxOrderController::class, 'requestExtension']); // DONE: Request extension
         Route::post('/{orderId}/request-revision', [InboxOrderController::class, 'requestRevision']); // Request revision
         Route::post('/{orderId}/accept-delivery', [InboxOrderController::class, 'acceptDelivery']); // Accept delivery
         Route::get('/{orderId}', [InboxOrderController::class, 'show']); // Order details
 
-        // Extension responses
+        // Extension request & responses
+        Route::post('/{orderId}/request-extension', [InboxOrderController::class, 'requestExtension']); // DONE: Request extension
         Route::post('/extensions/{extensionId}/respond', [InboxOrderController::class, 'respondToExtension']); // DONE: Respond to extension
     });
+});
+
+
+// ────────────────────────────────────────────────────────────────
+// Ordder and payment from gig
+// ────────────────────────────────────────────────────────────────
+Route::middleware(['auth:api'])->prefix('v1/order/client')->group(function () {
+    Route::post('/create-from-gig/{gigId}', [InboxOrderController::class, 'createFromGig']); // DONE: Order from gig
+    Route::post('/{orderId}/checkout', [PaymentController::class, 'createCheckout']); // DONE: Mark as paid
+    Route::post('/{orderId}/submit-delivery', [InboxOrderController::class, 'submitDelivery']); // Submit delivery
 });
 
 // ────────────────────────────────────────────────────────────────

@@ -12,7 +12,7 @@ use App\Models\OrderActivity;
 use App\Models\OrderDelivery;
 use App\Models\OrderQaReview;
 use App\Models\Room;
-use App\Models\SellerEarning;
+use App\Models\SellerEarnings;
 use App\Services\Payment\EscrowService;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -232,75 +232,75 @@ class InboxOrderService
     /**
      * Mark order as paid (after payment gateway)
      */
-    public function markOrderAsPaid(int $orderId, array $paymentData = [])
-    {
-        DB::beginTransaction();
-        try {
-            $order = Order::with(['gig', 'room', 'buyer', 'seller'])->find($orderId);
+    // public function markOrderAsPaid(int $orderId, array $paymentData = [])
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $order = Order::with(['gig', 'room', 'buyer', 'seller'])->find($orderId);
 
-            if (!$order) {
-                throw new Exception('Order not found');
-            }
+    //         if (!$order) {
+    //             throw new Exception('Order not found');
+    //         }
 
-            if ($order->status !== 'pending_payment') {
-                throw new Exception('Order is not pending payment');
-            }
+    //         if ($order->status !== 'pending_payment') {
+    //             throw new Exception('Order is not pending payment');
+    //         }
 
-            // Update order
-            $order->update([
-                'status' => 'active',
-                'paid_at' => now(),
-                'started_at' => now(),
-                'funds_in_escrow' => true,
-                'payment_method' => $paymentData['payment_method'] ?? 'stripe',
-                'payment_intent_id' => $paymentData['payment_intent_id'] ?? null,
-            ]);
+    //         // Update order
+    //         $order->update([
+    //             'status' => 'active',
+    //             'paid_at' => now(),
+    //             'started_at' => now(),
+    //             'funds_in_escrow' => true,
+    //             'payment_method' => $paymentData['payment_method'] ?? 'stripe',
+    //             'payment_intent_id' => $paymentData['payment_intent_id'] ?? null,
+    //         ]);
 
-            // Increment gig orders
-            if ($order->gig_id) {
-                $order->gig->increment('orders');
-            }
+    //         // Increment gig orders
+    //         if ($order->gig_id) {
+    //             $order->gig->increment('orders');
+    //         }
 
-            // Create earning record (in pending status)
-            SellerEarning::create([
-                'seller_id' => $order->seller_id,
-                'order_id' => $orderId,
-                'gross_amount' => $order->price,
-                'platform_fee' => $order->platform_fee,
-                'net_amount' => $order->seller_earnings,
-                'status' => 'pending',
-            ]);
+    //         // Create earning record (in pending status)
+    //         SellerEarnings::create([
+    //             'seller_id' => $order->seller_id,
+    //             'order_id' => $orderId,
+    //             'gross_amount' => $order->price,
+    //             'platform_fee' => $order->platform_fee,
+    //             'net_amount' => $order->seller_earnings,
+    //             'status' => 'pending',
+    //         ]);
 
-            // Update room
-            $order->room->update(['has_active_order' => true]);
+    //         // Update room
+    //         $order->room->update(['has_active_order' => true]);
 
-            // Send system message
-            Chat::create([
-                'sender_id' => $order->buyer_id,
-                'receiver_id' => $order->seller_id,
-                'room_id' => $order->room_id,
-                'type' => 'system',
-                'order_id' => $orderId,
-                'text' => "Payment received. Order #{$order->order_number} is now active.",
-            ]);
+    //         // Send system message
+    //         Chat::create([
+    //             'sender_id' => $order->buyer_id,
+    //             'receiver_id' => $order->seller_id,
+    //             'room_id' => $order->room_id,
+    //             'type' => 'system',
+    //             'order_id' => $orderId,
+    //             'text' => "Payment received. Order #{$order->order_number} is now active.",
+    //         ]);
 
-            $order->room->update(['last_message_at' => now()]);
+    //         $order->room->update(['last_message_at' => now()]);
 
-            OrderActivity::create([
-                'order_id' => $orderId,
-                'user_id' => null,
-                'type' => 'payment_received',
-                'description' => 'Payment received, order activated',
-            ]);
+    //         OrderActivity::create([
+    //             'order_id' => $orderId,
+    //             'user_id' => null,
+    //             'type' => 'payment_received',
+    //             'description' => 'Payment received, order activated',
+    //         ]);
 
-            DB::commit();
+    //         DB::commit();
 
-            return $order->fresh(['gig', 'buyer.profile', 'seller.profile', 'room']);
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
+    //         return $order->fresh(['gig', 'buyer.profile', 'seller.profile', 'room']);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         throw $e;
+    //     }
+    // }
 
     /**
      * Submit delivery for QA review
