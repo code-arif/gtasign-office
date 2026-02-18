@@ -126,7 +126,7 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
     Route::group(['prefix' => 'educations'], function () {
         Route::get('/', [EducationController::class, 'index']);
         Route::post('/store', [EducationController::class, 'store']);
-        Route::post('/update/{id}', [EducationController::class, 'update']);
+        Route::post('/update', [EducationController::class, 'update']);
         Route::delete('/delete/{id}', [EducationController::class, 'destroy']);
     });
 
