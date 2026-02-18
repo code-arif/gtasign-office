@@ -134,7 +134,7 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
     Route::group(['prefix' => 'certifications'], function () {
         Route::get('/', [CertificateController::class, 'index']);
         Route::post('/store', [CertificateController::class, 'store']);
-        Route::post('/update/{id}', [CertificateController::class, 'update']);
+        Route::post('/update', [CertificateController::class, 'update']);
         Route::delete('/delete/{id}', [CertificateController::class, 'destroy']);
     });
 
@@ -142,7 +142,7 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
     Route::group(['prefix' => 'skills'], function () {
         Route::get('/', [UserExperienceController::class, 'index']);
         Route::post('/store', [UserExperienceController::class, 'store']);
-        Route::post('/update/{id}', [UserExperienceController::class, 'update']);
+        Route::post('/update', [UserExperienceController::class, 'update']);
         Route::delete('/delete/{id}', [UserExperienceController::class, 'destroy']);
     });
 
