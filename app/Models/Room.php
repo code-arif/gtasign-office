@@ -9,6 +9,8 @@ class Room extends Model
 {
     use HasFactory;
 
+    protected $appends = ['other_user', 'last_message'];
+
     protected $fillable = [
         'first_user_id',
         'second_user_id',
@@ -151,15 +153,15 @@ class Room extends Model
      */
     // public function getOtherUser(int $userId)
     // {
-    //     if ($this->first_user_id == $userId) {
-    //         return $this->secondUser;
+    //     $authId = auth('api')->id();
+
+    //     if (!$authId) {
+    //         return null;
     //     }
 
-    //     if ($this->second_user_id == $userId) {
-    //         return $this->firstUser;
-    //     }
-
-    //     return null;
+    //     return $this->first_user_id == $authId
+    //         ? $this->secondUser
+    //         : $this->firstUser;
     // }
 
     public function getOtherUserAttribute()
@@ -174,6 +176,15 @@ class Room extends Model
             ? $this->secondUser
             : $this->firstUser;
     }
+
+    /**
+     * Get the last message in the room
+     */
+    public function getLastMessageAttribute()
+    {
+        return $this->latestMessage;
+    }
+
 
 
     /**
@@ -199,6 +210,23 @@ class Room extends Model
     {
         return $this->update(['last_message_at' => now()]);
     }
+
+    /*
+    * Relationship for last message
+    */
+    // public function lastMessage()
+    // {
+    //     return $this->hasOne(Chat::class, 'room_id')->latestOfMany();
+    // }
+
+    /**
+     * Accessor for last message
+     */
+    // public function getLastMessageAttribute()
+    // {
+    //     return $this->lastMessage;
+    // }
+
 
     /**
      * Update room order status

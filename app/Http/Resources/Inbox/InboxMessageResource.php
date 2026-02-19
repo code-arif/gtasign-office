@@ -19,6 +19,7 @@ class InboxMessageResource extends JsonResource
             'sender' => [
                 'id' => $this->sender?->id,
                 'name' => $this->sender->profile?->first_name . ' ' . $this->sender->profile?->last_name,
+                'role'=> $this->sender->role,
                 'avatar' => $this->sender->profile?->avatar ? asset('storage/' . $this->sender->profile?->avatar) : asset('default/profile.jpg'),
             ],
             'metadata' => $this->metadata,

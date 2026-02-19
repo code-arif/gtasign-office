@@ -181,7 +181,7 @@ class InboxService
         $room->load(['firstUser.profile', 'secondUser.profile']);
 
         // Get other user details
-        $otherUser = $room->getOtherUser($userId);
+        $otherUser = $room->getOtherUserAttribute($userId);
 
         return [
             'room' => $room,
