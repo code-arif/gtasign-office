@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             TagsSeeder::class,
             LanguageSeeder::class,
             GigSeeder::class,
-            GigImageSeeder::class,
+            // GigImageSeeder::class,
             GigTagSeeder::class,
         ]);
 
