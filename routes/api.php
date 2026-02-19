@@ -235,8 +235,8 @@ Route::prefix('v1/payment')->group(function () {
 // ────────────────────────────────────────────────────────────────
 Route::prefix('v1/expert')->group(function () {
     // Stripe Connect onboarding
-    Route::post('/stripe/connect', [StripeConnectController::class, 'connect']);
-    Route::get('/stripe/status', [StripeConnectController::class, 'status']);
+    Route::post('/stripe/connect', [StripeConnectController::class, 'connect']); // DONE: Connect Stripe account
+    Route::get('/stripe/status', [StripeConnectController::class, 'status']); // DONE: Check Stripe connection status
     Route::get('/stripe/dashboard', [StripeConnectController::class, 'dashboard']);
 
     // Wallet & Withdrawals
