@@ -39,7 +39,7 @@ class InboxService
 
         // Add unread count and other user info to each room
         $rooms->getCollection()->transform(function ($room) use ($userId) {
-            $room->other_user = $room->getOtherUser($userId);
+            $room->other_user = $room->getOtherUserAttribute($userId);
             $room->unread_count = $room->getUnreadCount($userId);
             return $room;
         });
