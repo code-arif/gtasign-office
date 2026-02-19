@@ -35,31 +35,52 @@ class StripeConnectController extends Controller
         try {
             $user = auth('api')->user();
 
+            if (!$user) {
+                return $this->error([], 'User not authenticated.', 404);
+            }
+
             if (!$user->hasRole('expert')) {
                 return $this->error(null, 'Only experts can connect Stripe accounts', 403);
             }
 
             $stripeAccountId = $user->profile?->stripe_account_id;
 
-            // Create account if doesn't exist
+            // ── Create new account if none exists ──────────────────────
             if (!$stripeAccountId) {
                 $stripeAccountId = $this->stripeService->createConnectAccount($user);
             }
 
-            // Generate onboarding link
-            $onboardingUrl = $this->stripeService->createConnectOnboardingLink(
-                $stripeAccountId,
-                $user->id
-            );
+            // ── If already fully onboarded → return dashboard link ─────
+            if ($this->stripeService->isConnectAccountReady($stripeAccountId)) {
+                $dashboardUrl = $this->stripeService->getConnectDashboardLink($stripeAccountId);
 
-            return $this->success('Stripe onboarding link generated', [
-                'onboarding_url'  => $onboardingUrl,
-                'stripe_account'  => $stripeAccountId,
-                'is_connected'    => false,
+                return $this->success('Stripe account already connected', [
+                    'onboarding_url' => null,
+                    'dashboard_url'  => $dashboardUrl,
+                    'stripe_account' => $stripeAccountId,
+                    'is_connected'   => true,
+                ]);
+            }
+
+            // ── Generate / refresh onboarding link ─────────────────────
+            $onboardingUrl = $this->stripeService->createConnectOnboardingLink($stripeAccountId);
+
+            return $this->success('Stripe onboarding link generated. Complete the onboarding to activate payouts.', [
+                'onboarding_url' => $onboardingUrl,
+                'dashboard_url'  => null,
+                'stripe_account' => $stripeAccountId,
+                'is_connected'   => false,
             ]);
         } catch (Exception $e) {
-            Log::error('Stripe connect error: ' . $e->getMessage());
-            return $this->error(null, 'Failed to initiate Stripe onboarding', 500);
+            Log::error('Stripe connect error: ' . $e->getMessage(), [
+                'user_id' => auth('api')->id(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                'Failed to initiate Stripe onboarding: ' . $e->getMessage(),
+                500
+            );
         }
     }
 
@@ -70,14 +91,14 @@ class StripeConnectController extends Controller
     public function status()
     {
         try {
-            $user            = auth('api')->user();
+            $user = auth('api')->user();
             $stripeAccountId = $user->profile?->stripe_account_id;
 
             if (!$stripeAccountId) {
                 return $this->success('Stripe account not connected', [
-                    'is_connected'    => false,
-                    'can_withdraw'    => false,
-                    'stripe_account'  => null,
+                    'is_connected' => false,
+                    'can_withdraw' => false,
+                    'stripe_account' => null,
                 ]);
             }
 
@@ -102,23 +123,34 @@ class StripeConnectController extends Controller
 
     /**
      * Get Stripe Express Dashboard link
-     * GET /api/expert/stripe/dashboard
+     * GET /api/v1/expert/stripe/dashboard
      */
     public function dashboard()
     {
         try {
             $user            = auth('api')->user();
-            $stripeAccountId = $user->profile?->stripe_account_id;
+            $stripeAccountId = $user->stripe_account_id ?? $user->profile?->stripe_account_id;
 
             if (!$stripeAccountId) {
-                return $this->error(null, 'No Stripe account connected', 404);
+                return $this->error(null, 'No Stripe account connected. Please complete onboarding first.', 404);
+            }
+
+            if (!$this->stripeService->isConnectAccountReady($stripeAccountId)) {
+                // Return a fresh onboarding link instead
+                $onboardingUrl = $this->stripeService->createConnectOnboardingLink($stripeAccountId);
+                return $this->error(
+                    ['onboarding_url' => $onboardingUrl],
+                    'Stripe onboarding not complete. Please finish the onboarding process.',
+                    400
+                );
             }
 
             $dashboardUrl = $this->stripeService->getConnectDashboardLink($stripeAccountId);
 
             return $this->success('Dashboard link generated', ['url' => $dashboardUrl]);
         } catch (Exception $e) {
-            return $this->error(null, 'Failed to generate dashboard link', 500);
+            Log::error('Stripe dashboard error: ' . $e->getMessage());
+            return $this->error(null, 'Failed to generate dashboard link: ' . $e->getMessage(), 500);
         }
     }
 
@@ -128,7 +160,7 @@ class StripeConnectController extends Controller
 
     /**
      * Get expert's wallet / earnings summary
-     * GET /api/expert/wallet
+     * GET /api/v1/expert/wallet
      */
     public function wallet()
     {
@@ -150,54 +182,54 @@ class StripeConnectController extends Controller
     {
         try {
             $user   = auth('api')->user();
-            $amount = $request->input('amount');
+            $amount = (float)$request->input('amount');
 
             if (!$user->hasRole('expert')) {
                 return $this->error(null, 'Only experts can withdraw earnings', 403);
             }
 
-            // Check Stripe account is ready
-            $stripeAccountId = $user->profile?->stripe_account_id;
-            if (!$stripeAccountId || !$this->stripeService->isConnectAccountReady($stripeAccountId)) {
-                return $this->error(null, 'Please complete Stripe onboarding before withdrawing', 400);
+            $stripeAccountId = $user->stripe_account_id ?? $user->profile?->stripe_account_id;
+
+            if (!$stripeAccountId) {
+                return $this->error(null, 'Please connect your Stripe account first.', 400);
             }
 
-            // Check available balance
-            if ($user->available_balance < $amount) {
+            if (!$this->stripeService->isConnectAccountReady($stripeAccountId)) {
+                return $this->error(null, 'Please complete Stripe onboarding before withdrawing.', 400);
+            }
+
+            $availableBalance = (float)($user->available_balance ?? 0);
+
+            if ($availableBalance < $amount) {
                 return $this->error(
                     null,
-                    "Insufficient balance. Available: \${$user->available_balance}",
+                    "Insufficient balance. Available: \${$availableBalance}",
                     400
                 );
             }
 
-            // Minimum withdrawal: $10
             if ($amount < 10) {
                 return $this->error(null, 'Minimum withdrawal amount is $10', 400);
             }
 
             // Create withdrawal record
-            $fee       = 0; // No platform fee on withdrawal (configurable)
-            $netAmount = $amount - $fee;
-
             DB::beginTransaction();
             $withdrawal = WithdrawalRequest::create([
                 'seller_id'         => $user->id,
                 'withdrawal_number' => 'WD-' . strtoupper(Str::random(10)),
                 'amount'            => $amount,
-                'fee'               => $fee,
-                'net_amount'        => $netAmount,
+                'fee'               => 0,
+                'net_amount'        => $amount,
                 'stripe_account_id' => $stripeAccountId,
                 'status'            => 'pending',
                 'requested_at'      => now(),
             ]);
             DB::commit();
 
-            // Process immediately (or queue for batch processing)
+            // Process via Stripe Transfer
             $withdrawal = $this->escrowService->processWithdrawal($withdrawal->id);
 
-            return $this->success('Withdrawal initiated successfully', [
-                'withdrawal_id'     => $withdrawal->id,
+            return $this->success('Withdrawal initiated. Funds will appear in your Stripe account shortly.', [
                 'withdrawal_number' => $withdrawal->withdrawal_number,
                 'amount'            => $withdrawal->amount,
                 'net_amount'        => $withdrawal->net_amount,

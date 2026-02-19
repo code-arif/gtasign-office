@@ -1,10 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\SocialLoginController;
+use App\Http\Controllers\Api\Payment\StripeCallbackController;
 use App\Http\Controllers\Api\Payment\StripeWebhookController;
 use App\Http\Controllers\Web\Frontend\AffiliateController;
-use App\Http\Controllers\Web\Frontend\HomeController;
 // use App\Http\Controllers\Api\StripeWebhookController as ApiStripeWebhookController;
+use App\Http\Controllers\Web\Frontend\HomeController;
 use App\Http\Controllers\Web\Frontend\SubscriberController;
 use App\Http\Controllers\Web\NotificationController;
 use Illuminate\Support\Facades\Route;
@@ -46,5 +47,11 @@ route::get('{orderId?}/payment/cancel', function ($orderId = null) {
 // Route::post('/webhook/stripe', [ApiStripeWebhookController::class, 'HandlePaymentWebhook']);
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
     ->withoutMiddleware(['auth:api']); // Must exclude auth middleware
+
+Route::prefix('stripe')->name('stripe.')->group(function () {
+    Route::get('/success/{id}', [StripeCallbackController::class, 'success'])->name('success');
+    Route::get('/refresh/{id}', [StripeCallbackController::class, 'refresh'])->name('refresh');
+});
+
 
 // Route::post('/rental/webhook', [RentedPaymentController::class, 'handleWebhook']);

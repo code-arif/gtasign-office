@@ -110,6 +110,11 @@ class Order extends Model
         return $this->hasOne(OrderQaReview::class)->latestOfMany();
     }
 
+    public function activities()
+    {
+        return $this->hasMany(OrderActivity::class)->orderBy('created_at', 'desc');
+    }
+
     public function extensionRequests()
     {
         return $this->hasMany(ExtensionRequest::class);

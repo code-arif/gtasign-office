@@ -14,16 +14,16 @@ class SubmitDeliveryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'message' => 'nullable|string|max:2000',
-            'files' => 'nullable|array|max:5',
-            'files.*' => 'file|mimes:jpg,jpeg,png,pdf,zip,doc,docx,txt|max:10240', // 10MB
+            'message' => 'nullable|string|max:4000',
+            'files' => 'nullable|array|max:10',
+            'files.*' => 'file|mimes:jpg,jpeg,png,pdf,zip,doc,docx,txt|max:102400', // 100MB
         ];
     }
 
     public function messages(): array
     {
         return [
-            'files.max' => 'Maximum 5 files allowed',
+            'files.max' => 'Maximum 10 files allowed',
             'files.*.max' => 'Each file must not exceed 10MB',
         ];
     }

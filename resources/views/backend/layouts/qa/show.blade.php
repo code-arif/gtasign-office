@@ -42,7 +42,7 @@
     @endphp
 
     <div class="app-content main-content mt-0">
-        <div class="side-app pb-5">
+        <div class="side-app pb-5" style="margin-bottom: 40px">
             <div class="main-container container-fluid">
 
                 <!-- PAGE HEADER -->
@@ -64,7 +64,7 @@
 
                 <!-- ── STATUS BANNER ── -->
                 @if ($review->status === 'pending')
-                    <div class="alert alert-warning d-flex align-items-center gap-3 mb-4 shadow-sm">
+                    <div class="alert alert-info d-flex align-items-center gap-3 mb-4 shadow-sm">
                         <i class="fe fe-clock fs-24 flex-shrink-0"></i>
                         <div class="flex-grow-1">
                             <strong>Awaiting Your Review</strong> — This delivery has been submitted by the expert and is
@@ -127,7 +127,7 @@
 
                                 <!-- Expert message -->
                                 @if ($delivery?->message)
-                                    <div class="delivery-message p-3 rounded mb-4">
+                                    <div class="delivery-message p-3 rounded-1 mb-4">
                                         <label class="form-label fw-600 text-muted text-uppercase small mb-2">
                                             <i class="fe fe-message-circle me-1"></i>Expert's Message
                                         </label>
@@ -397,11 +397,11 @@
                                         style="object-fit:cover; border:3px solid #e9ecef;">
                                     <div>
                                         <div class="fw-semibold">{{ $sellerName }}</div>
-                                        <small class="text-muted">@{{ $sellerProfile ? - > username ?? '—' }}</small>
+                                        <small class="text-muted">{{ $sellerProfile?-> username ?? '—' }}</small>
                                     </div>
                                 </div>
                                 <a href="{{ route('admin.experts.show', $order->seller_id) }}"
-                                    class="btn btn-outline-primary btn-sm w-100">
+                                    class="btn btn-outline-primary btn-sm w-100 d-inline-flex align-items-center">
                                     <i class="fe fe-external-link me-1"></i>View Expert Profile
                                 </a>
                             </div>
@@ -418,7 +418,7 @@
                                         style="object-fit:cover; border:3px solid #e9ecef;">
                                     <div>
                                         <div class="fw-semibold">{{ $buyerName }}</div>
-                                        <small class="text-muted">@{{ $buyerProfile ? - > username ?? '—' }}</small>
+                                        <small class="text-muted">{{ $buyerProfile?-> username ?? '—' }}</small>
                                     </div>
                                 </div>
                             </div>

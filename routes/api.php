@@ -192,7 +192,7 @@ Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
     Route::prefix('orders')->group(function () {
         // Route::post('/create-from-offer/{offerId}', [InboxOrderController::class, 'createFromOffer']); // DONE: Order from offer
         // Route::post('/{orderId}/mark-paid', [InboxOrderController::class, 'markPaid']); // Mark as paid
-        Route::post('/{orderId}/submit-delivery', [InboxOrderController::class, 'submitDelivery']); // Submit delivery
+
 
         Route::post('/{orderId}/request-revision', [InboxOrderController::class, 'requestRevision']); // Request revision
         Route::post('/{orderId}/accept-delivery', [InboxOrderController::class, 'acceptDelivery']); // Accept delivery
@@ -208,10 +208,11 @@ Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
 // ────────────────────────────────────────────────────────────────
 // Ordder and payment from gig
 // ────────────────────────────────────────────────────────────────
-Route::middleware(['auth:api'])->prefix('v1/order/client')->group(function () {
-    Route::post('/create-from-gig/{gigId}', [InboxOrderController::class, 'createFromGig']); // DONE: Order from gig
-    Route::post('/{orderId}/checkout', [PaymentController::class, 'createCheckout']); // DONE: Mark as paid
-    Route::post('/{orderId}/submit-delivery', [InboxOrderController::class, 'submitDelivery']); // Submit delivery
+Route::middleware(['auth:api'])->prefix('v1/order')->group(function () {
+    Route::post('/client/create-from-gig/{gigId}', [InboxOrderController::class, 'createFromGig']); // DONE: Order from gig
+    Route::post('/client/{orderId}/checkout', [PaymentController::class, 'createCheckout']); // DONE: Mark as paid
+
+    Route::post('/delivery/{orderId}/submit-delivery-to-qa', [InboxOrderController::class, 'submitDelivery']); // DONE: Submit delivery to qa
 });
 
 // ────────────────────────────────────────────────────────────────
@@ -225,7 +226,7 @@ Route::prefix('v1/payment')->group(function () {
     Route::post('/verify', [PaymentController::class, 'verifyPayment']);
 
     // LOCAL TEST ONLY (disabled in production)
-    Route::post('/test/simulate-success/{orderId}', [PaymentController::class, 'simulatePaymentSuccess']);
+    // Route::post('/test/simulate-success/{orderId}', [PaymentController::class, 'simulatePaymentSuccess']);
 });
 
 

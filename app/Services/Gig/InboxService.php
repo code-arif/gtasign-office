@@ -83,7 +83,7 @@ class InboxService
             ->update(['status' => 'read']);
 
         // Get other user
-        $otherUser = $room->getOtherUser($userId);
+        $otherUser = $room->getOtherUserAttribute($userId);
 
         return [
             'room' => $room,

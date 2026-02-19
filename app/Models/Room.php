@@ -73,7 +73,7 @@ class Room extends Model
     public function activeOrders()
     {
         return $this->hasMany(Order::class)
-                    ->whereIn('status', ['active', 'qa_pending', 'delivered']);
+            ->whereIn('status', ['active', 'qa_pending', 'delivered']);
     }
 
     /**
@@ -90,8 +90,8 @@ class Room extends Model
     public function pendingOffers()
     {
         return $this->hasMany(CustomOffer::class)
-                    ->where('status', 'pending')
-                    ->where('expires_at', '>', now());
+            ->where('status', 'pending')
+            ->where('expires_at', '>', now());
     }
 
     /*
@@ -106,7 +106,7 @@ class Room extends Model
     public function scopeForUser($query, int $userId)
     {
         return $query->where('first_user_id', $userId)
-                    ->orWhere('second_user_id', $userId);
+            ->orWhere('second_user_id', $userId);
     }
 
     /**
@@ -123,7 +123,7 @@ class Room extends Model
     public function scopeRecentActivity($query)
     {
         return $query->whereNotNull('last_message_at')
-                    ->orderBy('last_message_at', 'desc');
+            ->orderBy('last_message_at', 'desc');
     }
 
     /**
@@ -133,10 +133,10 @@ class Room extends Model
     {
         return $query->where(function ($q) use ($userId1, $userId2) {
             $q->where('first_user_id', $userId1)
-              ->where('second_user_id', $userId2);
+                ->where('second_user_id', $userId2);
         })->orWhere(function ($q) use ($userId1, $userId2) {
             $q->where('first_user_id', $userId2)
-              ->where('second_user_id', $userId1);
+                ->where('second_user_id', $userId1);
         });
     }
 
@@ -149,18 +149,32 @@ class Room extends Model
     /**
      * Get the other user in the room (not the given user)
      */
-    public function getOtherUser(int $userId)
+    // public function getOtherUser(int $userId)
+    // {
+    //     if ($this->first_user_id == $userId) {
+    //         return $this->secondUser;
+    //     }
+
+    //     if ($this->second_user_id == $userId) {
+    //         return $this->firstUser;
+    //     }
+
+    //     return null;
+    // }
+
+    public function getOtherUserAttribute()
     {
-        if ($this->first_user_id == $userId) {
-            return $this->secondUser;
+        $authId = auth('api')->id();
+
+        if (!$authId) {
+            return null;
         }
 
-        if ($this->second_user_id == $userId) {
-            return $this->firstUser;
-        }
-
-        return null;
+        return $this->first_user_id == $authId
+            ? $this->secondUser
+            : $this->firstUser;
     }
+
 
     /**
      * Check if user is part of this room
@@ -200,9 +214,9 @@ class Room extends Model
     public function getUnreadCount(int $userId): int
     {
         return $this->messages()
-                    ->where('receiver_id', $userId)
-                    ->where('status', '!=', 'read')
-                    ->count();
+            ->where('receiver_id', $userId)
+            ->where('status', '!=', 'read')
+            ->count();
     }
 
     /**

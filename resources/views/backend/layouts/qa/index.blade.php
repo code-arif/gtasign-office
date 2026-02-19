@@ -23,7 +23,7 @@
                 </div>
 
                 <!-- STATS CARDS -->
-                <div class="row mb-4">
+                <div class="row mb-1">
                     <div class="col-xl col-lg-3 col-md-6 col-sm-6">
                         <div class="card stats-card" style="border-left:4px solid #6366f1;">
                             <div class="card-body">
@@ -111,15 +111,15 @@
                                 </div>
                             </div>
 
-                            <div id="filterBody" style="display:none; margin-top:16px;">
+                            <div id="filterBody" style="display:none; margin-top:10px;">
                                 <hr class="mt-0 mb-3">
                                 <div class="row align-items-end g-3">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label class="form-label">Search</label>
                                         <input type="text" id="searchFilter" class="form-control"
                                             placeholder="Order number, expert name...">
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                         <label class="form-label">Status</label>
                                         <select class="form-select select3" id="statusFilter">
                                             <option value="all">All Status</option>
@@ -152,7 +152,7 @@
                 </div>
 
                 <!-- QA TABLE -->
-                <div class="row mt-3">
+                <div class="row mt-1">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header border-bottom d-flex justify-content-between align-items-center">

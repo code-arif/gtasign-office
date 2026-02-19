@@ -17,14 +17,21 @@ class OrderDelivery extends Model
         'files',
         'status',
         'revision_reason',
+        'qa_feedback',
         'submitted_at',
         'reviewed_at',
+        'qa_reviewed_at',
+        'delivered_to_client_at',
+        'client_reviewed_at',
     ];
 
     protected $casts = [
         'files' => 'array',
         'submitted_at' => 'datetime',
         'reviewed_at' => 'datetime',
+        'qa_reviewed_at' => 'datetime',
+        'delivered_to_client_at' => 'datetime',
+        'client_reviewed_at' => 'datetime',
     ];
 
     public function order()

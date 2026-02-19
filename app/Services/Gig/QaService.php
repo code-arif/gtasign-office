@@ -2,12 +2,10 @@
 
 namespace App\Services\Gig;
 
-
 use App\Models\Chat;
-use App\Models\Order;
 use App\Models\OrderActivity;
-use App\Models\OrderDelivery;
 use App\Models\OrderQaReview;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -69,6 +67,8 @@ class QaService
      */
     public function approveDelivery(int $reviewId, int $adminId, ?string $feedback = null): OrderQaReview
     {
+        $now = Carbon::now();
+
         DB::beginTransaction();
         try {
             $review = OrderQaReview::with(['order.room', 'delivery'])->find($reviewId);
@@ -93,23 +93,25 @@ class QaService
                 'status'      => 'approved',
                 'reviewed_by' => $adminId,
                 'feedback'    => $feedback,
-                'reviewed_at' => now(),
+                'reviewed_at' => $now,
             ]);
 
             // 2. Update delivery → delivered to client
             $delivery->update([
                 'status'                  => 'delivered_to_client',
                 'qa_feedback'             => $feedback,
-                'qa_reviewed_at'          => now(),
-                'delivered_to_client_at'  => now(),
+                'qa_reviewed_at'          => $now,
+                'delivered_to_client_at'  => $now,
             ]);
 
+            // dd($delivery->qa_reviewed_at);
+
             // 3. Update order → delivered, set auto-complete timer
-            $autoCompleteAt = now()->addDays(config('orders.auto_accept_days', 3));
+            $autoCompleteAt = $now->addDays(config('orders.auto_accept_days', 3));
             $order->update([
                 'status'           => 'delivered',
-                'qa_approved_at'   => now(),
-                'delivered_at'     => now(),
+                'qa_approved_at'   => $now,
+                'delivered_at'     => $now,
                 'auto_complete_at' => $autoCompleteAt,
             ]);
 
@@ -121,7 +123,7 @@ class QaService
                 'type'        => 'delivery_sent',
                 'order_id'    => $order->id,
                 'delivery_id' => $delivery->id,
-                'text'        => "✅ Your order has been delivered! Please review and accept or request revisions. Auto-accepted in " . config('orders.auto_accept_days', 3) . " days.",
+                'text'        => "Your order has been delivered! Please review and accept or request revisions. Auto-accepted in " . config('orders.auto_accept_days', 3) . " days.",
                 'metadata'    => [
                     'delivery_number' => $delivery->delivery_number,
                     'file_count'      => count($delivery->files ?? []),
@@ -129,7 +131,7 @@ class QaService
                 ],
             ]);
 
-            $order->room->update(['last_message_at' => now()]);
+            $order->room->update(['last_message_at' => $now]);
 
             // 5. Activity log
             OrderActivity::create([
@@ -160,6 +162,8 @@ class QaService
      */
     public function rejectDelivery(int $reviewId, int $adminId, string $feedback, array $issues = []): OrderQaReview
     {
+        $now = Carbon::now();
+
         DB::beginTransaction();
         try {
             $review = OrderQaReview::with(['order.room', 'delivery'])->find($reviewId);
@@ -181,14 +185,14 @@ class QaService
                 'reviewed_by' => $adminId,
                 'feedback'    => $feedback,
                 'issues'      => $issues,
-                'reviewed_at' => now(),
+                'reviewed_at' => $now,
             ]);
 
             // 2. Update delivery → qa_rejected
             $delivery->update([
                 'status'         => 'qa_rejected',
                 'qa_feedback'    => $feedback,
-                'qa_reviewed_at' => now(),
+                'qa_reviewed_at' => $now,
             ]);
 
             // 3. Order back to active (expert needs to re-submit)

@@ -81,13 +81,13 @@ class InboxController extends Controller
                 'Conversation retrieved successfully',
                 [
                     'room' => new RoomResource($conversation['room']),
-                    'other_user' => [
-                        'id' => $conversation['other_user']->id,
-                        'name' => $conversation['other_user']->profile?->first_name . ' ' . $conversation['other_user']->profile?->last_name,
-                        'username' => $conversation['other_user']->profile?->username,
-                        'avatar' => $conversation['other_user']->profile?->avatar ? asset('storage/' . $conversation['other_user']->profile?->avatar) : asset('default/profile.jpg'),
-                    ],
-                    'has_active_order' => $conversation['has_active_order'],
+                    // 'other_user' => [
+                    //     'id' => $conversation['other_user']->id,
+                    //     'name' => $conversation['other_user']->profile?->first_name . ' ' . $conversation['other_user']->profile?->last_name,
+                    //     'username' => $conversation['other_user']->profile?->username,
+                    //     'avatar' => $conversation['other_user']->profile?->avatar ? asset('storage/' . $conversation['other_user']->profile?->avatar) : asset('default/profile.jpg'),
+                    // ],
+                    // 'has_active_order' => $conversation['has_active_order'],
                     'messages' => InboxMessageResource::collection($messages),
                     'pagination' => [
                         'total' => $messages->total(),
