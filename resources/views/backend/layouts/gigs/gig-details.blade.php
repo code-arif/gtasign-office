@@ -100,7 +100,7 @@
                                     <i class="fe fe-list text-primary me-2"></i>All Gigs
                                 </h5>
                             </div>
-                            <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                            <div class="card-body p-0" style="max-height: 700px; overflow-y: auto;">
                                 <div class="list-group list-group-flush">
                                     @foreach ($gigs as $g)
                                         <a href="{{ route('admin.gigs.show', $g->id) }}"
@@ -139,7 +139,7 @@
                                                         $color = $statusColors[$g->status] ?? 'secondary';
                                                     @endphp
                                                     <span
-                                                        class="badge bg-{{ $color }} ms-2">{{ $g->status }}</span>
+                                                        class="badge bg-{{ $color }} ms-2">{{ ucfirst($g->status) }}</span>
                                                 @endif
                                             </div>
                                         </a>

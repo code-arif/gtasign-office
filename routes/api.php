@@ -205,9 +205,11 @@ Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
 });
 
 
-// ────────────────────────────────────────────────────────────────
-// Ordder and payment from gig
-// ────────────────────────────────────────────────────────────────
+/*
+|--------------------------------------------------------------------------
+| Ordder and payment from gig
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth:api'])->prefix('v1/order')->group(function () {
     Route::post('/client/create-from-gig/{gigId}', [InboxOrderController::class, 'createFromGig']); // DONE: Order from gig
     Route::post('/client/{orderId}/checkout', [PaymentController::class, 'createCheckout']); // DONE: Mark as paid

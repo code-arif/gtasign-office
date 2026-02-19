@@ -94,12 +94,14 @@
                                 Request
                             </a>
                         </li>
-                        <li><a href="{{ route('admin.qa.index') }}"
-                                class="slide-item {{ request()->routeIs('admin.qa.index') ? 'active' : '' }}"> All Orders
+                        <li><a href="{{ route('admin.orders.index') }}"
+                                class="slide-item {{ request()->routeIs('admin.orders.index') ? 'active' : '' }}"> All
+                                Orders
                             </a>
                         </li>
-                        <li><a href="{{ route('admin.qa.index') }}"
-                                class="slide-item {{ request()->routeIs('admin.qa.index') ? 'active' : '' }}"> Extension Requests
+                        <li><a href="{{ route('admin.extension-requests.index') }}"
+                                class="slide-item {{ request()->routeIs('admin.extension-requests.index') ? 'active' : '' }}">
+                                Extension Requests
                             </a>
                         </li>
                     </ul>
@@ -122,12 +124,12 @@
                     </ul>
                 </li>
 
-                <li>
+                {{-- <li>
                     <h3>CMS</h3>
-                </li>
+                </li> --}}
 
                 {{-- Home Page --}}
-                <li class="slide">
+                {{-- <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.cms.home*') ? 'has-link active' : '' }}"
                         data-bs-toggle="slide" href="#">
                         <i class="side-menu__icon fa fa-home"></i>
@@ -154,10 +156,10 @@
                                 class="slide-item {{ request()->routeIs('admin.cms.home.testimonial*') ? 'active' : '' }}">
                                 Testimonial Section </a></li>
                     </ul>
-                </li>
+                </li> --}}
 
                 {{-- About Page --}}
-                <li class="slide">
+                {{-- <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.cms.about*') ? 'has-link active' : '' }}"
                         data-bs-toggle="slide" href="/">
                         <i class="side-menu__icon fa fa-user"></i>
@@ -175,7 +177,7 @@
                                 class="slide-item {{ request()->routeIs('admin.cms.about.getting-started*') ? 'active' : '' }}">
                                 Get Started </a></li>
                     </ul>
-                </li>
+                </li> --}}
 
                 <li>
                     <h3>Settings</h3>
@@ -243,6 +245,12 @@
         transition: background-color 0.25s ease, color 0.25s ease, border-radius 0.25s ease;
         border-radius: 6px;
         margin: 1px 8px;
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        color: #333;
+        font-weight: 500;
+        text-decoration: none;
     }
 
     .side-menu__item:hover,

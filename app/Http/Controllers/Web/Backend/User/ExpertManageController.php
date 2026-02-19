@@ -51,7 +51,7 @@ class ExpertManageController extends Controller
                     'users.email_verified_at',
                 ])
                 ->with([
-                    'profile:id,user_id,first_name,last_name,avatar,username',
+                    'profile:id,user_id,first_name,last_name,avatar,username,level,level_name',
                 ])
                 ->withCount([
                     'gigs',                                          // $user->gigs_count
@@ -98,30 +98,54 @@ class ExpertManageController extends Controller
                     $q->where('users.email', 'like', "%{$keyword}%");
                 })
                 ->addColumn('expert_info', function ($user) {
-                    $profile  = $user->profile;
+                    $profile = $user->profile;
+
                     $fullName = $profile
                         ? trim($profile->first_name . ' ' . ($profile->last_name ?? ''))
                         : 'N/A';
-                    $username = $profile->username ?? '';
-                    $avatar   = $profile && $profile->avatar
+
+                    $username = $profile?->username ?? '';
+
+                    // Avatar
+                    $avatar = $profile && $profile->avatar
                         ? asset($profile->avatar)
                         : 'https://ui-avatars.com/api/?name=' . urlencode($fullName) . '&background=6366f1&color=fff&size=64';
 
+                    // Badges & icons
                     $deletedBadge = $user->deleted_at
-                        ? '<span class="badge bg-danger ms-2">Deleted</span>' : '';
-                    $verifiedIcon = $user->email_verified_at
-                        ? '<i class="fe fe-check-circle text-success ms-1" title="Email Verified"></i>' : '';
+                        ? '<span class="badge bg-danger ms-2">Deleted</span>'
+                        : '';
 
+                    $levelBadge = '';
+                    if ($profile && $profile->level) {
+                        $levelText = strtoupper($profile->level) ?: ucfirst($profile->level_name ?? '');
+                        $levelBadge = '<span class="badge bg-info ms-1 px-2">' . e($levelText) . '</span>';
+                    }
+
+                    $verifiedIcon = $user->email_verified_at
+                        ? '<i class="fe fe-check-circle text-success ms-1" title="Email Verified"></i>'
+                        : '';
+
+                    // Final HTML
                     return '
                         <div class="d-flex align-items-center">
-                            <img src="' . $avatar . '" alt="avatar" class="rounded-circle me-3 flex-shrink-0"
-                                 width="44" height="44" style="object-fit:cover; border:2px solid #e9ecef;">
+                            <img src="' . $avatar . '" alt="' . e($fullName) . '"
+                                class="rounded-circle me-3 flex-shrink-0"
+                                width="44" height="44"
+                                style="object-fit:cover; border:2px solid #e9ecef;">
                             <div>
-                                <div class="fw-semibold">' . e($fullName) . $deletedBadge . '</div>
-                                <small class="text-muted">@' . e($username) . $verifiedIcon . '</small>
+                                <div class="fw-semibold d-flex align-items-center flex-wrap gap-2">
+                                    ' . e($fullName) . '
+                                    ' . $levelBadge . '
+                                    ' . $deletedBadge . '
+                                </div>
+                                <small class="text-muted d-block">
+                                    @' . e($username) . $verifiedIcon . '
+                                </small>
                             </div>
                         </div>';
                 })
+
                 ->addColumn('contact', function ($user) {
                     return '
                         <div>
@@ -169,6 +193,12 @@ class ExpertManageController extends Controller
                         <i class="fe fe-eye"></i>
                     </a>';
 
+                    $levelBtn = '<button type="button" class="btn btn-success btn-sm me-1"
+                        title="Change Level"
+                        onclick="openLevelModal(' . $user->id . ')">
+                        <i class="fa-solid fa-turn-up"></i>
+                    </button>';
+
                     $statusBtn = '';
                     if (!$user->deleted_at) {
                         $statusBtn = '
@@ -191,7 +221,7 @@ class ExpertManageController extends Controller
                         </div>';
                     }
 
-                    return '<div class="d-flex">' . $viewBtn . $statusBtn . '</div>';
+                    return '<div class="d-flex">' . $viewBtn . $levelBtn . $statusBtn . '</div>';
                 })
                 ->rawColumns(['expert_info', 'contact', 'stats', 'status', 'joined_at', 'action'])
                 ->make(true);
@@ -395,6 +425,63 @@ class ExpertManageController extends Controller
         } catch (Exception $e) {
             Log::error('Expert export error: ' . $e->getMessage());
             return back()->with('error', 'Failed to export experts');
+        }
+    }
+
+    /**
+     * Show level change modal content (for AJAX or direct)
+     */
+    public function getLevelForm($id)
+    {
+        $expert = User::role('expert')
+            ->with('profile')
+            ->findOrFail($id);
+
+        $currentLevel      = $expert->profile?->level ?? null;
+        $currentLevelName  = $expert->profile?->level_name ?? null;
+
+        return response()->json([
+            'success'         => true,
+            'expert_id'       => $expert->id,
+            'current_level'   => $currentLevel,
+            'current_level_name' => $currentLevelName,
+            'full_name'       => $expert->profile
+                ? trim($expert->profile->first_name . ' ' . ($expert->profile->last_name ?? ''))
+                : 'N/A',
+            'username'        => $expert->profile?->username ?? '—',
+        ]);
+    }
+
+    /**
+     * Update expert level
+     */
+    public function updateLevel(Request $request, $id)
+    {
+        $request->validate([
+            'level'      => 'required|string|max:50',
+            'level_name' => 'nullable|string|max:100',
+        ]);
+
+        try {
+            $expert = User::role('expert')->findOrFail($id);
+
+            $expert->profile()->update([
+                'level'      => $request->level,
+                'level_name' => $request->level_name ?: null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Expert level updated successfully',
+                'level'   => $request->level,
+                'level_name' => $request->level_name,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Level update failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update level: ' . $e->getMessage(),
+            ], 422);
         }
     }
 

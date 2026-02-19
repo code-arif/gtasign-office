@@ -208,7 +208,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -243,6 +242,59 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Change Modal -->
+    <div class="modal fade" id="levelModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Change Expert Level</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>Expert:</strong>
+                        <span id="modalExpertName" class="fw-bold"></span>
+                        <small class="text-muted ms-2">@<span id="modalExpertUsername"></span></small>
+                    </div>
+
+                    <form id="levelForm">
+                        <input type="hidden" id="levelExpertId" name="expert_id">
+
+                        <div class="mb-3">
+                            <label class="form-label">Level <span class="text-danger">*</span></label>
+                            <select class="form-select" id="levelSelect" name="level" required>
+                                <option value="">Select Level</option>
+                                <option value="level 1">Level 1</option>
+                                <option value="level 2">Level 2</option>
+                                <option value="level 3">Level 3</option>
+                                {{-- <option value="expert">Expert</option> --}}
+                                {{-- <option value="top_rated">Top Rated</option> --}}
+                                {{-- <option value="pro">Pro</option> --}}
+                                <!-- Add more levels according to your business logic -->
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Level Display Name (optional)</label>
+                            <input type="text" class="form-control" id="levelNameInput" name="level_name"
+                                placeholder="e.g. Platinum Seller, Verified Pro, etc.">
+                            <small class="text-muted">This will be shown publicly (badge/title)</small>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="submitLevelBtn">
+                        <span class="btn-text">Save Level</span>
+                        <span class="spinner-border spinner-border-sm d-none"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -502,6 +554,75 @@
                 });
             }
         }
+
+        // Expert level Up
+        function openLevelModal(expertId) {
+            $.ajax({
+                url: `/admin/experts/${expertId}/level-form`,
+                type: 'GET',
+                success: function(res) {
+                    if (res.success) {
+                        $('#levelExpertId').val(res.expert_id);
+                        $('#modalExpertName').text(res.full_name);
+                        $('#modalExpertUsername').text(res.username);
+
+                        // Pre-select current level if exists
+                        $('#levelSelect').val(res.current_level || '');
+                        $('#levelNameInput').val(res.current_level_name || '');
+
+                        $('#levelModal').modal('show');
+                    } else {
+                        toastr.error('Could not load level form');
+                    }
+                },
+                error: function() {
+                    toastr.error('Error loading level data');
+                }
+            });
+        }
+
+        $('#submitLevelBtn').on('click', function() {
+            const expertId = $('#levelExpertId').val();
+            const level = $('#levelSelect').val();
+            const levelName = $('#levelNameInput').val().trim();
+
+            if (!level) {
+                toastr.warning('Please select a level');
+                $('#levelSelect').focus();
+                return;
+            }
+
+            $('#submitLevelBtn').prop('disabled', true);
+            $('#submitLevelBtn .btn-text').addClass('d-none');
+            $('#submitLevelBtn .spinner-border').removeClass('d-none');
+
+            $.ajax({
+                url: `/admin/experts/${expertId}/level`,
+                type: 'PATCH',
+                data: {
+                    level: level,
+                    level_name: levelName,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(res) {
+                    if (res.success) {
+                        toastr.success(res.message);
+                        $('#levelModal').modal('hide');
+                        dataTable.ajax.reload(); // optional: refresh table
+                    } else {
+                        toastr.error(res.message);
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error(xhr.responseJSON?.message || 'Failed to update level');
+                },
+                complete: function() {
+                    $('#submitLevelBtn').prop('disabled', false);
+                    $('#submitLevelBtn .btn-text').removeClass('d-none');
+                    $('#submitLevelBtn .spinner-border').addClass('d-none');
+                }
+            });
+        });
     </script>
 @endpush
 

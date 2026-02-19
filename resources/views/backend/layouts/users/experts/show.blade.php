@@ -63,7 +63,8 @@
                                     @if ($expert->deleted_at)
                                         <span class="badge bg-danger">Deleted</span>
                                     @endif
-                                    <span class="badge bg-{{ $statusColor }}">{{ ucfirst($expert->status) }}</span>
+                                    {{-- <span class="badge bg-{{ $statusColor }}">{{ ucfirst($expert->status) }}</span> --}}
+                                    <span class="badge bg-info text-end"> {{ strtoupper($expert->profile->level) }} </span>
                                 </div>
                                 <div class="d-flex flex-wrap gap-3 text-muted small">
                                     <span><i class="fe fe-mail me-1"></i>{{ $expert->email }}</span>

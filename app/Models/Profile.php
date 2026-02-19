@@ -16,6 +16,13 @@ class Profile extends Model
         'biography',
         'address',
         'avatar',
+        'is_pinned',
+        'level',
+        'level_name',
+        'stripe_account_id',
+        'stripe_onboarded_at',
+        'last_active_at',
+        'is_online'
     ];
 
     /**

@@ -17,6 +17,8 @@ use App\Http\Controllers\Web\Backend\FaqController;
 use App\Http\Controllers\Web\Backend\Gig\CategoryManageController;
 use App\Http\Controllers\Web\Backend\Gig\GigManageController;
 use App\Http\Controllers\Web\Backend\Gig\TagManageController;
+use App\Http\Controllers\Web\Backend\Order\ExtensionRequestController;
+use App\Http\Controllers\Web\Backend\Order\OrderManageController;
 use App\Http\Controllers\Web\Backend\QA\QaManageController;
 use App\Http\Controllers\Web\Backend\Settings\CaptchaController;
 use App\Http\Controllers\Web\Backend\Settings\EnvController;
@@ -77,7 +79,6 @@ Route::group(['prefix' => 'tags', 'as' => 'tags.'], function () {
     Route::delete('/delete/{id}', [TagManageController::class, 'destroy'])->name('destroy');
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Gig Management Routes
@@ -105,12 +106,12 @@ Route::group(['prefix' => 'languages', 'as' => 'languages.'], function () {
     Route::delete('/delete/{id}', [LanguageManageController::class, 'destroy'])->name('destroy');
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | User Management Routes
 |--------------------------------------------------------------------------
 */
+// Experts Management
 Route::prefix('experts')->name('experts.')->group(function () {
     Route::get('/', [ExpertManageController::class, 'index'])->name('index');
     Route::get('/data', [ExpertManageController::class, 'getData'])->name('data');
@@ -122,9 +123,13 @@ Route::prefix('experts')->name('experts.')->group(function () {
     Route::delete('/{id}/force', [ExpertManageController::class, 'forceDelete'])->name('force-delete');
 
     // Expert sub-pages
-    Route::get('/{id}/gigs', [ExpertManageController::class, 'gigs'])->name('gigs');
-    Route::get('/{id}/orders', [ExpertManageController::class, 'orders'])->name('orders');
-    Route::get('/{id}/earnings', [ExpertManageController::class, 'earnings'])->name('earnings');
+    Route::get('/{id}/gigs', [ExpertManageController::class, 'gigs'])->name('gigs'); // PENDING
+    Route::get('/{id}/orders', [ExpertManageController::class, 'orders'])->name('orders'); // PENDING
+    Route::get('/{id}/earnings', [ExpertManageController::class, 'earnings'])->name('earnings'); // PENDING
+
+    // Level management
+    Route::get('{id}/level-form',   [ExpertManageController::class, 'getLevelForm'])->name('level.form');
+    Route::patch('{id}/level',      [ExpertManageController::class, 'updateLevel'])->name('level.update');
 });
 
 // Clients Management
@@ -142,36 +147,43 @@ Route::prefix('clients')->name('clients.')->group(function () {
     Route::get('/{id}/orders', [ClientManageController::class, 'orders'])->name('orders'); // NOT WORKING, NEEDS FIXING
 });
 
-// ────────────────────────────────────────────────────────────────
-// ADMIN — QA PANEL
-// ────────────────────────────────────────────────────────────────
+/*
+|--------------------------------------------------------------------------
+| QA Management Routes
+|--------------------------------------------------------------------------
+*/
 Route::prefix('qa')->name('qa.')->group(function () {
-    Route::get('/',[QaManageController::class, 'index'])->name('index');
-    Route::get('/data',[QaManageController::class, 'getData'])->name('data');
-    Route::get('/{reviewId}',[QaManageController::class, 'show'])->name('show');
-    Route::post('/{reviewId}/approve',[QaManageController::class, 'approve'])->name('approve');
-    Route::post('/{reviewId}/reject',[QaManageController::class, 'reject'])->name('reject');
+    Route::get('/', [QaManageController::class, 'index'])->name('index');
+    Route::get('/data', [QaManageController::class, 'getData'])->name('data');
+    Route::get('/{reviewId}', [QaManageController::class, 'show'])->name('show');
+    Route::post('/{reviewId}/approve', [QaManageController::class, 'approve'])->name('approve');
+    Route::post('/{reviewId}/reject', [QaManageController::class, 'reject'])->name('reject');
 });
 
-
-Route::controller(FaqController::class)->prefix('faq')->name('faq.')->group(function () {
-    Route::get('/', 'index')->name('index');
-    Route::get('/create', 'create')->name('create');
-    Route::post('/store', 'store')->name('store');
-    Route::get('/show/{id}', 'show')->name('show');
-    Route::get('/edit/{id}', 'edit')->name('edit');
-    Route::post('/update/{id}', 'update')->name('update');
-    Route::delete('/delete/{id}', 'destroy')->name('destroy');
-    Route::get('/status/{id}', 'status')->name('status');
+/*
+|--------------------------------------------------------------------------
+| Order Management Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('orders')->name('orders.')->group(function () {
+    Route::get('/', [OrderManageController::class, 'index'])->name('index');
+    Route::get('/data', [OrderManageController::class, 'getData'])->name('data');
+    Route::get('/export', [OrderManageController::class, 'export'])->name('export');
+    Route::get('/{id}', [OrderManageController::class, 'show'])->name('show');
 });
 
-Route::get('subscriber', [SubscriberController::class, 'index'])->name('subscriber.index');
-
-Route::controller(ContactController::class)->prefix('contact')->name('contact.')->group(function () {
-    Route::get('/', 'index')->name('index');
-    Route::get('/status/{id}', 'status')->name('status');
+/*
+|--------------------------------------------------------------------------
+| Extenstion Requests Management Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('extension-requests')->name('extension-requests.')->group(function () {
+    Route::get('/',[ExtensionRequestController::class, 'index'])->name('index');
+    Route::get('/data',[ExtensionRequestController::class, 'getData'])->name('data');
+    Route::get('/{id}',[ExtensionRequestController::class, 'show'])->name('show');
+    Route::patch('/{id}/approve',[ExtensionRequestController::class, 'approve'])->name('approve');
+    Route::patch('/{id}/reject',[ExtensionRequestController::class, 'reject'])->name('reject');
 });
-
 
 
 /*
@@ -283,6 +295,26 @@ Route::prefix('cms')->name('cms.')->group(function () {
         Route::get('/getting-started', [GettingStartedController::class, 'index'])->name('getting-started.index');
         Route::post('/getting-started-header/store', [GettingStartedController::class, 'storePageTitle'])->name('getting-started-header.store');
     });
+});
+
+
+
+Route::controller(FaqController::class)->prefix('faq')->name('faq.')->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::get('/create', 'create')->name('create');
+    Route::post('/store', 'store')->name('store');
+    Route::get('/show/{id}', 'show')->name('show');
+    Route::get('/edit/{id}', 'edit')->name('edit');
+    Route::post('/update/{id}', 'update')->name('update');
+    Route::delete('/delete/{id}', 'destroy')->name('destroy');
+    Route::get('/status/{id}', 'status')->name('status');
+});
+
+Route::get('subscriber', [SubscriberController::class, 'index'])->name('subscriber.index');
+
+Route::controller(ContactController::class)->prefix('contact')->name('contact.')->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::get('/status/{id}', 'status')->name('status');
 });
 
 
