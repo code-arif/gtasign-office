@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Frontend\SettingsController;
 use App\Http\Controllers\Api\Gig\GigCategoryController;
 use App\Http\Controllers\Api\Gig\GigController;
 use App\Http\Controllers\Api\Gig\GigTagController;
+use App\Http\Controllers\Api\Gig\ReviewController;
 use App\Http\Controllers\Api\Inbox\CustomOfferController;
 use App\Http\Controllers\Api\Inbox\InboxController;
 use App\Http\Controllers\Api\Inbox\InboxOrderController;
@@ -241,6 +242,22 @@ Route::prefix('v1/payment')->group(function () {
     // LOCAL TEST ONLY (disabled in production)
     // Route::post('/test/simulate-success/{orderId}', [PaymentController::class, 'simulatePaymentSuccess']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| REVIEWS AND RATINGS
+|--------------------------------------------------------------------------
+*/
+// No auth
+Route::get('/v1/gigs/{gigId}/reviews', [ReviewController::class, 'index']);
+
+// Authenticated
+Route::middleware('auth:api')->group(function () {
+    Route::post('/v1/reviews/{orderId}', [ReviewController::class, 'store']);       // Client reviews order
+    Route::post('/v1/reviews/{reviewId}/reply', [ReviewController::class, 'reply']);       // Expert replies
+    Route::get('/v1/reviews/order/{orderId}', [ReviewController::class, 'checkOrderReview']); // Check if reviewed
+});
+
 
 /*
 |--------------------------------------------------------------------------
