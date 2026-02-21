@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\Payment\PaymentController;
 use App\Http\Controllers\Api\Payment\StripeConnectController;
 use App\Http\Controllers\Api\User\Profile\CertificateController;
 use App\Http\Controllers\Api\User\Profile\EducationController;
+use App\Http\Controllers\Api\User\Profile\UserAvailabilityController;
 use App\Http\Controllers\Api\User\Profile\UserExperienceController;
 use Illuminate\Support\Facades\Route;
 
@@ -145,6 +146,14 @@ Route::middleware(['auth:api', 'role:expert'])->prefix('v1/expert')->group(funct
         Route::post('/update', [UserExperienceController::class, 'update']);
         Route::delete('/delete/{id}', [UserExperienceController::class, 'destroy']);
     });
+
+    // Set Availability
+    Route::group(['prefix' => 'availability'], function () {
+        Route::post('/store', [UserAvailabilityController::class, 'store']);
+        Route::get('/show', [UserAvailabilityController::class, 'show']);
+        Route::delete('/cancel', [UserAvailabilityController::class, 'cancel']);
+    });
+
 
     /*
     |--------------------------------------------------------------------------

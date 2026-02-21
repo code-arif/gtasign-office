@@ -116,6 +116,22 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * Relationship: User Availability Table
+     */
+    public function availabilities()
+    {
+        return $this->hasMany(UserAvailability::class);
+    }
+
+    /**
+     * Get the active availability for the user
+     */
+    public function activeAvailability()
+    {
+        return $this->hasOne(UserAvailability::class)->where('is_active', true);
+    }
+
+    /**
      * Scope for active users
      */
     public function scopeActive($query)
