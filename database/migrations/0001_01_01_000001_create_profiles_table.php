@@ -27,6 +27,7 @@ return new class extends Migration
 
             $table->boolean('is_pinned')->default(false);
             $table->string('level')->nullable();
+            $table->string('level_name')->nullable();
 
             // last activity tracking
             $table->timestamp('last_active_at')->nullable();
