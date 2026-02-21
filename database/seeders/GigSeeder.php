@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Gig;
 use Faker\Factory as Faker;
-use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class GigSeeder extends Seeder
 {
@@ -19,8 +18,8 @@ class GigSeeder extends Seeder
 
             $status = $faker->randomElement($statuses);
 
-            DB::table('gigs')->insert([
-                'user_id' => $faker->numberBetween(1, 5), // make sure users exist
+            Gig::create([
+                'user_id' => $faker->numberBetween(1, 5),
                 'category_id' => $faker->numberBetween(1, 3),
                 'sub_category_id' => $faker->optional()->numberBetween(4, 6),
 
@@ -30,7 +29,8 @@ class GigSeeder extends Seeder
                 'price' => $faker->randomFloat(2, 50, 500),
                 'delivery_days' => $faker->numberBetween(1, 10),
 
-                'system_questions' => json_encode([
+                // Now pass array (Eloquent will convert to JSON)
+                'system_questions' => [
                     [
                         'question' => 'Do you have brand guidelines?',
                         'type' => 'text'
@@ -39,14 +39,14 @@ class GigSeeder extends Seeder
                         'question' => 'Preferred color?',
                         'type' => 'text'
                     ]
-                ]),
+                ],
 
-                'custom_questions' => json_encode([
+                'custom_questions' => [
                     [
                         'question' => $faker->sentence(4),
                         'required' => true
                     ]
-                ]),
+                ],
 
                 'status' => $status,
                 'rejection_reason' => $status === 'rejected'
@@ -59,13 +59,10 @@ class GigSeeder extends Seeder
                 'cancellations' => $faker->numberBetween(0, 5),
 
                 'published_at' => $status === 'active'
-                    ? Carbon::now()->subDays(rand(1, 30))
+                    ? now()->subDays(rand(1, 30))
                     : null,
 
                 'is_agreed' => true,
-
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
         }
     }

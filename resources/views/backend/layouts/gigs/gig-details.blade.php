@@ -395,7 +395,9 @@
                                             <h6 class="text-muted mb-3">System Questions</h6>
                                             <ol class="ps-3">
                                                 @foreach ($gig->system_questions as $question)
-                                                    <li class="mb-2">{{ $question }}</li>
+                                                    <li class="mb-2">
+                                                        {{ is_array($question) ? $question['question'] ?? '' : $question }}
+                                                    </li>
                                                 @endforeach
                                             </ol>
                                         </div>
@@ -406,7 +408,9 @@
                                             <h6 class="text-muted mb-3">Custom Questions</h6>
                                             <ol class="ps-3">
                                                 @foreach ($gig->custom_questions as $question)
-                                                    <li class="mb-2">{{ $question }}</li>
+                                                    <li class="mb-2">
+                                                        {{ is_array($question) ? $question['question'] ?? '' : $question }}
+                                                    </li>
                                                 @endforeach
                                             </ol>
                                         </div>
@@ -508,7 +512,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center" id="submitStatusBtn">
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center"
+                            id="submitStatusBtn">
                             <span class="btn-text">Confirm</span>
                             <span class="spinner-border spinner-border-sm d-none"></span>
                         </button>
