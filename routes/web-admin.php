@@ -111,7 +111,6 @@ Route::group(['prefix' => 'languages', 'as' => 'languages.'], function () {
 | User Management Routes
 |--------------------------------------------------------------------------
 */
-// Experts Management
 Route::prefix('experts')->name('experts.')->group(function () {
     Route::get('/', [ExpertManageController::class, 'index'])->name('index');
     Route::get('/data', [ExpertManageController::class, 'getData'])->name('data');
@@ -178,16 +177,28 @@ Route::prefix('orders')->name('orders.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('extension-requests')->name('extension-requests.')->group(function () {
-    Route::get('/',[ExtensionRequestController::class, 'index'])->name('index');
-    Route::get('/data',[ExtensionRequestController::class, 'getData'])->name('data');
-    Route::get('/{id}',[ExtensionRequestController::class, 'show'])->name('show');
-    Route::patch('/{id}/approve',[ExtensionRequestController::class, 'approve'])->name('approve');
-    Route::patch('/{id}/reject',[ExtensionRequestController::class, 'reject'])->name('reject');
+    Route::get('/', [ExtensionRequestController::class, 'index'])->name('index');
+    Route::get('/data', [ExtensionRequestController::class, 'getData'])->name('data');
+    Route::get('/{id}', [ExtensionRequestController::class, 'show'])->name('show');
+    Route::patch('/{id}/approve', [ExtensionRequestController::class, 'approve'])->name('approve');
+    Route::patch('/{id}/reject', [ExtensionRequestController::class, 'reject'])->name('reject');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Contact Management Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('contact')->name('contact.')->group(function () {
+    Route::get('/', [ContactController::class, 'index'])->name('index');
+    Route::get('/status/{id}', [ContactController::class, 'status'])->name('status');
 });
 
 
 /*
-* CMS
+|--------------------------------------------------------------------------
+| CMS Management Routes
+|--------------------------------------------------------------------------
 */
 Route::prefix('cms')->name('cms.')->group(function () {
     //Privacy and Terms
@@ -202,12 +213,12 @@ Route::prefix('cms')->name('cms.')->group(function () {
     });
 
     // home - hero section
-    Route::get('/home/hero', [HomePageController::class, 'heroIndex'])->name('home.hero.section');
-    Route::post('/home/hero/update', [HomePageController::class, 'heroUpdate'])->name('home.hero.section.update');
+    Route::get('/home/hero', [HomePageController::class, 'heroIndex'])->name('home.hero.section'); // DONE: Show hero section data
+    Route::post('/home/hero/update', [HomePageController::class, 'heroUpdate'])->name('home.hero.section.update'); // DONE: Update hero section data
 
-    // home - training camp section
-    Route::get('/home/training-camp', [HomePageController::class, 'trainingCampIndex'])->name('home.training-camp.section');
-    Route::post('/home/training-camp/update', [HomePageController::class, 'trainingCampUpdate'])->name('home.training-camp.section.update');
+    // home - ai sysmtem section
+    Route::get('/home/ai-system', [HomePageController::class, 'aiSystemIndex'])->name('home.ai-system.section');
+    Route::post('/home/ai-system/update', [HomePageController::class, 'aiSystemUpdate'])->name('home.ai-system.section.update');
 
     // home page partner section Routes
     Route::get('/home/partner', [SliderController::class, 'index'])->name('home.slider.index');
@@ -298,7 +309,6 @@ Route::prefix('cms')->name('cms.')->group(function () {
 });
 
 
-
 Route::controller(FaqController::class)->prefix('faq')->name('faq.')->group(function () {
     Route::get('/', 'index')->name('index');
     Route::get('/create', 'create')->name('create');
@@ -312,10 +322,7 @@ Route::controller(FaqController::class)->prefix('faq')->name('faq.')->group(func
 
 Route::get('subscriber', [SubscriberController::class, 'index'])->name('subscriber.index');
 
-Route::controller(ContactController::class)->prefix('contact')->name('contact.')->group(function () {
-    Route::get('/', 'index')->name('index');
-    Route::get('/status/{id}', 'status')->name('status');
-});
+
 
 
 

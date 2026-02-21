@@ -107,11 +107,10 @@
                     </ul>
                 </li>
 
-                {{-- Manage Order --}}
+                {{-- Contact Order --}}
                 <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.qa.*') ? 'has-link active' : '' }}"
-                        data-bs-toggle="slide" href="#">
-                        {{-- <i class="side-menu__icon fa-brands fa-first-order"></i> --}}
+                    <a class="side-menu__item {{ request()->routeIs('admin.contact.index') ? 'has-link active' : '' }}"
+                        href="{{ route('admin.contact.index') }}">
                         <i class="side-menu__icon fa-solid fa-circle-question"></i>
                         <span class="side-menu__label">Support Corner</span>
                     </a>
@@ -134,12 +133,12 @@
                     </ul>
                 </li>
 
-                {{-- <li>
+                <li>
                     <h3>CMS</h3>
-                </li> --}}
+                </li>
 
                 {{-- Home Page --}}
-                {{-- <li class="slide">
+                <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.cms.home*') ? 'has-link active' : '' }}"
                         data-bs-toggle="slide" href="#">
                         <i class="side-menu__icon fa fa-home"></i>
@@ -150,23 +149,23 @@
                         <li><a href="{{ route('admin.cms.home.hero.section') }}"
                                 class="slide-item {{ request()->routeIs('admin.cms.home.hero*') ? 'active' : '' }}">
                                 Hero Section </a></li>
-                        <li><a href="{{ route('admin.cms.home.training-camp.section') }}"
-                                class="slide-item {{ request()->routeIs('admin.cms.home.training-camp*') ? 'active' : '' }}">
-                                Training Camps Section </a></li>
-                        <li><a href="{{ route('admin.cms.home.slider.index') }}"
+                        <li><a href="{{ route('admin.cms.home.ai-system.section') }}"
+                                class="slide-item {{ request()->routeIs('admin.cms.home.ai-system.section*') ? 'active' : '' }}">
+                                AI System </a></li>
+                        {{-- <li><a href="{{ route('admin.cms.home.slider.index') }}"
                                 class="slide-item {{ request()->routeIs('admin.cms.home.slider*') ? 'active' : '' }}">
-                                Partners Section </a></li>
-                        <li><a href="{{ route('admin.cms.home.features.index') }}"
+                                Partners Section </a></li> --}}
+                        {{-- <li><a href="{{ route('admin.cms.home.features.index') }}"
                                 class="slide-item {{ request()->routeIs('admin.cms.home.features*') ? 'active' : '' }}">
-                                Features Section </a></li>
-                        <li><a href="{{ route('admin.cms.home.operation.section') }}"
+                                Features Section </a></li> --}}
+                        {{-- <li><a href="{{ route('admin.cms.home.operation.section') }}"
                                 class="slide-item {{ request()->routeIs('admin.cms.home.operation*') ? 'active' : '' }}">
-                                Operations Section </a></li>
-                        <li><a href="{{ route('admin.cms.home.testimonial.index') }}"
+                                Operations Section </a></li> --}}
+                        {{-- <li><a href="{{ route('admin.cms.home.testimonial.index') }}"
                                 class="slide-item {{ request()->routeIs('admin.cms.home.testimonial*') ? 'active' : '' }}">
-                                Testimonial Section </a></li>
+                                Testimonial Section </a></li> --}}
                     </ul>
-                </li> --}}
+                </li>
 
                 {{-- About Page --}}
                 {{-- <li class="slide">

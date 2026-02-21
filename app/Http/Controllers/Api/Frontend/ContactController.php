@@ -18,27 +18,31 @@ class ContactController extends Controller
 
     public function submitContact(Request $request)
     {
+        // Validation according to UI
         $data = $request->validate([
-            'name'    => 'nullable|string|max:50',
-            'email'   => 'required|email|max:100',
-            'subject' => 'nullable|string|max:100',
-            'message' => 'nullable|string|max:1000',
+            'name'         => 'required|string|max:100',
+            'company_name' => 'required|string|max:150',
+            'phone'        => 'nullable|string|max:30',
+            'email'        => 'required|email|max:150',
+            'subject'      => 'required|string|max:150',
+            'message'      => 'required|string|max:2000',
         ]);
 
         DB::beginTransaction();
 
         try {
-            // Save contact
+            // Create Contact (status will be default = active)
             $contact = Contact::create($data);
 
-            // Send mail (admin / support)
-            Mail::to(config('mail.from.address'))->queue(new ContactSubmittedMail($contact));
+            // Send Mail to Admin
+            Mail::to(config('mail.from.address'))
+                ->queue(new ContactSubmittedMail($contact));
 
             DB::commit();
 
             return $this->success(
-                $contact,
                 'Contact form submitted successfully!',
+                $contact,
                 201
             );
         } catch (Exception $e) {
@@ -47,7 +51,7 @@ class ContactController extends Controller
 
             Log::error('Contact form submit failed', [
                 'error' => $e->getMessage(),
-                'data'  => $data,
+                'payload' => $data,
             ]);
 
             return $this->error(

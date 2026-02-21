@@ -5,7 +5,7 @@
 @section('content')
     <!--app-content open-->
     <div class="app-content main-content mt-0">
-        <div class="side-app">
+        <div class="side-app" style="margin-bottom: 50px">
 
             <!-- CONTAINER -->
             <div class="main-container container-fluid">
@@ -14,10 +14,12 @@
                 <div class="page-header">
                     <div>
                         <h1 class="page-title">Home page - Hero section</h1>
+                        <small>Home page hero section all data</small>
                     </div>
                     <div class="ms-auto pageheader-btn">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="javascript:void(0);">Home page</a></li>
+                            <span>&nbsp; &gt&gt &nbsp;</span>
                             <li class="breadcrumb-item active" aria-current="page">Hero section</li>
                         </ol>
                     </div>
@@ -58,7 +60,34 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                        
+
+                                        {{-- Hero Video Upload --}}
+                                        <div class="form-group mb-3">
+                                            <label for="video" class="form-label">Hero Video</label>
+
+                                            <input type="file" name="video" id="video"
+                                                class="form-control dropify @error('video') is-invalid @enderror"
+                                                data-default-file="{{ isset($data->video) ? asset($data->video) : '' }}"
+                                                data-allowed-file-extensions="mp4 mov avi webm" data-max-file-size="50M" />
+
+                                            @error('video')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        @if (!empty($data->video))
+                                            <div class="mb-3">
+                                                <label class="form-label">Current Video</label>
+                                                <div>
+                                                    <video width="320" height="180" controls
+                                                        style="border-radius:8px;">
+                                                        <source src="{{ asset($data->video) }}" type="video/mp4">
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         <div class="form-group">
                                             <button class="btn btn-primary" type="submit">Save change</button>
                                         </div>

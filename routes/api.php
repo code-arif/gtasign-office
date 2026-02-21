@@ -217,9 +217,11 @@ Route::middleware(['auth:api'])->prefix('v1/order')->group(function () {
     Route::post('/delivery/{orderId}/submit-delivery-to-qa', [InboxOrderController::class, 'submitDelivery']); // DONE: Submit delivery to qa
 });
 
-// ────────────────────────────────────────────────────────────────
-// PAYMENTS (Client-facing)
-// ────────────────────────────────────────────────────────────────
+/*
+|--------------------------------------------------------------------------
+|  PAYMENTS (Client-facing)
+|--------------------------------------------------------------------------
+*/
 Route::prefix('v1/payment')->group(function () {
     // Create checkout session for an order → returns Stripe URL
     // Route::post('/checkout/{orderId}', [PaymentController::class, 'createCheckout']);
@@ -231,10 +233,11 @@ Route::prefix('v1/payment')->group(function () {
     // Route::post('/test/simulate-success/{orderId}', [PaymentController::class, 'simulatePaymentSuccess']);
 });
 
-
-// ────────────────────────────────────────────────────────────────
-// EXPERT — STRIPE CONNECT + WALLET
-// ────────────────────────────────────────────────────────────────
+/*
+|--------------------------------------------------------------------------
+| EXPERT — STRIPE CONNECT + WALLET
+|--------------------------------------------------------------------------
+*/
 Route::prefix('v1/expert')->group(function () {
     // Stripe Connect onboarding
     Route::post('/stripe/connect', [StripeConnectController::class, 'connect']); // DONE: Connect Stripe account
@@ -247,11 +250,8 @@ Route::prefix('v1/expert')->group(function () {
     Route::get('/wallet/withdrawals', [StripeConnectController::class, 'withdrawalHistory']);
 });
 
-
-
-
 // contact from submit
-Route::post('/contact-form', [ContactController::class, 'submitContact']);
+Route::post('v1/contact-form', [ContactController::class, 'submitContact']);
 
 // get home page cms data
 Route::get('/cms/home', [HomePageController::class, 'home']);
