@@ -107,6 +107,16 @@
                     </ul>
                 </li>
 
+                {{-- Manage Order --}}
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.qa.*') ? 'has-link active' : '' }}"
+                        data-bs-toggle="slide" href="#">
+                        {{-- <i class="side-menu__icon fa-brands fa-first-order"></i> --}}
+                        <i class="side-menu__icon fa-solid fa-circle-question"></i>
+                        <span class="side-menu__label">Support Corner</span>
+                    </a>
+                </li>
+
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.cms.privecyandterms.*') ? 'has-link active' : '' }}"
                         data-bs-toggle="slide" href="#">
@@ -251,64 +261,5 @@
         color: #333;
         font-weight: 500;
         text-decoration: none;
-    }
-
-    .side-menu__item:hover,
-    .side-menu__item.active,
-    .side-menu__item.has-link.active {
-        background-color: #05402e !important;
-        color: #ffffff !important;
-        border-radius: 6px;
-    }
-
-    /* Icons & labels follow parent color */
-    .side-menu__item:hover .side-menu__icon,
-    .side-menu__item:hover .side-menu__label,
-    .side-menu__item:hover .angle,
-    .side-menu__item.active .side-menu__icon,
-    .side-menu__item.active .side-menu__label,
-    .side-menu__item.active .angle,
-    .side-menu__item.has-link.active .side-menu__icon,
-    .side-menu__item.has-link.active .side-menu__label,
-    .side-menu__item.has-link.active .angle {
-        color: #ffffff !important;
-        fill: #ffffff !important;
-    }
-
-    /* SVG icon inside active/hover */
-    .side-menu__item:hover .side-menu__icon path,
-    .side-menu__item.active .side-menu__icon path,
-    .side-menu__item.has-link.active .side-menu__icon path {
-        fill: #ffffff !important;
-    }
-
-    /* ── Sub-menu items: hover + active ── */
-    .slide-menu .slide-item {
-        transition: background-color 0.25s ease, color 0.25s ease, padding-left 0.2s ease;
-        border-radius: 5px;
-        margin: 1px 4px;
-        padding: 7px 14px;
-        display: block;
-    }
-
-    .slide-menu .slide-item:hover,
-    .slide-menu .slide-item.active {
-        background-color: #05402e !important;
-        color: #ffffff !important;
-        padding-left: 18px;
-    }
-
-    /* Left accent bar on active parent */
-    .side-menu__item.active::before,
-    .side-menu__item.has-link.active::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 3px;
-        height: 60%;
-        background: #05402e;
-        border-radius: 0 3px 3px 0;
     }
 </style>

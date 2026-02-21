@@ -127,7 +127,7 @@
                             <div id="filterBody" style="display:none; margin-top:16px;">
                                 <hr class="mt-0 mb-3">
                                 <div class="row align-items-end g-3">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label class="form-label">Search</label>
                                         <input type="text" id="searchFilter" class="form-control"
                                             placeholder="Search by name, email, username...">
@@ -158,9 +158,9 @@
                                             <i class="fe fe-refresh-cw"></i>
                                         </button>
                                     </div>
-                                    <div class="col-md-1 d-flex align-items-end">
-                                        <label class="deleted-toggle-label mb-0" for="showDeletedFilter"
-                                            style="min-width:unset; padding:8px 12px;">
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <label class="deleted-toggle-label" for="showDeletedFilter"
+                                            style="min-width:unset; padding:4px 12px;">
                                             <input type="checkbox" id="showDeletedFilter" class="deleted-toggle-input">
                                             <span class="deleted-toggle-track">
                                                 <span class="deleted-toggle-thumb"></span>
@@ -551,6 +551,7 @@
             background: #f8f9fa;
             transition: border-color .25s, background .25s;
             user-select: none;
+            margin-bottom:0px !important;
         }
 
         .deleted-toggle-label:hover {

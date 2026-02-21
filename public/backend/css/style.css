@@ -32474,7 +32474,7 @@ body.rtl {
    padding-right: 20px !important;
 }
 .rtl .slide-menu li .slide-item:before {
-   /* content: "\e0e7"; */
+   content: "\e0e7";
 }
 .rtl .sub-slide-menu {
    padding: 0 0 15px 15px;
@@ -50947,7 +50947,7 @@ div.dtr-bs-modal table.table tr:first-child td {
 }
 .closed-leftmenu .slide-menu li .slide-item:before {
    color: #68798b;
-   /* content: "\e0e7"; */
+   content: "\e0e7";
    font-family: typicons;
    font-size: 10px;
    font-style: normal;
@@ -54527,7 +54527,7 @@ div.dtr-bs-modal table.table tr:first-child td {
 }
 .slide-menu li .slide-item:before {
    color: #68798b;
-   /* content: "\e0e7"; */
+   content: "\e0e7";
    font-family: typicons;
    font-size: 13px;
    font-style: normal;
@@ -54638,7 +54638,7 @@ div.dtr-bs-modal table.table tr:first-child td {
       z-index: 9;
    }
    .app.sidebar-mini.sidenav-toggled .side-menu__item {
-      border-radius: 0;
+      border-radius: 6px !important;
    }
    .sidebar-mini.sidenav-toggled .app-sidebar__user .avatar-md {
       margin: 0 auto;
@@ -54996,7 +54996,7 @@ div.dtr-bs-modal table.table tr:first-child td {
    color: var(--primary-bg-color) !important;
 }
 .app.sidenav-toggled .side-menu .side-menu__icon {
-   font-size: 1.5rem !important;
+   font-size: 1.2rem !important;
    width: 1.3rem !important;
 }
 .sidebar-open #menu-icon {

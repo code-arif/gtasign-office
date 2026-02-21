@@ -1,4 +1,6 @@
-@extends('backend.app', ['title' => 'Tags'])
+@extends('backend.app')
+
+@section('title', 'Tags')
 
 @section('content')
     <div class="app-content main-content mt-0">

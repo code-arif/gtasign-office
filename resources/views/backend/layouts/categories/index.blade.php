@@ -1,4 +1,6 @@
-@extends('backend.app', ['title' => 'Categories Management'])
+@extends('backend.app')
+
+@section('title', 'Categories Management')
 
 @push('styles')
     <link href="{{ asset('default/datatable.css') }}" rel="stylesheet" />
