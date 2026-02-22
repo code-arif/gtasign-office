@@ -11,7 +11,7 @@ class OrderService
         return Order::with([
             'buyer.profile',
             'seller.profile',
-            'gig',
+            'gig.primaryImage',
             'room',
         ])
             ->where('seller_id', $sellerId)

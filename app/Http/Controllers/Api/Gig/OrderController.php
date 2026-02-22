@@ -61,7 +61,7 @@ class OrderController extends Controller
             $orders = $query->latest()->paginate($perPage);
 
             return $this->success('Orders retrieved successfully', [
-                'orders' => OrderInboxResource::collection($orders),
+                'orders' => OrderResource::collection($orders),
                 'pagination' => [
                     'total'        => $orders->total(),
                     'per_page'     => $orders->perPage(),

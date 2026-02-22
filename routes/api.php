@@ -226,7 +226,7 @@ Route::middleware(['auth:api'])->prefix('v1/order')->group(function () {
     Route::post('/client/{orderId}/checkout', [PaymentController::class, 'createCheckout']); // DONE: Mark as paid
 
     Route::get('/list', [OrderController::class, 'index']); // DONE: My order list
-    Route::get('/seller/orders/{buyerId}', [OrderController::class, 'MySellerOrders']);
+    Route::get('/seller/orders/{buyerId}', [OrderController::class, 'MySellerOrders']); // DONE: Seller order with buyer details
     Route::post('/delivery/{orderId}/submit-delivery-to-qa', [InboxOrderController::class, 'submitDelivery']); // DONE: Submit delivery to qa
 });
 

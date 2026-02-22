@@ -26,14 +26,20 @@ class OrderResource extends JsonResource
             'gig' => $this->when($this->gig, [
                 'id' => $this->gig?->id,
                 'title' => $this->gig?->title,
+                // Primary Image
+                'image' => $this->gig?->primaryImage
+                    ? asset($this->gig?->primaryImage->path)
+                    : asset('default/no_image.webp'),
             ]),
             'buyer' => [
                 'id' => $this->buyer->id,
                 'name' => $this->buyer->profile->full_name,
+                'avatar' => $this->buyer->profile->avatar_url ? asset($this->buyer->profile->avatar_url) : asset('default/profile.jpg'),
             ],
             'seller' => [
                 'id' => $this->seller->id,
                 'name' => $this->seller->profile->full_name,
+                'avatar' => $this->seller->profile->avatar_url ? asset($this->seller->profile->avatar_url) : asset('default/profile.jpg'),
             ],
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
         ];
