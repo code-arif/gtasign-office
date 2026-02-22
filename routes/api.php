@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Frontend\SettingsController;
 use App\Http\Controllers\Api\Gig\GigCategoryController;
 use App\Http\Controllers\Api\Gig\GigController;
 use App\Http\Controllers\Api\Gig\GigTagController;
+use App\Http\Controllers\Api\Gig\OrderController;
 use App\Http\Controllers\Api\Gig\ReviewController;
 use App\Http\Controllers\Api\Inbox\CustomOfferController;
 use App\Http\Controllers\Api\Inbox\InboxController;
@@ -224,6 +225,7 @@ Route::middleware(['auth:api'])->prefix('v1/order')->group(function () {
     Route::post('/client/create-from-gig/{gigId}', [InboxOrderController::class, 'createFromGig']); // DONE: Order from gig
     Route::post('/client/{orderId}/checkout', [PaymentController::class, 'createCheckout']); // DONE: Mark as paid
 
+    Route::get('/list', [OrderController::class, 'index']); // My order list
     Route::post('/delivery/{orderId}/submit-delivery-to-qa', [InboxOrderController::class, 'submitDelivery']); // DONE: Submit delivery to qa
 });
 
