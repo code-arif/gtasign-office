@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\Gig;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Inbox\OrderInboxResource;
+use App\Http\Resources\Order\OrderResource;
 use App\Models\Order;
+use App\Services\Order\OrderService;
 use App\Traits\ApiResponse;
 use Exception;
 use Illuminate\Http\Request;
@@ -13,15 +15,14 @@ use Illuminate\Support\Facades\Log;
 class OrderController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(private OrderService $orderService) {}
+
     /**
      * Get authenticated user's order list.
      * Role-aware: client gets their purchases, expert gets their sales.
-     *
      * GET /api/v1/orders
      *
-     * Query params:
-     *   status   = pending_payment|active|qa_pending|delivered|completed|cancelled|disputed
-     *   per_page = 15 (default)
      */
     public function index(Request $request)
     {
@@ -72,6 +73,34 @@ class OrderController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error('Order list error: ' . $e->getMessage());
+            return $this->error(null, 'Failed to retrieve orders', 500);
+        }
+    }
+
+
+    public function MySellerOrders(Request $request, int $buyerId)
+    {
+        try {
+            $sellerId = auth()->id(); // logged-in seller
+            $perPage  = $request->input('per_page', 10);
+
+            $orders = $this->orderService->getSellerOrdersWithBuyer(
+                $sellerId,
+                $buyerId,
+                $perPage
+            );
+
+            return $this->success('Orders retrieved successfully', [
+                'orders' => OrderResource::collection($orders),
+                'pagination' => [
+                    'total'        => $orders->total(),
+                    'per_page'     => $orders->perPage(),
+                    'current_page' => $orders->currentPage(),
+                    'last_page'    => $orders->lastPage(),
+                ],
+            ]);
+        } catch (Exception $e) {
+            Log::error('Get seller orders error: ' . $e->getMessage());
             return $this->error(null, 'Failed to retrieve orders', 500);
         }
     }
