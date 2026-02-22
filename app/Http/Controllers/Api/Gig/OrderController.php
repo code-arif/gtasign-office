@@ -37,10 +37,13 @@ class OrderController extends Controller
                 'gig:id,title,price',
                 'buyer.profile:id,user_id,first_name,last_name,avatar,username',
                 'seller.profile:id,user_id,first_name,last_name,avatar,username',
-                'latestDelivery:id,order_id,delivery_number,status,submitted_at',
             ]);
-
-            return $isExpert;exit();
+            // $query = Order::with([
+            //     'gig:id,title,price',
+            //     'buyer.profile:id,user_id,first_name,last_name,avatar,username',
+            //     'seller.profile:id,user_id,first_name,last_name,avatar,username',
+            //     'latestDelivery:id,order_id,delivery_number,status,submitted_at',
+            // ]);
 
             // Scope to user's orders
             if ($isExpert) {
