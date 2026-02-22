@@ -40,6 +40,8 @@ class OrderController extends Controller
                 'latestDelivery:id,order_id,delivery_number,status,submitted_at',
             ]);
 
+            return $isExpert;exit();
+
             // Scope to user's orders
             if ($isExpert) {
                 $query->where('seller_id', $user->id);

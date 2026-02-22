@@ -255,9 +255,9 @@ Route::get('/v1/gigs/{gigId}/reviews', [ReviewController::class, 'index']);
 
 // Authenticated
 Route::middleware('auth:api')->group(function () {
-    Route::post('/v1/reviews/{orderId}', [ReviewController::class, 'store']);       // Client reviews order
-    Route::post('/v1/reviews/{reviewId}/reply', [ReviewController::class, 'reply']);       // Expert replies
-    Route::get('/v1/reviews/order/{orderId}', [ReviewController::class, 'checkOrderReview']); // Check if reviewed
+    Route::post('/v1/reviews/{orderId}', [ReviewController::class, 'store']); // DONE: Client reviews order
+    // Route::post('/v1/reviews/{reviewId}/reply', [ReviewController::class, 'reply']); // Expert replies
+    // Route::get('/v1/reviews/order/{orderId}', [ReviewController::class, 'checkOrderReview']); // Check if reviewed
 });
 
 
@@ -279,7 +279,7 @@ Route::prefix('v1/expert')->group(function () {
 });
 
 // contact from submit
-Route::post('v1/contact-form', [ContactController::class, 'submitContact']);
+Route::post('v1/contact-form', [ContactController::class, 'submitContact']); // DONE: Contact form submission
 
 // get home page cms data
 Route::get('/cms/home', [HomePageController::class, 'home']);

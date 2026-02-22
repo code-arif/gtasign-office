@@ -16783,7 +16783,7 @@ input[type="radio"] {
    background: var(--primary-bg-color);
 }
 .select2-container {
-   width: 20% !important;
+   /* width: 20% !important; */
 }
 .select2-results__option span img,
 .select2-selection__rendered span img {

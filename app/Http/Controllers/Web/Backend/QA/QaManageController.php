@@ -147,7 +147,7 @@ class QaManageController extends Controller
 
                 return '
                     <div>
-                        <span class="badge bg-' . $color . ' p-2">
+                        <span class="badge bg-' . $color . ' p-1 d-inline-flex align-items-center">
                             <i class="fe fe-' . $icon . ' me-1"></i>' . $label . '
                         </span>
                         ' . ($reviewedBy ? '<div class="mt-1"><small class="text-muted">by ' . e($reviewedBy) . '</small></div>' : '') . '

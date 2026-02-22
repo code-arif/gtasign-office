@@ -366,27 +366,61 @@
 
         /* ── Quick Approve ── */
         function quickApprove(reviewId) {
-            if (!confirm('Approve this delivery and send to client?')) return;
 
-            NProgress.start();
-            $.ajax({
-                url: `/admin/qa/${reviewId}/approve`,
-                type: 'POST',
-                success: function(res) {
-                    NProgress.done();
-                    if (res.success) {
-                        toastr.success(res.message);
-                        dataTable.ajax.reload();
-                    } else {
-                        toastr.error(res.message);
+            Swal.fire({
+                title: 'Approve Delivery?',
+                text: 'This will approve the QA and send the delivery to the client.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Approve',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true
+            }).then((result) => {
+
+                if (!result.isConfirmed) return;
+
+                NProgress.start();
+
+                $.ajax({
+                    url: `/admin/qa/${reviewId}/approve`,
+                    type: 'POST',
+                    success: function(res) {
+                        NProgress.done();
+
+                        if (res.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Approved!',
+                                text: res.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            dataTable.ajax.reload(null, false);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Failed!',
+                                text: res.message
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        NProgress.done();
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: xhr.responseJSON?.message || 'Failed to approve'
+                        });
                     }
-                },
-                error: function(xhr) {
-                    NProgress.done();
-                    toastr.error(xhr.responseJSON?.message || 'Failed to approve');
-                }
+                });
+
             });
         }
+
 
         /* ── Open Reject Modal ── */
         function openRejectModal(reviewId) {
@@ -456,12 +490,19 @@
             const chevron = document.getElementById('filterChevron');
             const hint = document.getElementById('filterCollapseHint');
             const isOpen = body.style.display !== 'none';
+
             if (isOpen) {
                 $(body).slideUp(250);
                 chevron.style.transform = 'rotate(0deg)';
                 hint.textContent = 'Click to expand';
             } else {
-                $(body).slideDown(250);
+                $(body).slideDown(250, function() {
+
+                    // 🔥 FIX SELECT2 WIDTH AFTER SHOW
+                    $('#statusFilter').select2('destroy');
+                    initSelect2();
+                });
+
                 chevron.style.transform = 'rotate(180deg)';
                 hint.textContent = 'Click to collapse';
             }
@@ -476,9 +517,10 @@
         function initSelect2() {
             if ($('.select3').length && typeof $.fn.select2 !== 'undefined') {
                 $('.select3').select2({
-                    placeholder: 'Select',
+                    placeholder: 'All Status',
                     allowClear: true,
-                    width: '100%'
+                    width: 'resolve', // important
+                    dropdownAutoWidth: true
                 });
             }
         }

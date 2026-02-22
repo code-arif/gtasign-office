@@ -15,7 +15,7 @@ class RespondToOfferRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'rejection_reason' => 'required|string|max:500',
+            'rejection_reason' => 'nullable|string|max:500',
         ];
     }
 }

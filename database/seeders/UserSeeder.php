@@ -6,13 +6,14 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\PermissionRegistrar;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
         if (!app()->environment('local')) {
-            $this->command->warn('⚠️  UserSeeder skipped — not in local environment.');
+            $this->command->warn('UserSeeder skipped — not in local environment.');
             return;
         }
 
@@ -24,7 +25,7 @@ class UserSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // Reset Spatie permission cache
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         /* =========================================
          * ROLES
@@ -86,7 +87,7 @@ class UserSeeder extends Seeder
         /* =========================================
          * EXPERTS — web + api both role
          * ========================================= */
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 5; $i++) {
             $users[] = [
                 'id'                => $id,
                 'email'             => "expert{$i}@example.com",
@@ -117,9 +118,9 @@ class UserSeeder extends Seeder
         }
 
         /* =========================================
-         * CLIENTS — web + api দুটো role
+         * CLIENTS — web + api two role
          * ========================================= */
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 5; $i++) {
             $users[] = [
                 'id'                => $id,
                 'email'             => "client{$i}@example.com",
@@ -155,7 +156,7 @@ class UserSeeder extends Seeder
         DB::table('users')->insert($users);
         DB::table('model_has_roles')->insert($modelRoles);
 
-        $this->command->info('✅ Users seeded: 2 admins, 10 experts, 10 clients.');
-        $this->command->info('✅ Each expert & client has both web + api guard roles.');
+        $this->command->info('Users seeded: 2 admins, 5 experts, 5 clients.');
+        $this->command->info('Each expert & client has both web + api guard roles.');
     }
 }

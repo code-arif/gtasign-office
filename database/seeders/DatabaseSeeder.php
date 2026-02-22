@@ -22,6 +22,10 @@ class DatabaseSeeder extends Seeder
             GigSeeder::class,
             // GigImageSeeder::class,
             GigTagSeeder::class,
+            RoomSeeder::class,
+            OrderSeeder::class,
+            OrderDeliverySeeder::class,
+            OrderQaReviewSeeder::class,
         ]);
 
         // optional: show output
