@@ -83,11 +83,13 @@ class OrderController extends Controller
         try {
             $sellerId = auth()->id(); // logged-in seller
             $perPage  = $request->input('per_page', 10);
+            $status  = $request->input('status');
 
             $orders = $this->orderService->getSellerOrdersWithBuyer(
                 $sellerId,
                 $buyerId,
-                $perPage
+                $perPage,
+                $status,
             );
 
             return $this->success('Orders retrieved successfully', [
