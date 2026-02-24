@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Web\Backend\Gig;
 
-use Exception;
-use App\Models\Category;
-use Illuminate\Http\Request;
-use Yajra\DataTables\DataTables;
-use Illuminate\Http\JsonResponse;
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\DataTables;
 
 class CategoryManageController extends Controller
 {
@@ -32,19 +33,23 @@ class CategoryManageController extends Controller
                 })
                 ->addColumn('status', function ($data) {
                     $isActive = $data->is_active;
-                    $backgroundColor = $isActive ? '#05402e' : '#ccc';
-                    $sliderTranslateX = $isActive ? '26px' : '2px';
-                    $sliderStyles = "position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background-color: white; border-radius: 50%; transition: transform 0.3s ease; transform: translateX($sliderTranslateX);";
 
-                    $status = '<div class="form-check form-switch" style="margin-left:40px; position: relative; width: 50px; height: 24px; background-color: ' . $backgroundColor . '; border-radius: 12px; transition: background-color 0.3s ease; cursor: pointer;">';
-                    $status .= '<input type="checkbox" class="form-check-input status-toggle"
+                    return '
+                    <label class="custom-switch">
+                        <input type="checkbox"
+                            class="status-toggle"
                             data-id="' . $data->id . '"
-                            ' . ($isActive ? 'checked' : '') . '
-                            style="position: absolute; width: 100%; height: 100%; opacity: 0; z-index: 2; cursor: pointer;">';
-                    $status .= '<span style="' . $sliderStyles . '"></span>';
-                    $status .= '</div>';
+                            ' . ($isActive ? 'checked' : '') . '>
+                        <span class="switch-slider"></span>
+                    </label>
+                ';
+                })
+                ->addColumn('image', function ($data) {
+                    $imageUrl = $data->image
+                        ? asset('storage/' . $data->image)
+                        : asset('default/no_image.webp'); // fallback
 
-                    return $status;
+                    return '<img src="' . $imageUrl . '" alt="' . $data->name . '" style="width:50px; height:50px; object-fit:cover; border-radius:5px;">';
                 })
                 ->addColumn('action', function ($data) use ($categories) {
                     $buttons = '<div class="btn-group btn-group-sm" role="group">';
@@ -65,7 +70,7 @@ class CategoryManageController extends Controller
 
                     return $buttons;
                 })
-                ->rawColumns(['parent_name', 'status', 'action'])
+                ->rawColumns(['parent_name', 'status', 'action', 'image'])
                 ->make(true);
         }
 
@@ -109,6 +114,7 @@ class CategoryManageController extends Controller
             'parent_id' => 'nullable|exists:categories,id',
             'description' => 'nullable|string',
             'order' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -119,27 +125,27 @@ class CategoryManageController extends Controller
         }
 
         try {
+
+            // Upload Image
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = Helper::fileUpload($request->file('image'), 'categories');
+            }
+
             $category = Category::create([
                 'name' => $request->name,
                 'slug' => $request->slug,
                 'parent_id' => $request->parent_id,
                 'description' => $request->description,
                 'order' => $request->order ?? 0,
-                'is_active' => $request->has('is_active') ? true : false,
+                'image' => $imagePath, // save
+                'is_active' => $request->has('is_active'),
             ]);
-
-            // Get updated parent categories
-            $parentCategories = Category::whereNull('parent_id')
-                ->where('is_active', true)
-                ->where('id', '!=', $category->id)
-                ->orderBy('name')
-                ->get();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Category created successfully!',
-                'category' => $category,
-                'parent_categories' => $parentCategories
+                'category' => $category
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -162,6 +168,7 @@ class CategoryManageController extends Controller
             'parent_id' => 'nullable|exists:categories,id|not_in:' . $id,
             'description' => 'nullable|string',
             'order' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -172,27 +179,29 @@ class CategoryManageController extends Controller
         }
 
         try {
+
+            $imagePath = $category->image;
+
+            // If new image uploaded → delete old + upload new
+            if ($request->hasFile('image')) {
+                Helper::fileDelete($category->image);
+                $imagePath = Helper::fileUpload($request->file('image'), 'categories');
+            }
+
             $category->update([
                 'name' => $request->name,
                 'slug' => $request->slug,
                 'parent_id' => $request->parent_id,
                 'description' => $request->description,
                 'order' => $request->order ?? $category->order,
-                'is_active' => $request->has('is_active') ? true : false,
+                'image' => $imagePath,
+                'is_active' => $request->has('is_active'),
             ]);
-
-            // Get updated parent categories
-            $parentCategories = Category::whereNull('parent_id')
-                ->where('is_active', true)
-                ->where('id', '!=', $id)
-                ->orderBy('name')
-                ->get();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Category updated successfully!',
-                'category' => $category,
-                'parent_categories' => $parentCategories
+                'category' => $category
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -210,10 +219,12 @@ class CategoryManageController extends Controller
         try {
             $category = Category::with('children')->findOrFail($id);
 
-            if ($category->children->isNotEmpty()) {
-                foreach ($category->children as $child) {
-                    $child->delete();
-                }
+            // delete image
+            Helper::fileDelete($category->image);
+
+            foreach ($category->children as $child) {
+                Helper::fileDelete($child->image);
+                $child->delete();
             }
 
             $category->delete();

@@ -118,8 +118,6 @@ class EscrowService
 
     /**
      * Process a withdrawal request — transfer to expert's Stripe Connect account.
-     *
-     * @param  int  $withdrawalId
      */
     public function processWithdrawal(int $withdrawalId): WithdrawalRequest
     {

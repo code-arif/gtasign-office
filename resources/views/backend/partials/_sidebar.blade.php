@@ -147,14 +147,14 @@
                     </a>
                     <ul class="slide-menu">
                         <li><a href="{{ route('admin.cms.home.hero.section') }}"
-                                class="slide-item {{ request()->routeIs('admin.cms.home.hero*') ? 'active' : '' }}">
+                                class="slide-item {{ request()->routeIs('admin.cms.home.hero') ? 'active' : '' }}">
                                 Hero Section </a></li>
-                        <li><a href="{{ route('admin.cms.home.ai-system.section') }}"
-                                class="slide-item {{ request()->routeIs('admin.cms.home.ai-system.section*') ? 'active' : '' }}">
-                                AI System </a></li>
-                        {{-- <li><a href="{{ route('admin.cms.home.slider.index') }}"
-                                class="slide-item {{ request()->routeIs('admin.cms.home.slider*') ? 'active' : '' }}">
-                                Partners Section </a></li> --}}
+                        <li><a href="{{ route('admin.cms.home.tags.section') }}"
+                                class="slide-item {{ request()->routeIs('admin.cms.home.tags.section') ? 'active' : '' }}">
+                                Tags Section </a></li>
+                        <li><a href="{{ route('admin.cms.home.ai-security.index') }}"
+                                class="slide-item {{ request()->routeIs('admin.cms.ai-security.section') ? 'active' : '' }}">
+                                Security Expert Section </a></li>
                         {{-- <li><a href="{{ route('admin.cms.home.features.index') }}"
                                 class="slide-item {{ request()->routeIs('admin.cms.home.features*') ? 'active' : '' }}">
                                 Features Section </a></li> --}}

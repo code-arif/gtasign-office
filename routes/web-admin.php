@@ -56,10 +56,7 @@ Route::get("dashboard", [DashboardController::class, 'index'])->name('dashboard'
 */
 Route::group(['prefix' => 'categories', 'as' => 'categories.'], function () {
     Route::get('/', [CategoryManageController::class, 'index'])->name('index');
-    Route::get('/create', [CategoryManageController::class, 'create'])->name('create');
     Route::post('/store', [CategoryManageController::class, 'store'])->name('store');
-    Route::get('/show/{id}', [CategoryManageController::class, 'show'])->name('show');
-    Route::get('/edit/{id}', [CategoryManageController::class, 'edit'])->name('edit');
     Route::post('/update/{id}', [CategoryManageController::class, 'update'])->name('update');
     Route::delete('/delete/{id}', [CategoryManageController::class, 'destroy'])->name('destroy');
     Route::get('/status/{id}', [CategoryManageController::class, 'status'])->name('status');
@@ -194,7 +191,6 @@ Route::prefix('contact')->name('contact.')->group(function () {
     Route::get('/status/{id}', [ContactController::class, 'status'])->name('status');
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | CMS Management Routes
@@ -213,20 +209,24 @@ Route::prefix('cms')->name('cms.')->group(function () {
     });
 
     // home - hero section
-    Route::get('/home/hero', [HomePageController::class, 'heroIndex'])->name('home.hero.section'); // DONE: Show hero section data
-    Route::post('/home/hero/update', [HomePageController::class, 'heroUpdate'])->name('home.hero.section.update'); // DONE: Update hero section data
+    Route::get('/home/hero-section', [HomePageController::class, 'heroIndex'])->name('home.hero.section'); // DONE: Show hero section data
+    Route::post('/home/hero-section/update', [HomePageController::class, 'heroUpdate'])->name('home.hero.section.update'); // DONE: Update hero section data
 
     // home - ai sysmtem section
-    Route::get('/home/ai-system', [HomePageController::class, 'aiSystemIndex'])->name('home.ai-system.section');
-    Route::post('/home/ai-system/update', [HomePageController::class, 'aiSystemUpdate'])->name('home.ai-system.section.update');
+    Route::get('/home/tags-section', [HomePageController::class, 'tagSectionIndex'])->name('home.tags.section');
+    Route::post('/home/tags-section/update', [HomePageController::class, 'tagSectionUpdate'])->name('home.tags.section.update');
 
-    // home page partner section Routes
-    Route::get('/home/partner', [SliderController::class, 'index'])->name('home.slider.index');
-    Route::post('/partner/update', [SliderController::class, 'headerUpdate'])->name('home.slider.header.update');
-    Route::post('/partner/store', [SliderController::class, 'store'])->name('home.slider.store');
-    Route::post('/partner/{id}/status', [SliderController::class, 'updateStatus'])->name('home.slider.status');
-    Route::delete('/partner/{id}', [SliderController::class, 'destroy'])->name('home.slider.destroy');
-    Route::post('/partner/update-order', [SliderController::class, 'updateOrder'])->name('home.slider.updateOrder');
+    // AI SECURITY SECTION
+    Route::get('ai-security', [HomePageController::class, 'aiSecurityIndex'])->name('home.ai-security.index');
+    Route::post('ai-security/update', [HomePageController::class, 'aiSecurityUpdate'])->name('home.ai-security.update');
+
+    // ITEMS (Cards)
+    Route::get('ai-security/items', [HomePageController::class, 'aiSecurityItems'])->name('home.ai-security.items');
+    Route::post('ai-security/item/store', [HomePageController::class, 'aiSecurityItemStore'])->name('home.ai-security.item.store');
+    Route::get('ai-security/item/edit/{id}', [HomePageController::class, 'aiSecurityItemEdit'])->name('home.ai-security.item.edit');
+    Route::post('ai-security/item/update/{id}', [HomePageController::class, 'aiSecurityItemUpdate'])->name('home.ai-security.item.update');
+    Route::delete('ai-security/item/delete/{id}', [HomePageController::class, 'aiSecurityItemDestroy'])->name('home.ai-security.item.destroy');
+
 
     // home page feature section
     Route::get('/home/features', [FeaturesController::class, 'index'])->name('home.features.index');

@@ -14,7 +14,7 @@
                 <div class="page-header">
                     <div>
                         <h1 class="page-title">Home Page</h1>
-                        <small>Home Page - AI System Section Data</small>
+                        <small>Home Page - Tags Section Data</small>
                     </div>
                     <div class="ms-auto pageheader-btn">
                         <ol class="breadcrumb">
@@ -36,7 +36,7 @@
                             </div>
                             <div class="card-body">
                                 <form class="form-horizontal" method="post"
-                                    action="{{ route('admin.cms.home.ai-system.section.update') }}"
+                                    action="{{ route('admin.cms.home.tags.section.update') }}"
                                     enctype="multipart/form-data">
                                     @csrf
                                     <div class="row mb-4">

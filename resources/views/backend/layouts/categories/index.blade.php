@@ -46,6 +46,7 @@
                                         <thead>
                                             <tr>
                                                 <th class="wd-10p">ID</th>
+                                                <th class="wd-15p">Image</th>
                                                 <th class="wd-20p">Name</th>
                                                 <th class="wd-20p">Slug</th>
                                                 <th class="wd-15p">Parent</th>
@@ -132,6 +133,15 @@
                                 </div>
                             </div>
 
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="form-label">Category Image</label>
+                                    <input type="file" class="form-control dropify" name="image" id="image"
+                                        data-allowed-file-extensions="jpg jpeg png webp" data-max-file-size="2M">
+                                    <div class="invalid-feedback" id="image-error"></div>
+                                </div>
+                            </div>
+
                             <div class="col-md-12 mt-3">
                                 <div class="form-check" style="display: flex; align-items: center;">
                                     <input type="checkbox" class="form-check-input" name="is_active" id="is_active"
@@ -192,6 +202,13 @@
                         orderable: false,
                         searchable: false,
                         width: '10%'
+                    },
+                    {
+                        data: 'image',
+                        name: 'image',
+                        orderable: false,
+                        searchable: false,
+                        width: '15%'
                     },
                     {
                         data: 'name',
@@ -337,6 +354,16 @@
                             $('#description').val(category.description);
                             $('#is_active').prop('checked', category.is_active);
 
+                            var drEvent = $('#image').dropify({
+                                defaultFile: category.image_url // accessor in model
+                            });
+                            drEvent = drEvent.data('dropify');
+                            drEvent.resetPreview();
+                            drEvent.clearElement();
+                            drEvent.settings.defaultFile = category.image_url;
+                            drEvent.destroy();
+                            drEvent.init();
+
                             // Update parent categories dropdown
                             if (response.categories) {
                                 updateParentCategoriesDropdown(response.categories);
@@ -465,11 +492,14 @@
             $('#categoryForm').on('submit', function(e) {
                 e.preventDefault();
 
-                var formData = $(this).serialize();
+                var formData = new FormData(this); // FormData for file
                 var categoryId = $('#category_id').val();
-                var url = categoryId ? "{{ url('admin/categories') }}/" + categoryId :
+                var url = categoryId ? "{{ url('admin/categories/update') }}/" + categoryId :
                     "{{ route('admin.categories.store') }}";
-                var method = categoryId ? 'PUT' : 'POST';
+                var method = categoryId ? 'POST' : 'POST';
+                if (categoryId) {
+                    formData.append('_method', 'POST');
+                }
 
                 clearFormErrors();
                 $('#submitBtn').prop('disabled', true);
@@ -480,19 +510,17 @@
                     url: url,
                     type: method,
                     data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function(response) {
                         if (response.success) {
                             toastr.success(response.message);
                             $('#categoryModal').modal('hide');
-
-                            // Update parent categories dropdown dynamically
                             if (response.parent_categories) {
                                 updateParentCategoriesDropdown(response.parent_categories);
                             }
-
                             table.ajax.reload(null, false);
                         } else {
-                            // Display validation errors
                             if (response.errors) {
                                 $.each(response.errors, function(key, value) {
                                     $('#' + key).addClass('is-invalid');
@@ -516,18 +544,11 @@
             });
 
             // Status toggle handler - FIXED
-            $(document).on('click', '.form-check.form-switch', function(e) {
-                // Prevent multiple triggers if clicking directly on checkbox
-                if ($(e.target).hasClass('status-toggle')) {
-                    return;
-                }
+            $(document).on('change', '.status-toggle', function() {
 
-                var checkbox = $(this).find('.status-toggle');
+                var checkbox = $(this);
                 var id = checkbox.data('id');
                 var isChecked = checkbox.is(':checked');
-
-                // Toggle the checkbox visually
-                checkbox.prop('checked', !isChecked);
 
                 Swal.fire({
                     title: 'Change Status?',
@@ -537,40 +558,29 @@
                     confirmButtonText: 'Yes',
                     cancelButtonText: 'No',
                 }).then((result) => {
+
                     if (result.isConfirmed) {
+
                         $.ajax({
                             url: "{{ url('admin/categories/status') }}/" + id,
                             type: 'GET',
                             success: function(response) {
+
                                 if (response.success) {
                                     toastr.success(response.message);
-                                    // Update the visual switch
-                                    var switchDiv = checkbox.closest(
-                                        '.form-check.form-switch');
-                                    if (response.is_active) {
-                                        switchDiv.css('background-color', '#05402e');
-                                        switchDiv.find('span').css('transform',
-                                            'translateX(26px)');
-                                    } else {
-                                        switchDiv.css('background-color', '#ccc');
-                                        switchDiv.find('span').css('transform',
-                                            'translateX(2px)');
-                                    }
                                 } else {
                                     toastr.error(response.message);
-                                    // Revert if failed
-                                    checkbox.prop('checked', isChecked);
+                                    checkbox.prop('checked', !isChecked);
                                 }
                             },
                             error: function() {
                                 toastr.error('An error occurred!');
-                                // Revert if error
-                                checkbox.prop('checked', isChecked);
+                                checkbox.prop('checked', !isChecked);
                             }
                         });
+
                     } else {
-                        // If cancelled, revert the checkbox
-                        checkbox.prop('checked', isChecked);
+                        checkbox.prop('checked', !isChecked);
                     }
                 });
             });
@@ -628,8 +638,9 @@
         .custom-switch {
             position: relative;
             display: inline-block;
-            width: 70px;
-            height: 36px;
+            width: 50px;
+            height: 24px;
+            cursor: pointer;
         }
 
         .custom-switch input {
@@ -637,6 +648,7 @@
             width: 0;
             height: 0;
         }
+
 
         .custom-switch-label {
             position: absolute;
@@ -703,6 +715,34 @@
         .btn-group-sm .btn {
             padding: 0.25rem 0.5rem;
             font-size: 0.875rem;
+        }
+
+        .switch-slider {
+            position: absolute;
+            inset: 0;
+            background-color: #ccc;
+            border-radius: 34px;
+            transition: 0.3s;
+        }
+
+        .switch-slider:before {
+            content: "";
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            top: 2px;
+            background-color: #fff;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .custom-switch input:checked+.switch-slider {
+            background-color: #05402e;
+        }
+
+        .custom-switch input:checked+.switch-slider:before {
+            transform: translateX(26px);
         }
     </style>
 @endpush

@@ -69,31 +69,31 @@ class HomePageController extends Controller
     /**
      * show home page ai system section data and section item
      */
-    public function aiSystemIndex(Request $request)
+    public function tagSectionIndex(Request $request)
     {
-        $data = CMS::where('page', 'home')->where('section', 'ai-system')->where('name', 'item')->first();
+        $data = CMS::where('page', 'home')->where('section', 'tags-section')->where('name', 'item')->first();
 
-        return view("backend.layouts.cms.home.ai-system", compact(["data"]));
+        return view("backend.layouts.cms.home.tags-section", compact(["data"]));
     }
 
     /**
      * update training camp section
      **/
-    public function aiSystemUpdate(CmsRequest $request)
+    public function tagSectionUpdate(CmsRequest $request)
     {
         try {
             $validated_data = $request->validated();
 
             // get the existing record
             $existing = CMS::where('page', 'home')
-                ->where('section', 'ai-system')
+                ->where('section', 'tags-section')
                 ->where('name', 'item')
                 ->first();
 
             CMS::updateOrCreate(
                 [
                     'page' => 'home',
-                    'section' => 'ai-system',
+                    'section' => 'tags-section',
                     'name' => 'item'
                 ],
                 $validated_data
@@ -107,42 +107,106 @@ class HomePageController extends Controller
 
 
     /**
-     * show home page operation section data
+     * Show AI Security Section
      */
-    public function operationIndex(Request $request)
+    public function aiSecurityIndex()
     {
-        $data = CMS::where('page', 'home')->where('section', 'operations')->where('name', 'item')->first();
+        $header = CMS::where('page', 'home')
+            ->where('section', 'ai-security')
+            ->where('name', 'header')
+            ->first();
 
-        return view("backend.layouts.cms.home.operations", compact(["data"]));
+        return view("backend.layouts.cms.home.ai-security", compact('header'));
     }
 
-
-    /**
-     * update operation section
-     **/
-    public function operationUpdate(CmsRequest $request)
+    /*
+    * Update AI Security Section
+    */
+    public function aiSecurityUpdate(CmsRequest $request)
     {
         try {
-            $validated_data = $request->validated();
-
-            // get the existing record
-            $existing = CMS::where('page', 'home')
-                ->where('section', 'operations')
-                ->where('name', 'item')
-                ->first();
 
             CMS::updateOrCreate(
                 [
                     'page' => 'home',
-                    'section' => 'operations',
-                    'name' => 'item'
+                    'section' => 'ai-security',
+                    'name' => 'header'
                 ],
-                $validated_data
+                $request->validated()
             );
 
-            return back()->with('t-success', 'Content updated successfully!');
+            return back()->with('t-success', 'AI Security Section Updated');
         } catch (Exception $e) {
-            return back()->with('t-error', 'Failed to update: ' . $e->getMessage());
+            return back()->with('t-error', $e->getMessage());
         }
+    }
+
+    /**
+     * Get all AI Security Item
+     */
+    public function aiSecurityItems()
+    {
+        $items = CMS::where('page', 'home')
+            ->where('section', 'ai-security')
+            ->where('name', 'item')
+            ->latest()
+            ->get();
+
+        return datatables()->of($items)
+            ->addIndexColumn()
+            ->addColumn('action', function ($row) {
+                return '
+                <button class="btn btn-sm btn-primary editItem" data-id="' . $row->id . '">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="showDeleteConfirm(' . $row->id . ')">Delete</button>
+            ';
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    /**
+     * AI Security Item Store
+     */
+    public function aiSecurityItemStore(Request $request)
+    {
+        $request->validate([
+            'title' => 'required',
+            'points' => 'required|array'
+        ]);
+
+        CMS::create([
+            'page' => 'home',
+            'section' => 'ai-security',
+            'name' => 'item',
+            'title' => $request->title,
+            'metadata' => json_encode(['points' => $request->points])
+        ]);
+
+        return response()->json(['status' => 1, 'message' => 'Item Created']);
+    }
+
+    /**
+     * Update AI Security Item
+     */
+    public function aiSecurityItemUpdate(Request $request, $id)
+    {
+        $cms = CMS::findOrFail($id);
+
+        $cms->update([
+            'title' => $request->title,
+            'metadata' => json_encode(['points' => $request->points])
+        ]);
+
+        return response()->json(['status' => 1, 'message' => 'Updated']);
+    }
+
+    /**
+     * Destory AI Security Item
+     */
+    public function aiSecurityItemDestroy($id)
+    {
+        CMS::findOrFail($id)->delete();
+
+        return response()->json(['message' => 'Deleted']);
     }
 }

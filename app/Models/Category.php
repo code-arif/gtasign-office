@@ -18,6 +18,7 @@ class Category extends Model
         'description',
         'is_active',
         'order',
+        'image',
     ];
 
     protected $casts = [
@@ -59,5 +60,12 @@ class Category extends Model
     public function scopeChildren($query)
     {
         return $query->whereNotNull('parent_id');
+    }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image
+            ? asset('storage/' . $this->image)
+            : asset('default/no_image.webp');
     }
 }
