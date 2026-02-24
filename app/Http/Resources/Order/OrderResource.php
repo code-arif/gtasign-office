@@ -29,7 +29,7 @@ class OrderResource extends JsonResource
                 'title' => $this->gig?->title,
                 // Primary Image
                 'image' => $this->gig?->primaryImage
-                    ? asset( '/' . $this->gig?->primaryImage->path)
+                    ? asset( 'storage/' . $this->gig?->primaryImage->path)
                     : asset('default/no_image.webp'),
             ]),
             'buyer' => [
