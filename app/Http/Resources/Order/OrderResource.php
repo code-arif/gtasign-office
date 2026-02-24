@@ -23,6 +23,7 @@ class OrderResource extends JsonResource
             'expected_delivery_at' => $this->expected_delivery_at?->format('Y-m-d H:i:s'),
             'days_until_delivery' => $this->daysUntilDelivery(),
             'is_late' => $this->isLate(),
+            'room_id' => $this->room_id,
             'gig' => $this->when($this->gig, [
                 'id' => $this->gig?->id,
                 'title' => $this->gig?->title,
