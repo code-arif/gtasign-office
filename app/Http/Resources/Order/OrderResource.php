@@ -35,12 +35,12 @@ class OrderResource extends JsonResource
             'buyer' => [
                 'id' => $this->buyer->id,
                 'name' => $this->buyer->profile->full_name,
-                'avatar' => $this->buyer->profile->avatar_url ? asset($this->buyer->profile->avatar_url) : asset('default/profile.jpg'),
+                'avatar' => $this->buyer->profile->avatar_url ? asset('storage/' . $this->buyer->profile->avatar_url) : asset('default/profile.jpg'),
             ],
             'seller' => [
                 'id' => $this->seller->id,
                 'name' => $this->seller->profile->full_name,
-                'avatar' => $this->seller->profile->avatar_url ? asset($this->seller->profile->avatar_url) : asset('default/profile.jpg'),
+                'avatar' => $this->seller->profile->avatar_url ? asset('storage/' . $this->seller->profile->avatar_url) : asset('default/profile.jpg'),
             ],
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
         ];
