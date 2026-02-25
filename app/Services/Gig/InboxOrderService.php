@@ -438,6 +438,7 @@ class InboxOrderService
                     'extension_id' => $extension->id,
                     'additional_days' => $data['additional_days'],
                     'reason' => $data['reason'],
+                    'extenstion' => $extension
                 ],
             ]);
 
