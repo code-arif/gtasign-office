@@ -70,7 +70,8 @@ class InboxService
             'receiver.profile',
             'customOffer.gig',
             'order.gig',
-            'delivery'
+            'delivery',
+            'extensionRequest'
         ])
             ->where('room_id', $roomId)
             ->latest('id')

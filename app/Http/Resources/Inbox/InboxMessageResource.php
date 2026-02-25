@@ -19,7 +19,7 @@ class InboxMessageResource extends JsonResource
             'sender' => [
                 'id' => $this->sender?->id,
                 'name' => $this->sender->profile?->first_name . ' ' . $this->sender->profile?->last_name,
-                'role'=> $this->sender->role,
+                'role' => $this->sender->role,
                 'avatar' => $this->sender->profile?->avatar ? asset('storage/' . $this->sender->profile?->avatar) : asset('default/profile.jpg'),
             ],
             'metadata' => $this->metadata,
@@ -39,7 +39,9 @@ class InboxMessageResource extends JsonResource
             ),
             'extension' => $this->when(
                 in_array($this->type, ['extension_request', 'extension_approved', 'extension_rejected']),
-                fn() => ExtensionRequestResource::make($this->metadata['extension'] ?? null)
+                fn() => $this->extensionRequest 
+                    ? ExtensionRequestResource::make($this->extensionRequest)
+                    : null
             ),
 
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),

@@ -159,7 +159,7 @@ class Order extends Model
     public function scopeInEscrow($query)
     {
         return $query->where('funds_in_escrow', true)
-                     ->whereNull('escrow_released_at');
+            ->whereNull('escrow_released_at');
     }
 
     public function scopeForBuyer($query, $buyerId)
@@ -206,7 +206,7 @@ class Order extends Model
     public function canRequestRevision()
     {
         return $this->status === 'delivered'
-               && $this->revision_count < $this->max_revisions;
+            && $this->revision_count < $this->max_revisions;
     }
 
     public function canAccept()
@@ -219,11 +219,19 @@ class Order extends Model
         return $this->status === 'active' && !$this->isLate();
     }
 
+    /**
+     * Relation with extenstion table
+     */
+    public function extension()
+    {
+        return $this->belongsTo(ExtensionRequest::class, 'order_id', 'order_id');
+    }
+
     public function isLate()
     {
         return $this->status === 'active'
-               && $this->expected_delivery_at
-               && $this->expected_delivery_at->isPast();
+            && $this->expected_delivery_at
+            && $this->expected_delivery_at->isPast();
     }
 
     public function daysUntilDelivery()
@@ -253,9 +261,9 @@ class Order extends Model
     public function canReleaseEscrow()
     {
         return $this->isCompleted()
-               && $this->funds_in_escrow
-               && $this->completed_at
-               && $this->completed_at->addDays(14)->isPast();
+            && $this->funds_in_escrow
+            && $this->completed_at
+            && $this->completed_at->addDays(14)->isPast();
     }
 
     // Auto-generate order number

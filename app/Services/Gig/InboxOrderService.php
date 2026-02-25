@@ -14,7 +14,6 @@ use App\Models\OrderQaReview;
 use App\Models\Room;
 use App\Models\SellerEarnings;
 use App\Services\Payment\EscrowService;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -440,13 +439,13 @@ class InboxOrderService
                 'type' => 'extension_request',
                 'order_id' => $orderId,
                 'text' => "Extension requested: {$data['additional_days']} days\nReason: {$data['reason']}",
+                'extension_request_id' => $extension->id,
                 'metadata' => [
                     'extension_id' => $extension->id,
                     'additional_days' => $data['additional_days'],
                     'reason' => $data['reason'],
-                    'new_delivery_date' => $newDeliveryDate,
-                    'old_delivery_date' => $order->expected_delivery_at->format('Y-m-d H:i:s'),
-                    'extension_status' => $order->extension->status
+                    'old_delivery_date' => $order->expected_delivery_at,
+                    'new_delivery_date' => $newDeliveryDate
                 ],
             ]);
 
@@ -457,67 +456,6 @@ class InboxOrderService
                 'user_id' => $sellerId,
                 'type' => 'extension_requested',
                 'description' => "Extension requested: {$data['additional_days']} days",
-            ]);
-
-            DB::commit();
-
-            return $extension->fresh(['order', 'requester.profile']);
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
-
-    /**
-     * Withdraw request extenstion
-     */
-    public function withdrawExtensionRequest(int $extensionId, int $sellerId)
-    {
-        DB::beginTransaction();
-
-        try {
-            $extension = ExtensionRequest::with('order.room')
-                ->where('id', $extensionId)
-                ->where('status', 'pending')
-                ->first();
-
-            if (!$extension) {
-                throw new Exception('Extension not found');
-            }
-
-            if ($extension->requested_by !== $sellerId) {
-                throw new Exception('Unauthorized');
-            }
-
-            // Update status
-            $extension->update([
-                'status' => 'withdrawn',
-                'withdrawn_at' => now(),
-            ]);
-
-            $order = $extension->order;
-
-            // Send chat message
-            Chat::create([
-                'sender_id' => $sellerId,
-                'receiver_id' => $order->buyer_id,
-                'room_id' => $order->room_id,
-                'type' => 'extension_withdrawn',
-                'order_id' => $order->id,
-                'text' => "Extension request withdrawn",
-                'metadata' => [
-                    'extension_id' => $extension->id,
-                ],
-            ]);
-
-            $order->room->update(['last_message_at' => now()]);
-
-            // Activity log
-            OrderActivity::create([
-                'order_id' => $order->id,
-                'user_id' => $sellerId,
-                'type' => 'extension_withdrawn',
-                'description' => "Extension request withdrawn",
             ]);
 
             DB::commit();
