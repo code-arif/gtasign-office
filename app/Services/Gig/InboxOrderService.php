@@ -14,6 +14,7 @@ use App\Models\OrderQaReview;
 use App\Models\Room;
 use App\Models\SellerEarnings;
 use App\Services\Payment\EscrowService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -426,6 +427,10 @@ class InboxOrderService
                 'requested_at' => now(),
             ]);
 
+            $newDeliveryDate = Carbon::parse($order->expected_delivery_at)
+                ->addDays($data['additional_days'])
+                ->format('Y-m-d H:i:s');
+
             // Send message
             Chat::create([
                 'sender_id' => $sellerId,
@@ -433,12 +438,13 @@ class InboxOrderService
                 'room_id' => $order->room_id,
                 'type' => 'extension_request',
                 'order_id' => $orderId,
+                'delivery_date' => $order->expected_delivery_at,
                 'text' => "Extension requested: {$data['additional_days']} days\nReason: {$data['reason']}",
                 'metadata' => [
                     'extension_id' => $extension->id,
                     'additional_days' => $data['additional_days'],
                     'reason' => $data['reason'],
-                    'extenstion' => $extension
+                    'new_delivery_date' => $newDeliveryDate,
                 ],
             ]);
 
