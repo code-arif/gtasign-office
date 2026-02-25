@@ -10,7 +10,6 @@ class OrderService
         int $sellerId,
         int $buyerId,
         int $perPage = 10,
-        ?string $status = null
     ) {
         $query = Order::with([
             'buyer.profile',
@@ -19,7 +18,8 @@ class OrderService
             'room',
         ])
             ->where('seller_id', $sellerId)
-            ->where('buyer_id', $buyerId);
+            ->where('buyer_id', $buyerId)
+            ->where('status', 'active');
 
         /**
          * Apply Status Filter Only When Provided
