@@ -30,6 +30,7 @@ return new class extends Migration
 
             $table->timestamp('requested_at');
             $table->timestamp('responded_at')->nullable();
+            $table->timestamp('withdrawn_at')->nullable();
 
             $table->timestamps();
 

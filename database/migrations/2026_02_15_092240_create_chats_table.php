@@ -33,6 +33,7 @@ return new class extends Migration
                 'delivery_rejected',
                 'delivery_sent',
                 'extension_request',
+                'extension_withdrawn',
                 'extension_approved',
                 'extension_rejected',
                 'revision_request',

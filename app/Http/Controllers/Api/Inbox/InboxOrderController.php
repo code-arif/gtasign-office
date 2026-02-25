@@ -218,13 +218,13 @@ class InboxOrderController extends Controller
         }
     }
 
-    public function withdrawRequestExtension(Request $request)
+    public function withdrawRequestExtension(Request $request, int $extensionId)
     {
         try {
             $user = auth('api')->user();
 
             $extension = $this->inboxOrderService->withdrawExtensionRequest(
-                $request->extension_id,
+                $extensionId,
                 $user->id
             );
 
@@ -238,11 +238,14 @@ class InboxOrderController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 $e->getMessage(),
-                $e->getMessage() === 'Extension not found' ? 404 : ($e->getMessage() === 'Unauthorized' ? 403 : 400)
+                match ($e->getMessage()) {
+                    'Extension not found' => 404,
+                    'Unauthorized'        => 403,
+                    default               => 400
+                }
             );
         }
     }
-
     /**
      * Respond to extension request (Client)
      * POST /api/inbox/orders/extensions/{extensionId}/respond

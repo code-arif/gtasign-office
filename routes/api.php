@@ -210,7 +210,7 @@ Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
 
         // Extension request & responses
         Route::post('/{orderId}/request-extension', [InboxOrderController::class, 'requestExtension']); // DONE: Request extension
-        Route::post('/request-extension/withdraw', [InboxOrderController::class, 'withdrawRequestExtension']); // DONE: Withdraw request extension
+        Route::post('/request-extension/{extensionId}/withdraw', [InboxOrderController::class, 'withdrawRequestExtension']); // DONE: Withdraw request extension
         Route::post('/extensions/{extensionId}/respond', [InboxOrderController::class, 'respondToExtension']); // DONE: Respond to extension
     });
 });
