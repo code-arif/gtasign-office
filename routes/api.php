@@ -40,7 +40,6 @@ Route::get('/health-check', function () {
     ], 200);
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | User Authentication Routes
@@ -292,8 +291,6 @@ Route::get('/terms-and-conditions', [PrivecyPolicyController::class, 'termsAndCo
 
 // get setting data
 Route::get('/settings', [SettingsController::class, 'index']);
-
-
 
 
 // === Unified Notification Routes ===
