@@ -461,6 +461,67 @@ class InboxOrderService
     }
 
     /**
+     * Withdraw request extenstion
+     */
+    public function withdrawExtensionRequest(int $extensionId, int $sellerId)
+    {
+        DB::beginTransaction();
+
+        try {
+            $extension = ExtensionRequest::with('order.room')
+                ->where('id', $extensionId)
+                ->where('status', 'pending')
+                ->first();
+
+            if (!$extension) {
+                throw new Exception('Extension not found');
+            }
+
+            if ($extension->requested_by !== $sellerId) {
+                throw new Exception('Unauthorized');
+            }
+
+            // Update status
+            $extension->update([
+                'status' => 'withdrawn',
+                'withdrawn_at' => now(),
+            ]);
+
+            $order = $extension->order;
+
+            // Send chat message
+            Chat::create([
+                'sender_id' => $sellerId,
+                'receiver_id' => $order->buyer_id,
+                'room_id' => $order->room_id,
+                'type' => 'extension_withdrawn',
+                'order_id' => $order->id,
+                'text' => "Extension request withdrawn",
+                'metadata' => [
+                    'extension_id' => $extension->id,
+                ],
+            ]);
+
+            $order->room->update(['last_message_at' => now()]);
+
+            // Activity log
+            OrderActivity::create([
+                'order_id' => $order->id,
+                'user_id' => $sellerId,
+                'type' => 'extension_withdrawn',
+                'description' => "Extension request withdrawn",
+            ]);
+
+            DB::commit();
+
+            return $extension->fresh(['order', 'requester.profile']);
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * Respond to extension request
      */
     public function respondToExtension(int $extensionId, int $buyerId, string $action)
