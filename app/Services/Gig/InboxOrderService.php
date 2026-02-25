@@ -427,8 +427,9 @@ class InboxOrderService
                 'requested_at' => now(),
             ]);
 
-            $newDeliveryDate = Carbon::parse($order->expected_delivery_at)
-                ->addDays($data['additional_days'])
+            $newDeliveryDate = $order->expected_delivery_at
+                ->copy()
+                ->addDays((int) $data['additional_days'])
                 ->format('Y-m-d H:i:s');
 
             // Send message
