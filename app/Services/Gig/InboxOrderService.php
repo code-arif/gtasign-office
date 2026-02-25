@@ -439,13 +439,13 @@ class InboxOrderService
                 'room_id' => $order->room_id,
                 'type' => 'extension_request',
                 'order_id' => $orderId,
-                'delivery_date' => $order->expected_delivery_at,
                 'text' => "Extension requested: {$data['additional_days']} days\nReason: {$data['reason']}",
                 'metadata' => [
                     'extension_id' => $extension->id,
                     'additional_days' => $data['additional_days'],
                     'reason' => $data['reason'],
                     'new_delivery_date' => $newDeliveryDate,
+                    'old_delivery_date' => $order->expected_delivery_at,
                 ],
             ]);
 
