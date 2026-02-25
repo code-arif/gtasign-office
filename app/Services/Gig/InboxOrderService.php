@@ -445,7 +445,7 @@ class InboxOrderService
                     'additional_days' => $data['additional_days'],
                     'reason' => $data['reason'],
                     'new_delivery_date' => $newDeliveryDate,
-                    'old_delivery_date' => $order->expected_delivery_at,
+                    'old_delivery_date' => $order->expected_delivery_at->format('Y-m-d H:i:s'),
                 ],
             ]);
 
