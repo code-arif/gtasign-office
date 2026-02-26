@@ -52,7 +52,7 @@ class QaManageController extends Controller
             'order.seller.profile:id,user_id,first_name,last_name,username,avatar',
             'delivery:id,order_id,delivery_number,files,submitted_at',
             'reviewer.profile:id,user_id,first_name,last_name',
-        ]);
+        ])->orderBy('id', 'desc');
 
         // Status filter
         if ($request->filled('status') && $request->status !== 'all') {

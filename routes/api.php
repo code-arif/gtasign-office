@@ -227,7 +227,9 @@ Route::middleware(['auth:api'])->prefix('v1/order')->group(function () {
 
     Route::get('/list', [OrderController::class, 'index']); // DONE: My order list
     Route::get('/seller/orders/{buyerId}', [OrderController::class, 'MySellerOrders']); // DONE: Seller order with buyer details
+
     Route::post('/delivery/{orderId}/submit-delivery-to-qa', [InboxOrderController::class, 'submitDelivery']); // DONE: Submit delivery to qa
+    Route::post('/delivery/{orderId}/withdraw', [InboxOrderController::class, 'withdrawDelivery']); // DONE: Withdraw delivery from qa
 });
 
 /*

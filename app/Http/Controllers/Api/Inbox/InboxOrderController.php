@@ -188,6 +188,39 @@ class InboxOrderController extends Controller
     }
 
     /**
+     * Withdraw delivery
+     */
+    public function withdrawDelivery(int $orderId)
+    {
+        try {
+            $user = auth('api')->user();
+
+            if (!$user->hasRole('expert')) {
+                return $this->error(null, 'Only experts can withdraw deliveries', 403);
+            }
+
+            $order = $this->inboxOrderService->withdrawDelivery($orderId, $user->id);
+
+            return $this->success(
+                'Delivery withdrawn successfully',
+                ['order' => new OrderInboxResource($order)]
+            );
+        } catch (Exception $e) {
+            Log::error('Withdraw delivery error: ' . $e->getMessage());
+
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                $e->getMessage(),
+                match ($e->getMessage()) {
+                    'Order not found'  => 404,
+                    'Unauthorized'     => 403,
+                    default            => 400
+                }
+            );
+        }
+    }
+
+    /**
      * Request extension (Expert)
      * POST /api/inbox/orders/{orderId}/request-extension
      */
