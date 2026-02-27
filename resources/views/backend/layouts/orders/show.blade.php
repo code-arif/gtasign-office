@@ -137,7 +137,7 @@
                                 @php
                                     $sp = $order->seller?->profile;
                                     $sa = $sp?->avatar
-                                        ? asset($sp->avatar)
+                                        ? asset('storage/' . $sp->avatar)
                                         : 'https://ui-avatars.com/api/?name=' .
                                             urlencode($sellerName) .
                                             '&size=64&background=6366f1&color=fff';
