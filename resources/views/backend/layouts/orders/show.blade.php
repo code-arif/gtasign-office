@@ -101,8 +101,9 @@
                             <div class="card-body pt-2">
                                 @php
                                     $bp = $order->buyer?->profile;
+
                                     $ba = $bp?->avatar
-                                        ? asset($bp->avatar)
+                                        ? asset('storage/' . $bp->avatar)
                                         : 'https://ui-avatars.com/api/?name=' .
                                             urlencode($buyerName) .
                                             '&size=64&background=0ea5e9&color=fff';
@@ -134,13 +135,12 @@
                             </div>
                             <div class="card-body pt-2">
                                 @php
-                                    $bp = $order->buyer?->profile;
-
-                                    $ba = $bp?->avatar
-                                        ? asset('storage/' . $bp->avatar)
+                                    $sp = $order->seller?->profile;
+                                    $sa = $sp?->avatar
+                                        ? asset($sp->avatar)
                                         : 'https://ui-avatars.com/api/?name=' .
-                                            urlencode($buyerName) .
-                                            '&size=64&background=0ea5e9&color=fff';
+                                            urlencode($sellerName) .
+                                            '&size=64&background=6366f1&color=fff';
                                 @endphp
                                 <div class="text-center mb-3">
                                     <img src="{{ $sa }}" class="rounded-circle" width="64" height="64"
