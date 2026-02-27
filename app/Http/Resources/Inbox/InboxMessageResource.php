@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Inbox;
 
+use App\Http\Resources\Gig\ReviewResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -30,7 +31,7 @@ class InboxMessageResource extends JsonResource
                 new CustomOfferResource($this->customOffer)
             ),
             'order' => $this->when(
-                in_array($this->type, ['order_placed', 'delivery_submitted', 'delivery_sent', 'order_completed']),
+                in_array($this->type, ['order_placed', 'delivery_submitted', 'delivery_sent', 'order_completed', 'rating']),
                 new OrderInboxResource($this->order)
             ),
             'delivery' => $this->when(
@@ -39,9 +40,13 @@ class InboxMessageResource extends JsonResource
             ),
             'extension' => $this->when(
                 in_array($this->type, ['extension_request', 'extension_approved', 'extension_rejected']),
-                fn() => $this->extensionRequest 
+                fn() => $this->extensionRequest
                     ? ExtensionRequestResource::make($this->extensionRequest)
                     : null
+            ),
+            'rating' => $this->when(
+                $this->type === 'rating' && $this->order?->review,
+                fn() => new ReviewResource($this->order->review->loadMissing('reviewer.profile', 'reviewedUser'))
             ),
 
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),

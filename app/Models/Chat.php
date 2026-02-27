@@ -94,6 +94,14 @@ class Chat extends Model
         return $this->belongsTo(ExtensionRequest::class, 'extension_request_id');
     }
 
+    /**
+     * Relation with review table
+    */
+    // public function rating()
+    // {
+    //     return $this->belongsTo(OrderReview::class, 'delivery_id');
+    // }
+
     /*
     |--------------------------------------------------------------------------
     | Scopes

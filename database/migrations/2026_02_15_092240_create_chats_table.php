@@ -39,6 +39,7 @@ return new class extends Migration
                 'revision_request',
                 'order_completed',
                 'order_cancelled',
+                'rating',
                 'system'
             ])->default('text');
 

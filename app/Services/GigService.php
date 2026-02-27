@@ -73,22 +73,6 @@ class GigService
     /**
      * Get single gig by ID
      */
-    // public function getGigById(int $id)
-    // {
-    //     return Gig::with([
-    //         'user',
-    //         'category',
-    //         'subCategory',
-    //         'images',
-    //         'documents',
-    //         'tags',
-    //         'reviews.reviewer' // reviewer info
-    //     ])
-    //         ->withCount('reviews')
-    //         ->withAvg('reviews', 'rating')
-    //         ->find($id);
-    // }
-
     public function getGigById(int $id, ?int $authUserId = null)
     {
         $gig = Gig::with([

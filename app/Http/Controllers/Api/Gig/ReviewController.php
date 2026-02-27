@@ -45,6 +45,37 @@ class ReviewController extends Controller
      * Client submits a review for a completed order.
      * POST /api/v1/reviews/{orderId}
      */
+    // public function store(Request $request, int $orderId)
+    // {
+    //     $request->validate([
+    //         'rating' => 'required|integer|min:1|max:5',
+    //         'review' => 'nullable|string|max:1000',
+    //     ]);
+
+    //     try {
+    //         $review = $this->reviewService->createReview(
+    //             $orderId,
+    //             auth('api')->id(),
+    //             $request->only(['rating', 'review'])
+    //         );
+
+    //         return $this->success('Review submitted successfully', [
+    //             'review' => new ReviewResource($review),
+    //         ], 201);
+    //     } catch (Exception $e) {
+    //         Log::error('Create review error: ' . $e->getMessage());
+
+    //         $status = match ($e->getMessage()) {
+    //             'Order not found'                       => 404,
+    //             'You have already reviewed this order'  => 409,
+    //             default                                 => 400,
+    //         };
+
+    //         return $this->error(null, $e->getMessage(), $status);
+    //     }
+    // }
+
+
     public function store(Request $request, int $orderId)
     {
         $request->validate([
@@ -60,15 +91,21 @@ class ReviewController extends Controller
             );
 
             return $this->success('Review submitted successfully', [
-                'review' => new ReviewResource($review),
+                'review'       => new ReviewResource($review),
+                'chat_message' => [
+                    'id'       => $review->chat_message->id,
+                    'type'     => $review->chat_message->type,  // 'rating'
+                    'metadata' => $review->chat_message->metadata,
+                    'order_id' => $review->chat_message->order_id,
+                ],
             ], 201);
         } catch (Exception $e) {
             Log::error('Create review error: ' . $e->getMessage());
 
             $status = match ($e->getMessage()) {
-                'Order not found'                       => 404,
-                'You have already reviewed this order'  => 409,
-                default                                 => 400,
+                'Order not found'                      => 404,
+                'You have already reviewed this order' => 409,
+                default                                => 400,
             };
 
             return $this->error(null, $e->getMessage(), $status);

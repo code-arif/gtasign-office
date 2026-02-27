@@ -70,6 +70,7 @@ class InboxService
             'receiver.profile',
             'customOffer.gig',
             'order.gig',
+            'order.review',
             'delivery',
             'extensionRequest'
         ])

@@ -2,6 +2,8 @@
 
 namespace App\Services\Gig;
 
+use App\Models\Chat;
+use App\Models\Gig;
 use App\Models\Order;
 use App\Models\OrderReview;
 use Exception;
@@ -43,8 +45,6 @@ class ReviewService
                 throw new Exception('Rating must be between 1 and 5');
             }
 
-            dd($order);
-
             $review = OrderReview::create([
                 'order_id'         => $orderId,
                 'reviewer_id'      => $reviewerId,
@@ -55,12 +55,32 @@ class ReviewService
                 'is_public'        => true,
             ]);
 
+            // Send message in inbox
+            $chatMessage = Chat::create([
+                'sender_id'   => $reviewerId,
+                'receiver_id' => $order->seller_id,
+                'room_id'     => $order->room_id,
+                'type'        => 'rating',
+                'order_id'    => $order->id,
+                'text'        => $data['review'] ?? null, // review text
+                'metadata'    => [
+                    'order_id'     => $order->id,
+                    'order_number' => $order->order_number,
+                    'price'        => $order->price,
+                    'rating'       => $review->rating,
+                    'review'       => $review->review,
+                ],
+            ]);
+
+            // review attach
+            $review->chat_message = $chatMessage;
+
             // Update gig average rating cache
-            $this->updateGigRating($order->gig_id);
+            // $this->updateGigRating($order->gig_id);
 
             DB::commit();
 
-            return $review->load(['reviewer.profile', 'reviewedUser.profile', 'order', 'gig']);
+            return $review->load(['gig', 'reviewer.profile', 'reviewedUser.profile', 'order.room']);
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
@@ -70,6 +90,40 @@ class ReviewService
     /**
      * Expert (seller) replies to a review on their gig.
      */
+    // public function replyToReview(int $reviewId, int $sellerId, string $reply): OrderReview
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $review = OrderReview::with('order')->find($reviewId);
+
+    //         if (!$review) {
+    //             throw new Exception('Review not found');
+    //         }
+
+    //         // Only the reviewed seller can reply
+    //         if ($review->reviewed_user_id !== $sellerId) {
+    //             throw new Exception('You can only reply to reviews on your own gigs');
+    //         }
+
+    //         if ($review->seller_reply) {
+    //             throw new Exception('You have already replied to this review');
+    //         }
+
+    //         $review->update([
+    //             'seller_reply' => $reply,
+    //             'replied_at'   => now(),
+    //         ]);
+
+    //         DB::commit();
+
+    //         return $review->fresh(['reviewer.profile', 'reviewedUser.profile', 'gig']);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         throw $e;
+    //     }
+    // }
+
+
     public function replyToReview(int $reviewId, int $sellerId, string $reply): OrderReview
     {
         DB::beginTransaction();
@@ -80,7 +134,6 @@ class ReviewService
                 throw new Exception('Review not found');
             }
 
-            // Only the reviewed seller can reply
             if ($review->reviewed_user_id !== $sellerId) {
                 throw new Exception('You can only reply to reviews on your own gigs');
             }
@@ -92,6 +145,23 @@ class ReviewService
             $review->update([
                 'seller_reply' => $reply,
                 'replied_at'   => now(),
+            ]);
+
+            // Chat message create
+            Chat::create([
+                'sender_id'   => $sellerId,
+                'receiver_id' => $review->reviewer_id,
+                'room_id'     => $review->order->room_id,
+                'type'        => 'rating',
+                'order_id'    => $review->order_id,
+                'text'        => $reply,
+                'metadata'    => [
+                    'order_id'     => $review->order_id,
+                    'order_number' => $review->order->order_number,
+                    'rating'       => $review->rating,
+                    'review'       => $review->review,
+                    'seller_reply' => $reply,
+                ],
             ]);
 
             DB::commit();
@@ -136,7 +206,7 @@ class ReviewService
             ->selectRaw('AVG(rating) as avg_rating, COUNT(*) as reviews_count')
             ->first();
 
-        \App\Models\Gig::where('id', $gigId)->update([
+        Gig::where('id', $gigId)->update([
             'avg_rating'    => round($stats->avg_rating ?? 0, 1),
             'reviews_count' => $stats->reviews_count ?? 0,
         ]);
