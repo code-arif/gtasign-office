@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
-use Exception;
-use App\Models\Gig;
 use App\Helpers\Helper;
+use App\Models\Gig;
+use App\Models\Room;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -74,24 +75,59 @@ class GigService
      */
     // public function getGigById(int $id)
     // {
-    //     return Gig::with(['user', 'category', 'subCategory', 'images', 'documents', 'tags'])
+    //     return Gig::with([
+    //         'user',
+    //         'category',
+    //         'subCategory',
+    //         'images',
+    //         'documents',
+    //         'tags',
+    //         'reviews.reviewer' // reviewer info
+    //     ])
+    //         ->withCount('reviews')
+    //         ->withAvg('reviews', 'rating')
     //         ->find($id);
     // }
 
-    public function getGigById(int $id)
+    public function getGigById(int $id, ?int $authUserId = null)
     {
-        return Gig::with([
+        $gig = Gig::with([
             'user',
             'category',
             'subCategory',
             'images',
             'documents',
             'tags',
-            'reviews.reviewer' // reviewer info
+            'reviews.reviewer'
         ])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->find($id);
+
+        if (!$gig) {
+            return null;
+        }
+
+        // If the authenticated user is the owner, no room is needed.
+        if ($authUserId && $authUserId !== $gig->user_id) {
+            $gigOwnerId = $gig->user_id;
+
+            $roomId = Room::where(function ($q) use ($authUserId, $gigOwnerId) {
+                $q->where('first_user_id', $authUserId)
+                    ->where('second_user_id', $gigOwnerId);
+            })
+                ->orWhere(function ($q) use ($authUserId, $gigOwnerId) {
+                    $q->where('first_user_id', $gigOwnerId)
+                        ->where('second_user_id', $authUserId);
+                })
+                ->value('id');
+
+            $gig->room_id = $roomId;
+        } else {
+            $gig->room_id = null;
+        }
+
+        return $gig;
     }
 
     /**

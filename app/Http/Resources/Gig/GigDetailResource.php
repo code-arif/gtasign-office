@@ -55,6 +55,8 @@ class GigDetailResource extends JsonResource
 
             'user' => new GigUserResource($this->whenLoaded('user')),
 
+            'room_id' => $this->room_id ?? null, // room থাকলে ID, না থাকলে null
+
             'published_at' => $this->published_at?->format('Y-m-d H:i:s'),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
         ];

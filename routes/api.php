@@ -72,7 +72,6 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
         Route::get('/', [GigController::class, 'index']); // done
         Route::get('/active', [GigController::class, 'active']);
         Route::get('/search', [GigController::class, 'search']); // done
-        Route::get('/details/{id}', [GigController::class, 'show']); // done
 
         // Track analytics
         Route::post('/{id}/track-click', [GigController::class, 'trackClick']); // done (partial)
@@ -82,6 +81,8 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
         Route::get('/gig-tags', [GigTagController::class, 'index']); // done
     });
 });
+
+Route::get('/v1/gigs/details/{id}', [GigController::class, 'show'])->middleware('auth:api'); // DONE: Auth Required
 
 /*
 |--------------------------------------------------------------------------

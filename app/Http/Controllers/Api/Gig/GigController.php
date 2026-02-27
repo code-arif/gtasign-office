@@ -122,19 +122,40 @@ class GigController extends Controller
     /**
      * Show single gig
      */
+    // public function show($id)
+    // {
+    //     try {
+    //         $gig = $this->gigService->getGigById($id);
+
+    //         if (!$gig) {
+    //             return $this->error(null, 'Gig not found', 404);
+    //         }
+
+    //         // Track impression
+    //         $this->gigService->trackImpression($id);
+
+    //         // Track click
+    //         $this->gigService->trackClick($id);
+
+    //         return $this->success('Gig retrieved successfully', new GigDetailResource($gig));
+    //     } catch (Exception $e) {
+    //         Log::error('Gig show error: ' . $e->getMessage());
+    //         return $this->error(['exception' => $e->getMessage()], 'Failed to retrieve gig', 500);
+    //     }
+    // }
+
     public function show($id)
     {
         try {
-            $gig = $this->gigService->getGigById($id);
+            $authUserId = auth('api')->id(); // If guest is null
+
+            $gig = $this->gigService->getGigById($id, $authUserId);
 
             if (!$gig) {
                 return $this->error(null, 'Gig not found', 404);
             }
 
-            // Track impression
             $this->gigService->trackImpression($id);
-
-            // Track click
             $this->gigService->trackClick($id);
 
             return $this->success('Gig retrieved successfully', new GigDetailResource($gig));
