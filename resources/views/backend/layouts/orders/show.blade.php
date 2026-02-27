@@ -134,12 +134,13 @@
                             </div>
                             <div class="card-body pt-2">
                                 @php
-                                    $sp = $order->seller?->profile;
-                                    $sa = $sp?->avatar
-                                        ? asset($sp->avatar)
+                                    $bp = $order->buyer?->profile;
+
+                                    $ba = $bp?->avatar
+                                        ? asset('storage/' . $bp->avatar)
                                         : 'https://ui-avatars.com/api/?name=' .
-                                            urlencode($sellerName) .
-                                            '&size=64&background=6366f1&color=fff';
+                                            urlencode($buyerName) .
+                                            '&size=64&background=0ea5e9&color=fff';
                                 @endphp
                                 <div class="text-center mb-3">
                                     <img src="{{ $sa }}" class="rounded-circle" width="64" height="64"
@@ -149,7 +150,7 @@
                                     <div class="fw-semibold">{{ $sellerName }}</div>
                                     <small class="text-muted">{{ $order->seller?->email }}</small>
                                     @if ($sp?->username)
-                                        <div class="mt-1"><small class="text-muted">{{ $sp-> username }}</small></div>
+                                        <div class="mt-1"><small class="text-muted">{{ $sp->username }}</small></div>
                                     @endif
                                     <a href="{{ route('admin.experts.show', $order->seller_id) }}"
                                         class="btn btn-sm btn-outline-success mt-2">
@@ -358,7 +359,9 @@
                         <div class="card">
                             <div class="card-header border-0">
                                 <h5 class="card-title mb-0"><i class="fe fe-list me-2"></i>Activity Log</h5>
-                                <small class="text-muted" style="margin-left: 15px; margin-top: 5px;">{{ $order->activities->count() }} activities</small>
+                                <small class="text-muted"
+                                    style="margin-left: 15px; margin-top: 5px;">{{ $order->activities->count() }}
+                                    activities</small>
                             </div>
                             <div class="card-body p-0">
                                 @forelse($order->activities as $activity)
