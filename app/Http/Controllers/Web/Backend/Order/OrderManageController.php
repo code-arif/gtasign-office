@@ -154,7 +154,7 @@ class OrderManageController extends Controller
             'buyer.profile',
             'seller.profile',
             'deliveries' => fn($q) => $q->orderBy('delivery_number'),
-            'qaReviews.reviewedBy',
+            // 'qaReviews.reviewedBy',
             'extensionRequests.requestedBy',
             'activities.user',
             'review',
