@@ -5,8 +5,6 @@ namespace App\Services;
 use Exception;
 use App\Models\Gig;
 use App\Helpers\Helper;
-use App\Models\GigImage;
-use App\Models\GigDocument;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,7 +15,9 @@ class GigService
      */
     public function getAllGigs(array $filters = [], int $perPage = 15)
     {
-        $query = Gig::where('status', 'active')->with(['user', 'category', 'subCategory', 'images']);
+        $query = Gig::where('status', 'active')->with(['user', 'category', 'subCategory', 'images'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating');
         $query = $this->applyFilters($query, $filters);
 
         return $query->latest()->paginate($perPage);
@@ -72,9 +72,25 @@ class GigService
     /**
      * Get single gig by ID
      */
+    // public function getGigById(int $id)
+    // {
+    //     return Gig::with(['user', 'category', 'subCategory', 'images', 'documents', 'tags'])
+    //         ->find($id);
+    // }
+
     public function getGigById(int $id)
     {
-        return Gig::with(['user', 'category', 'subCategory', 'images', 'documents', 'tags'])
+        return Gig::with([
+            'user',
+            'category',
+            'subCategory',
+            'images',
+            'documents',
+            'tags',
+            'reviews.reviewer' // reviewer info
+        ])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
             ->find($id);
     }
 

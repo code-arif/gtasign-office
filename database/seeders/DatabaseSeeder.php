@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             OrderSeeder::class,
             OrderDeliverySeeder::class,
             OrderQaReviewSeeder::class,
+            OrderReviewSeeder::class,
         ]);
 
         // optional: show output

@@ -82,10 +82,25 @@ class Gig extends Model
         return $this->hasMany(GigDocument::class);
     }
 
-    // public function orders()
+    /**
+     * Relation with order table
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    // public function reviews()
     // {
-    //     return $this->hasMany(Order::class);
+    //     return $this->hasMany(OrderReview::class);
     // }
+
+    public function reviews()
+    {
+        return $this->hasMany(OrderReview::class)
+            ->where('is_public', true)
+            ->latest();
+    }
 
     /**
      * Tags attached to the gig

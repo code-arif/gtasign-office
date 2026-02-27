@@ -18,7 +18,6 @@ Broadcast::channel('notify.{id}', function ($user, $id) {
 /*
 # chat
 */
-
 Broadcast::channel('chat-room.{room_id}', function ($user, $room_id) {
     $room = Room::find($room_id);
     return (int) $user->id === (int) $room?->user_one_id || (int) $user->id === (int) $room?->user_two_id;
@@ -39,7 +38,6 @@ Broadcast::channel('offer-send-notification.{seller_id}', function ($user, $sell
 });
 
 // for get status
-
 Broadcast::channel('offer-accept-notification.{buyer_id}', function ($user, $buyer_id) {
     return (int)$user->id === (int) $buyer_id;
 });

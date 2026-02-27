@@ -184,7 +184,7 @@ Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
     Route::get('/', [InboxController::class, 'index']); // DONE: Get inbox list
     Route::get('/conversation/{roomId}', [InboxController::class, 'conversation']); // DONE: Get conversation
     Route::post('/send/{receiverId}', [InboxController::class, 'sendMessage']); // DONE: Send message
-    // Route::post('/start/{userId}', [InboxController::class, 'startConversation']); // Start conversation
+    Route::post('/start/{userId}', [InboxController::class, 'startConversation']); // DONE: Start conversation
     Route::post('/{roomId}/mark-read', [InboxController::class, 'markAsRead']); // Mark as read (PROBLEM)
 
     // Custom offers

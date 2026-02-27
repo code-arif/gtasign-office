@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Gig;
 
+use App\Http\Resources\Order\OrderResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -57,8 +58,14 @@ class GigListResource extends JsonResource
             'delivery_days' => $this->delivery_days,
             'status' => $this->status,
 
+            'reviews_count' => $this->reviews_count ?? 0,
+            'average_rating' => $this->reviews_avg_rating
+                ? round((float) $this->reviews_avg_rating, 2)
+                : 0,
+
             'primary_image' => new GigImageResource(
-                $this->whenLoaded('images',
+                $this->whenLoaded(
+                    'images',
                     fn() =>
                     $this->images->where('is_primary', true)->first()
                 )

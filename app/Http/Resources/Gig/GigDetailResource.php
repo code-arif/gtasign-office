@@ -37,6 +37,16 @@ class GigDetailResource extends JsonResource
 
             'analytics' => new GigAnalyticsResource($this->resource),
 
+            'reviews_count' => $this->reviews_count ?? 0,
+
+            'average_rating' => $this->reviews_avg_rating
+                ? round((float) $this->reviews_avg_rating, 1)
+                : 0,
+
+            'reviews' => ReviewResource::collection(
+                $this->whenLoaded('reviews')
+            ),
+
             'status' => $this->status,
             'rejection_reason' => $this->when(
                 $this->status === 'rejected',
