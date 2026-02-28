@@ -379,12 +379,12 @@ class InboxOrderService
 
             $order->room->update(['last_message_at' => now()]);
 
-            OrderActivity::create([
-                'order_id' => $orderId,
-                'user_id' => $sellerId,
-                'type' => 'delivery_submitted',
-                'description' => "Delivery #{$deliveryNumber} submitted for QA",
-            ]);
+            // OrderActivity::create([
+            //     'order_id' => $orderId,
+            //     'user_id' => $sellerId,
+            //     'type' => 'delivery_submitted',
+            //     'description' => "Delivery #{$deliveryNumber} submitted for QA",
+            // ]);
 
             DB::commit();
 
@@ -836,6 +836,82 @@ class InboxOrderService
     //         throw $e;
     //     }
     // }
+
+    /**
+     * QA approved — Deliver to client
+     */
+    public function deliverToClient(int $orderId, int $sellerId): Order
+    {
+        DB::beginTransaction();
+        try {
+            $order = Order::with(['room', 'buyer', 'seller', 'latestDelivery'])->find($orderId);
+
+            if (!$order) {
+                throw new Exception('Order not found');
+            }
+
+            // Expert check your order
+            if (!$order->isOwnedBySeller($sellerId)) {
+                throw new Exception('Unauthorized');
+            }
+
+            if ($order->status !== 'qa_approved') {
+                throw new Exception('Order must be in QA Approved status');
+            }
+
+            $latestDelivery = $order->latestDelivery;
+
+            if (!$latestDelivery) {
+                throw new Exception('No delivery found');
+            }
+
+            // Delivery status update
+            $latestDelivery->update([
+                'status'       => 'delivered_to_client',
+                'delivered_at' => now(),
+            ]);
+
+            $autoCompleteDays = config('orders.auto_complete_days', 3);
+            $autoCompleteAt   = now()->addDays($autoCompleteDays);
+
+            $order->update([
+                'status'           => 'delivered',
+                'delivered_at'     => now(),
+                'auto_complete_at' => $autoCompleteAt,
+            ]);
+
+            Chat::create([
+                'sender_id'   => $sellerId,
+                'receiver_id' => $order->buyer_id,
+                'room_id'     => $order->room_id,
+                'type'        => 'delivery_sent',
+                'order_id'    => $orderId,
+                'delivery_id' => $latestDelivery->id,
+                'text'        => "Delivery sent for Order #{$order->order_number}. Please review and accept.",
+                'metadata'    => [
+                    'delivery_number'  => $latestDelivery->delivery_number,
+                    'file_count'       => count($latestDelivery->files ?? []),
+                    'auto_complete_at' => $autoCompleteAt->format('Y-m-d H:i:s'),
+                ],
+            ]);
+
+            $order->room->update(['last_message_at' => now()]);
+
+            // OrderActivity::create([
+            //     'order_id'    => $orderId,
+            //     'user_id'     => $sellerId,
+            //     'type'        => 'delivery_sent',
+            //     'description' => "Delivery #{$latestDelivery->delivery_number} sent to client by expert.",
+            // ]);
+
+            DB::commit();
+
+            return $order->fresh(['gig', 'buyer.profile', 'seller.profile', 'room', 'latestDelivery']);
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
 
     /**
      * Accept delivery (Client — after QA approval)

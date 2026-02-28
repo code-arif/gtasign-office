@@ -98,7 +98,7 @@ class QaService
 
             // 2. Update delivery → delivered to client
             $delivery->update([
-                'status'                  => 'delivered_to_client',
+                'status'                  => 'qa_approved',
                 'qa_feedback'             => $feedback,
                 'qa_reviewed_at'          => $now,
                 'delivered_to_client_at'  => $now,
@@ -109,7 +109,7 @@ class QaService
             // 3. Update order → delivered, set auto-complete timer
             $autoCompleteAt = $now->addDays(config('orders.auto_accept_days', 3));
             $order->update([
-                'status'           => 'delivered',
+                'status'           => 'qa_approved',
                 'qa_approved_at'   => $now,
                 'delivered_at'     => $now,
                 'auto_complete_at' => $autoCompleteAt,
@@ -141,12 +141,12 @@ class QaService
                 'description' => "QA approved delivery #{$delivery->delivery_number}",
             ]);
 
-            OrderActivity::create([
-                'order_id'    => $order->id,
-                'user_id'     => $adminId,
-                'type'        => 'delivered_to_client',
-                'description' => 'Delivery sent to client after QA approval',
-            ]);
+            // OrderActivity::create([
+            //     'order_id'    => $order->id,
+            //     'user_id'     => $adminId,
+            //     'type'        => 'delivered_to_client',
+            //     'description' => 'Delivery sent to client after QA approval',
+            // ]);
 
             DB::commit();
 
@@ -209,7 +209,7 @@ class QaService
                 'type'        => 'delivery_rejected',
                 'order_id'    => $order->id,
                 'delivery_id' => $delivery->id,
-                'text'        => "❌ Your delivery was returned by QA. Please review the feedback and resubmit.\n\nFeedback: {$feedback}",
+                'text'        => "Your delivery was returned by QA. Please review the feedback and resubmit.\n\nFeedback: {$feedback}",
                 'metadata'    => [
                     'issues'          => $issues,
                     'delivery_number' => $delivery->delivery_number,

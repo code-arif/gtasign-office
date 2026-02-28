@@ -251,6 +251,10 @@ class InboxOrderController extends Controller
         }
     }
 
+    /**
+     * Withdraw request extension (Expert)
+     * POST /api/inbox/request-extension/{extensionId}/withdraw
+     */
     public function withdrawRequestExtension(Request $request, int $extensionId)
     {
         try {
@@ -279,6 +283,7 @@ class InboxOrderController extends Controller
             );
         }
     }
+
     /**
      * Respond to extension request (Client)
      * POST /api/inbox/orders/extensions/{extensionId}/respond
@@ -339,6 +344,41 @@ class InboxOrderController extends Controller
                 ['exception' => $e->getMessage()],
                 $e->getMessage(),
                 $e->getMessage() === 'Order not found' ? 404 : ($e->getMessage() === 'Unauthorized' ? 403 : 400)
+            );
+        }
+    }
+
+    /**
+     * QA approved — Deliver to client
+     * POST /api/inbox/orders/{orderId}/deliver-to-client
+     */
+    public function deliverToClient(int $orderId)
+    {
+        try {
+            $user = auth('api')->user();
+
+            // Only expert roles can deliver.
+            if (!$user->hasRole('expert')) {
+                return $this->error(null, 'Unauthorized', 403);
+            }
+
+            $order = $this->inboxOrderService->deliverToClient($orderId, $user->id);
+
+            return $this->success(
+                'Delivery sent to client successfully',
+                ['order' => new OrderInboxResource($order)]
+            );
+        } catch (Exception $e) {
+            Log::error('Deliver to client error: ' . $e->getMessage());
+
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                $e->getMessage(),
+                match ($e->getMessage()) {
+                    'Order not found'  => 404,
+                    'Unauthorized'     => 403,
+                    default            => 400,
+                }
             );
         }
     }

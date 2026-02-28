@@ -37,7 +37,7 @@ return new class extends Migration
             $table->text('requirements')->nullable();
 
             // Order Status
-            $table->enum('status', ['pending_payment', 'active', 'qa_pending', 'qa_rejected', 'delivered', 'revision_requested', 'completed', 'cancelled', 'disputed'])->default('pending_payment');
+            $table->enum('status', ['pending_payment', 'active', 'qa_pending', 'qa_approved', 'qa_rejected', 'delivered', 'revision_requested', 'completed', 'cancelled', 'disputed'])->default('pending_payment');
 
             // Payment & Escrow
             $table->string('payment_method')->nullable();

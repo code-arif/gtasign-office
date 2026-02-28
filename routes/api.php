@@ -231,6 +231,11 @@ Route::middleware(['auth:api'])->prefix('v1/order')->group(function () {
 
     Route::post('/delivery/{orderId}/submit-delivery-to-qa', [InboxOrderController::class, 'submitDelivery']); // DONE: Submit delivery to qa
     Route::post('/delivery/{orderId}/withdraw', [InboxOrderController::class, 'withdrawDelivery']); // DONE: Withdraw delivery from qa
+
+    Route::post('/delivery/{orderId}/delivered_to_client', [InboxOrderController::class, 'deliverToClient']); // DONE: Orer delivery to client after qa approved
+
+    Route::post('/{reviewId}/reject', [InboxOrderController::class, 'reject']);
+    Route::post('/{reviewId}/accept', [InboxOrderController::class, 'accept']);
 });
 
 /*

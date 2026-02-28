@@ -27,6 +27,7 @@ return new class extends Migration
                 'revision_requested',
                 'extension_requested',
                 'extension_approved',
+                'extension_rejected',
                 'order_completed',
                 'order_cancelled',
                 'escrow_released',

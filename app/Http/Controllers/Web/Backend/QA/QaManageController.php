@@ -246,7 +246,7 @@ class QaManageController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Delivery approved and sent to client successfully.',
+                'message' => 'QA delivery approved and sent to client successfully.',
                 'review'  => [
                     'id'     => $review->id,
                     'status' => $review->status,
