@@ -233,9 +233,10 @@ Route::middleware(['auth:api'])->prefix('v1/order')->group(function () {
     Route::post('/delivery/{orderId}/withdraw', [InboxOrderController::class, 'withdrawDelivery']); // DONE: Withdraw delivery from qa
 
     Route::post('/delivery/{orderId}/delivered_to_client', [InboxOrderController::class, 'deliverToClient']); // DONE: Orer delivery to client after qa approved
+    Route::get('/{orderId}/details', [InboxOrderController::class, 'show']); // DONE: Get order details
 
-    Route::post('/{reviewId}/reject', [InboxOrderController::class, 'reject']);
-    Route::post('/{reviewId}/accept', [InboxOrderController::class, 'accept']);
+    Route::post('/{orderId}/accept-delivery', [InboxOrderController::class, 'acceptDelivery']);
+    Route::post('/{orderId}/reject-delivery', [InboxOrderController::class, 'rejectDelivery']);
 });
 
 /*

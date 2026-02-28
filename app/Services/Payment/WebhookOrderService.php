@@ -19,9 +19,6 @@ use Illuminate\Support\Facades\DB;
  */
 class WebhookOrderService
 {
-
-
-
     /**
      * Activate an order after confirmed payment.
      * This is idempotent — safe to call multiple times on same order.
@@ -48,7 +45,7 @@ class WebhookOrderService
                 'stripe_checkout_session_id' => $paymentData['session_id'] ?? null,
                 'auto_complete_at' => $now->copy()->addDays(config('orders.auto_complete_days', 7)),
             ]);
-            
+
             // 2. Increment gig order count
             if ($order->gig_id) {
                 $order->gig()->increment('orders');

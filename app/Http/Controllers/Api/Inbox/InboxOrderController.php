@@ -385,7 +385,7 @@ class InboxOrderController extends Controller
 
     /**
      * Accept delivery (Client - after QA approval)
-     * POST /api/inbox/orders/{orderId}/accept-delivery
+     * POST /api/inbox/orders/{orderId}/reject-delivery
      */
     public function acceptDelivery(int $orderId)
     {
@@ -409,6 +409,45 @@ class InboxOrderController extends Controller
             );
         }
     }
+
+    /**
+     * Reject delivery (Client)
+     * POST /api/inbox/orders/{orderId}/reject-delivery
+     */
+    public function rejectDelivery(Request $request, int $orderId)
+    {
+        try {
+            $user = auth('api')->user();
+
+            $request->validate([
+                'reason' => 'required|string|min:10|max:1000',
+            ]);
+
+            $order = $this->inboxOrderService->rejectDelivery(
+                $orderId,
+                $user->id,
+                $request->input('reason')
+            );
+
+            return $this->success(
+                'Delivery rejected. Order has been cancelled.',
+                ['order' => new OrderInboxResource($order)]
+            );
+        } catch (Exception $e) {
+            Log::error('Reject delivery error: ' . $e->getMessage());
+
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                $e->getMessage(),
+                match ($e->getMessage()) {
+                    'Order not found' => 404,
+                    'Unauthorized'    => 403,
+                    default           => 400
+                }
+            );
+        }
+    }
+
 
     /**
      * Get order details

@@ -42,17 +42,48 @@ class EscrowService
     /**
      * Move earning to "clearing" after order completion.
      * Called by InboxOrderService::acceptDelivery()
-     *
-     * @param  int  $orderId
-     * @param  int  $holdDays  Default: 14 days (configurable)
      */
+    // public function startClearingPeriod(int $orderId, int $holdDays = 14): SellerEarnings
+    // {
+    //     $earning = SellerEarnings::where('order_id', $orderId)->first();
+
+    //     if (!$earning) {
+    //         throw new Exception("No earning record found for order #{$orderId}");
+    //     }
+
+    //     if ($earning->status !== 'pending') {
+    //         throw new Exception("Earning is not in pending state (current: {$earning->status})");
+    //     }
+
+    //     $availableAt = now()->addDays($holdDays);
+
+    //     $earning->update([
+    //         'status'       => 'clearing',
+    //         'available_at' => $availableAt,
+    //     ]);
+
+    //     // Update seller's pending_clearance balance on User model
+    //     $earning->seller()->increment('pending_clearance', $earning->net_amount);
+
+    //     return $earning->fresh();
+    // }
+
+
     public function startClearingPeriod(int $orderId, int $holdDays = 14): SellerEarnings
     {
-        $earning = SellerEarnings::where('order_id', $orderId)->first();
+        $order = Order::find($orderId);
 
-        if (!$earning) {
-            throw new Exception("No earning record found for order #{$orderId}");
-        }
+        // If you don't have Earning, create it now.
+        $earning = SellerEarnings::firstOrCreate(
+            ['order_id' => $orderId],
+            [
+                'seller_id'    => $order->seller_id,
+                'gross_amount' => $order->price,
+                'platform_fee' => $order->platform_fee,
+                'net_amount'   => $order->seller_earnings,
+                'status'       => 'pending',
+            ]
+        );
 
         if ($earning->status !== 'pending') {
             throw new Exception("Earning is not in pending state (current: {$earning->status})");
@@ -65,7 +96,6 @@ class EscrowService
             'available_at' => $availableAt,
         ]);
 
-        // Update seller's pending_clearance balance on User model
         $earning->seller()->increment('pending_clearance', $earning->net_amount);
 
         return $earning->fresh();

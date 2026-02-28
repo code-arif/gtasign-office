@@ -30,10 +30,12 @@ class OrderInboxResource extends JsonResource
             'buyer' => [
                 'id' => $this->buyer->id,
                 'name' => $this->buyer->profile->full_name,
+                'avatar' => $this->buyer->profile?->avatar ? asset('storage/' . $this->buyer->profile?->avatar) : asset('default/profile.jpg'),
             ],
             'seller' => [
                 'id' => $this->seller->id,
                 'name' => $this->seller->profile->full_name,
+                'avatar' => $this->seller->profile?->avatar ? asset('storage/' . $this->seller->profile?->avatar) : asset('default/profile.jpg'),
             ],
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
         ];

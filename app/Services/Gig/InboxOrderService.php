@@ -952,10 +952,9 @@ class InboxOrderService
                 'auto_complete_at' => null,
             ]);
 
-            // ── Start 14-day escrow clearing via EscrowService ───────────
+            // ── Start 14-day escrow clearing via EscrowService
             $holdDays = config('orders.escrow_hold_days', 14);
             $this->escrowService->startClearingPeriod($order->id, $holdDays);
-            // ─────────────────────────────────────────────────────────────
 
             // System message
             Chat::create([
@@ -981,6 +980,85 @@ class InboxOrderService
                 'user_id'     => $buyerId,
                 'type'        => 'order_completed',
                 'description' => 'Order accepted by client. Escrow period started.',
+            ]);
+
+            DB::commit();
+
+            return $order->fresh(['gig', 'buyer.profile', 'seller.profile', 'room', 'latestDelivery']);
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Reject delivery (Client — no payment to expert)
+     */
+    public function rejectDelivery(int $orderId, int $buyerId, string $reason): Order
+    {
+        DB::beginTransaction();
+        try {
+            $order = Order::with(['room', 'latestDelivery', 'seller'])->find($orderId);
+
+            if (!$order) {
+                throw new Exception('Order not found');
+            }
+
+            if (!$order->isOwnedByBuyer($buyerId)) {
+                throw new Exception('Unauthorized');
+            }
+
+            // Can only be rejected in 'delivered' status
+            if ($order->status !== 'delivered') {
+                throw new Exception('Order must be in delivered status to reject');
+            }
+
+            // Delivery status update
+            $latestDelivery = $order->latestDelivery;
+            if ($latestDelivery) {
+                $latestDelivery->update([
+                    'status'             => 'revision_requested',
+                    'revision_reason'    => $reason,
+                    'client_reviewed_at' => now(),
+                ]);
+            }
+
+            //Cancel the order — the expert will not receive any money.
+            $order->update([
+                'status'              => 'cancelled',
+                'cancelled_at'        => now(),
+                'cancelled_by'        => 'buyer',
+                'cancellation_reason' => $reason,
+                'auto_complete_at'    => null,
+            ]);
+
+            // Refund if the earning record is pending
+            // (Stripe refund logic needs to be handled separately)
+            SellerEarnings::where('order_id', $orderId)
+                ->where('status', 'pending')
+                ->update(['status' => 'refunded']);
+
+            // Chat message
+            Chat::create([
+                'sender_id'   => $buyerId,
+                'receiver_id' => $order->seller_id,
+                'room_id'     => $order->room_id,
+                'type'        => 'order_cancelled',
+                'order_id'    => $orderId,
+                'text'        => "Delivery rejected by client. Order #{$order->order_number} has been cancelled.\nReason: {$reason}",
+                'metadata'    => ['reason' => $reason],
+            ]);
+
+            $order->room->update([
+                'last_message_at' => now(),
+                'has_active_order' => false,
+            ]);
+
+            OrderActivity::create([
+                'order_id'    => $orderId,
+                'user_id'     => $buyerId,
+                'type'        => 'order_cancelled',
+                'description' => "Delivery rejected by client: {$reason}",
             ]);
 
             DB::commit();
