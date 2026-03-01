@@ -735,7 +735,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Order Details & Controls</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body" id="orderDetailContent">
                     <div class="text-center py-5">
@@ -755,7 +755,7 @@
                     <h5 class="modal-title" style="color:var(--clr-accent)">
                         <i class="fe fe-unlock me-2"></i>Release Escrow Early
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">&times;</button>
                 </div>
                 <form id="releaseEscrowForm" method="POST">
                     @csrf
@@ -792,7 +792,7 @@
                     <h5 class="modal-title" style="color:var(--clr-danger)">
                         <i class="fe fe-alert-triangle me-2"></i>Cancel Order & Handle Refund
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">&times;</button>
                 </div>
                 <form id="cancelOrderForm" method="POST">
                     @csrf
@@ -862,7 +862,7 @@
                     <h5 class="modal-title" style="color:var(--clr-blue)">
                         <i class="fe fe-zap me-2"></i>Force Stripe Transfer
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">&times;</button>
                 </div>
                 <form id="forceTransferForm" method="POST">
                     @csrf

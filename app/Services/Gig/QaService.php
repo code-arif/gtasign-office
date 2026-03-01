@@ -116,20 +116,20 @@ class QaService
             ]);
 
             // 4. Chat message to client (actual delivery notification)
-            Chat::create([
-                'sender_id'   => $order->seller_id,
-                'receiver_id' => $order->buyer_id,
-                'room_id'     => $order->room_id,
-                'type'        => 'delivery_sent',
-                'order_id'    => $order->id,
-                'delivery_id' => $delivery->id,
-                'text'        => "Your order has been delivered! Please review and accept or request revisions. Auto-accepted in " . config('orders.auto_accept_days', 3) . " days.",
-                'metadata'    => [
-                    'delivery_number' => $delivery->delivery_number,
-                    'file_count'      => count($delivery->files ?? []),
-                    'auto_accept_at'  => $autoCompleteAt->toISOString(),
-                ],
-            ]);
+            // Chat::create([
+            //     'sender_id'   => $order->seller_id,
+            //     'receiver_id' => $order->buyer_id,
+            //     'room_id'     => $order->room_id,
+            //     'type'        => 'delivery_sent',
+            //     'order_id'    => $order->id,
+            //     'delivery_id' => $delivery->id,
+            //     'text'        => "Your order has been delivered! Please review and accept or request revisions. Auto-accepted in " . config('orders.auto_accept_days', 3) . " days.",
+            //     'metadata'    => [
+            //         'delivery_number' => $delivery->delivery_number,
+            //         'file_count'      => count($delivery->files ?? []),
+            //         'auto_accept_at'  => $autoCompleteAt->toISOString(),
+            //     ],
+            // ]);
 
             $order->room->update(['last_message_at' => $now]);
 

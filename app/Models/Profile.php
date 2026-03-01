@@ -25,7 +25,9 @@ class Profile extends Model
         'is_online'
     ];
 
-    
+    protected $casts = [
+        'stripe_onboarded_at' => 'datetime'
+    ];
 
     /**
      * Relationship: user table
