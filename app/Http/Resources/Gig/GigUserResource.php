@@ -15,8 +15,9 @@ class GigUserResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'avatar' => $this->getAvatarUrl(),
-            'level' =>$this->profile->level ?? null,
+            'level' => $this->profile->level ?? null,
             'level_name' => $this->profile->level_name ?? null,
+            'active_orders' => $this->active_orders_count ?? 0, 
         ];
     }
 

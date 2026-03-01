@@ -76,7 +76,14 @@ class GigService
     public function getGigById(int $id, ?int $authUserId = null)
     {
         $gig = Gig::with([
-            'user',
+            'user.profile',
+            'user' => function ($query) {
+                $query->withCount([
+                    'sellerOrders as active_orders_count' => function ($q) {
+                        $q->whereIn('status', ['active', 'revision_requested', 'delivered']);
+                    }
+                ]);
+            },
             'category',
             'subCategory',
             'images',
