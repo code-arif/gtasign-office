@@ -46,7 +46,6 @@ use Illuminate\Support\Facades\Route;
 | Admin Dashboard Routes
 |--------------------------------------------------------------------------
 */
-
 Route::get("dashboard", [DashboardController::class, 'index'])->name('dashboard');
 
 
@@ -188,9 +187,6 @@ Route::prefix('extension-requests')->name('extension-requests.')->group(function
 | Add these inside your existing admin middleware group
 |--------------------------------------------------------------------------
 */
-
-// In web.php, inside Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(...)
-
 Route::prefix('payments')->name('payments.')->group(function () {
 
     // Dashboard

@@ -46,7 +46,8 @@ class AdminPaymentController extends Controller
     {
         if ($request->ajax()) {
             $orders = Order::with(['buyer.profile', 'seller.profile', 'gig', 'earning'])
-                ->select('orders.*');
+                ->select('orders.*')
+                ->latest();
 
             return DataTables::of($orders)
                 ->addIndexColumn()

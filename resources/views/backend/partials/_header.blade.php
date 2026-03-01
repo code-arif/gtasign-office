@@ -78,7 +78,7 @@
                                 <a href="#" data-bs-toggle="dropdown"
                                     class="nav-link pe-2 leading-none d-flex animate">
                                     <span>
-                                        <img src="{{ asset(Auth::user()->avatar ?? 'default/profile.jpg') }}"
+                                        <img src="{{ asset(Auth::user()->profile->avatar ?? 'default/profile.jpg') }}"
                                             alt="profile-user" class="avatar  profile-user brround cover-image">
                                     </span>
                                 </a>

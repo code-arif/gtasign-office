@@ -120,13 +120,14 @@ class ReviewController extends Controller
     {
         $request->validate([
             'reply' => 'required|string|max:500',
+            'rating' => 'required|integer|min:1|max:5',
         ]);
 
         try {
             $review = $this->reviewService->replyToReview(
                 $reviewId,
                 auth('api')->id(),
-                $request->input('reply')
+                $request->only(['rating', 'reply'])
             );
 
             return $this->success('Reply submitted successfully', [

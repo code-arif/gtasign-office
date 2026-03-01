@@ -284,8 +284,8 @@ Route::prefix('v1/expert')->group(function () {
 
     // Wallet & Withdrawals
     Route::get('/wallet', [StripeConnectController::class, 'wallet']); // DONE: Get my wallet
-    Route::post('/wallet/withdraw', [StripeConnectController::class, 'withdraw']); // Withdrawal request
-    Route::get('/wallet/withdrawals', [StripeConnectController::class, 'withdrawalHistory']);
+    Route::post('/wallet/withdraw', [StripeConnectController::class, 'withdraw']); // DONE: Withdrawal request
+    Route::get('/wallet/withdrawals', [StripeConnectController::class, 'withdrawalHistory']); // DONE: Withdrawal history
 });
 
 // contact from submit

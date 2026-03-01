@@ -27,25 +27,37 @@ class ProfileController extends Controller
     public function UpdateProfile(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'first_name'  => 'nullable|max:100|min:2',
+            'first_name' => 'nullable|max:100|min:2',
             'last_name'  => 'nullable|max:100|min:2',
-            'email' => 'nullable|email|unique:users,email,' . auth()->user()->id,
+            'email'      => 'nullable|email|unique:users,email,' . auth()->id(),
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-        try {
-            $user = User::find(auth()->user()->id);
-            $user->first_name  = $request->first_name;
-            $user->last_name  = $request->last_name;
-            $user->email = $request->email;
 
-            $user->save();
+        try {
+            $user = User::with('profile')->findOrFail(auth()->id());
+
+            // Update users table
+            if ($request->filled('email')) {
+                $user->email = $request->email;
+                $user->save();
+            }
+
+            // Update profile table
+            if ($user->profile) {
+                $user->profile->update([
+                    'first_name' => $request->first_name,
+                    'last_name'  => $request->last_name,
+                ]);
+            }
+
             session()->put('t-success', 'Profile updated successfully');
-        } catch (Exception) {
+        } catch (Exception $e) {
             session()->put('t-error', 'Something went wrong');
         }
+
         return redirect()->back();
     }
 
@@ -88,25 +100,26 @@ class ProfileController extends Controller
         ]);
 
         try {
-            $user      = Auth::user();
-            $image     = $request->file('profile_picture');
+            $user  = Auth::user();
+            $image = $request->file('profile_picture');
+
             $imageName = time() . '.' . $image->getClientOriginalExtension();
 
-            //? Check if there's an existing profile picture
-            if ($user->avatar && file_exists(public_path($user->avatar))) {
-                Helper::fileDelete(public_path($user->avatar));
+            // Delete old image
+            if ($user->profile && $user->profile->avatar && file_exists(public_path($user->profile->avatar))) {
+                Helper::fileDelete(public_path($user->profile->avatar));
             }
 
-            //* Use the Helper class to handle the file upload
             $imagePath = Helper::fileUpload($image, 'profile', $imageName);
 
-            if ($imagePath === null) {
+            if (!$imagePath) {
                 throw new Exception('Failed to upload image.');
             }
 
-            //! Update user's avatar with the new image path
-            $user->avatar = $imagePath;
-            $user->save();
+            // Save into profiles table
+            $user->profile->update([
+                'avatar' => $imagePath
+            ]);
 
             return response()->json([
                 'success'   => true,
@@ -115,7 +128,7 @@ class ProfileController extends Controller
             ]);
         } catch (Exception $e) {
             return response()->json([
-                't-success' => false,
+                'success' => false,
                 'message' => $e->getMessage(),
             ]);
         }

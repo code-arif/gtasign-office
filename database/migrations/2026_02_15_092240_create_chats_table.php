@@ -41,6 +41,7 @@ return new class extends Migration
                 'order_completed',
                 'order_cancelled',
                 'rating',
+                'rating_reply',
                 'system'
             ])->default('text');
 

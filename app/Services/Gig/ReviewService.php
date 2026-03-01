@@ -124,9 +124,60 @@ class ReviewService
     // }
 
 
-    public function replyToReview(int $reviewId, int $sellerId, string $reply): OrderReview
+    // public function replyToReview(int $reviewId, int $sellerId, array $reply): OrderReview
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $review = OrderReview::with('order')->find($reviewId);
+
+    //         if (!$review) {
+    //             throw new Exception('Review not found');
+    //         }
+
+    //         if ($review->reviewed_user_id !== $sellerId) {
+    //             throw new Exception('You can only reply to reviews on your own gigs');
+    //         }
+
+    //         if ($review->seller_reply) {
+    //             throw new Exception('You have already replied to this review');
+    //         }
+
+    //         $review->update([
+    //             'seller_reply' => $reply,
+    //             'replied_at'   => now(),
+    //         ]);
+
+    //         // Chat message create
+    //         Chat::create([
+    //             'sender_id'   => $sellerId,
+    //             'receiver_id' => $review->reviewer_id,
+    //             'room_id'     => $review->order->room_id,
+    //             'type'        => 'rating',
+    //             'order_id'    => $review->order_id,
+    //             'text'        => $reply,
+    //             'metadata'    => [
+    //                 'order_id'     => $review->order_id,
+    //                 'order_number' => $review->order->order_number,
+    //                 'rating'       => $review->rating,
+    //                 'review'       => $review->review,
+    //                 'seller_reply' => $reply,
+    //             ],
+    //         ]);
+
+    //         DB::commit();
+
+    //         return $review->fresh(['reviewer.profile', 'reviewedUser.profile', 'gig']);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         throw $e;
+    //     }
+    // }
+
+
+    public function replyToReview(int $reviewId, int $sellerId, array $data): OrderReview
     {
         DB::beginTransaction();
+
         try {
             $review = OrderReview::with('order')->find($reviewId);
 
@@ -142,8 +193,16 @@ class ReviewService
                 throw new Exception('You have already replied to this review');
             }
 
+            $rating = (int) $data['rating'];
+
+            if ($rating < 1 || $rating > 5) {
+                throw new Exception('Rating must be between 1 and 5');
+            }
+
+            // Update review
             $review->update([
-                'seller_reply' => $reply,
+                'seller_reply' => $data['reply'],
+                'seller_rating' => $rating, // <-- add this column in DB if needed
                 'replied_at'   => now(),
             ]);
 
@@ -152,15 +211,16 @@ class ReviewService
                 'sender_id'   => $sellerId,
                 'receiver_id' => $review->reviewer_id,
                 'room_id'     => $review->order->room_id,
-                'type'        => 'rating',
+                'type'        => 'rating_reply',
                 'order_id'    => $review->order_id,
-                'text'        => $reply,
+                'text'        => $data['reply'],
                 'metadata'    => [
-                    'order_id'     => $review->order_id,
-                    'order_number' => $review->order->order_number,
-                    'rating'       => $review->rating,
-                    'review'       => $review->review,
-                    'seller_reply' => $reply,
+                    'order_id'      => $review->order_id,
+                    'order_number'  => $review->order->order_number,
+                    'original_rating' => $review->rating,
+                    'seller_rating' => $rating,
+                    'review'        => $review->review,
+                    'seller_reply'  => $data['reply'],
                 ],
             ]);
 

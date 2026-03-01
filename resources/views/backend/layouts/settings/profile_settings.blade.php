@@ -1,5 +1,7 @@
 @extends('backend.app')
 
+@section('title', 'Admin Profile Settings')
+
 @section('content')
     <!--app-content open-->
     <div class="app-content main-content mt-0">
@@ -29,12 +31,12 @@
                                         <div class="d-flex flex-wrap align-items-center">
                                             <div class="profile-img-main rounded"
                                                 style="width: 125px; height: 125px; overflow: hidden;">
-                                                <img src="{{ Auth::user()->avatar ? asset(Auth::user()->avatar) : asset('default/profile.jpg') }}"
+                                                <img src="{{ Auth::user()->profile->avatar ? asset(Auth::user()->profile->avatar) : asset('default/profile.jpg') }}"
                                                     alt="Profile Picture" class="m-0 p-1"
                                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                                             </div>
                                             <div class="ms-4">
-                                                <h4>{{ Auth::user()->first_name . '  ' . Auth::user()->last_name ?? 'N/A' }}
+                                                <h4>{{ Auth::user()->profile->first_name . '  ' . Auth::user()->profile->last_name ?? 'N/A' }}
                                                 </h4>
                                                 <h4>{{ Auth::user()->email ?? 'N/A' }}</h4>
                                                 <a href="#" class="btn btn-primary btn-sm" id="uploadImageBtn">
@@ -79,7 +81,7 @@
                                                         <input type="text"
                                                             class="form-control @error('first_name') is-invalid @enderror"
                                                             name="first_name" placeholder="First Name" id="first_name"
-                                                            value="{{ Auth::user()->first_name ?? 'N/A' }}">
+                                                            value="{{ Auth::user()->profile->first_name ?? 'N/A' }}">
                                                         @error('first_name')
                                                             <span class="text-danger">{{ $message }}</span>
                                                         @enderror
@@ -91,7 +93,7 @@
                                                         <input type="text"
                                                             class="form-control @error('last_name') is-invalid @enderror"
                                                             name="last_name" placeholder="Name" id="last_name"
-                                                            value="{{ Auth::user()->last_name ?? 'N/A' }}">
+                                                            value="{{ Auth::user()->profile->last_name ?? 'N/A' }}">
                                                         @error('last_name')
                                                             <span class="text-danger">{{ $message }}</span>
                                                         @enderror
