@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Models\User;
 use App\Helpers\Helper;
-use App\Traits\ApiResponse;
-use App\Http\Resources\UserResource;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
+use App\Models\OrderReview;
+use App\Models\SellerEarnings;
+use App\Models\User;
+use App\Traits\ApiResponse;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Exception;
 
 class UserController extends Controller
 {
@@ -21,22 +24,51 @@ class UserController extends Controller
     /**
      * Get User Profile
      */
+    // public function profile()
+    // {
+    //     try {
+    //         $user = auth('api')->user()->load('profile');
+
+    //         if (!$user) {
+    //             return $this->error(
+    //                 null,
+    //                 'User not found',
+    //                 404
+    //             );
+    //         }
+
+    //         return $this->success(
+    //             'User profile retrieved successfully',
+    //             new UserResource($user)
+    //         );
+    //     } catch (Exception $e) {
+    //         Log::error('Get profile error: ' . $e->getMessage());
+    //         return $this->error(
+    //             ['exception' => $e->getMessage()],
+    //             'Failed to retrieve profile',
+    //             500
+    //         );
+    //     }
+    // }
+
     public function profile()
     {
         try {
             $user = auth('api')->user()->load('profile');
 
             if (!$user) {
-                return $this->error(
-                    null,
-                    'User not found',
-                    404
-                );
+                return $this->error(null, 'User not found', 404);
+            }
+
+            $stats = null;
+
+            if ($user->role === 'expert') {
+                $stats = $this->computeExpertStats($user->id);
             }
 
             return $this->success(
                 'User profile retrieved successfully',
-                new UserResource($user)
+                new UserResource(['user' => $user, 'stats' => $stats])
             );
         } catch (Exception $e) {
             Log::error('Get profile error: ' . $e->getMessage());
@@ -46,6 +78,84 @@ class UserController extends Controller
                 500
             );
         }
+    }
+
+    private function computeExpertStats(int $userId): array
+    {
+        // ─── Rating & Reviews ───────────────────────────────────────────
+        $reviewStats = OrderReview::where('reviewed_user_id', $userId)
+            ->selectRaw('
+            ROUND(AVG(rating), 1)                   AS avg_rating,
+            COUNT(*)                                AS total_reviews,
+            ROUND(AVG(communication_rating), 1)     AS avg_communication,
+            ROUND(AVG(service_rating), 1)           AS avg_service,
+            ROUND(AVG(delivery_rating), 1)          AS avg_delivery
+        ')
+            ->first();
+
+        // ─── Success Score ───────────────────────────────────────────────
+        // Success = completed / (completed + cancelled) × 100
+        $orderCounts = \App\Models\Order::where('seller_id', $userId)
+            ->whereIn('status', ['completed', 'cancelled'])
+            ->selectRaw("
+            COUNT(*) AS total,
+            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed
+        ")
+            ->first();
+
+        $successScore = ($orderCounts->total > 0)
+            ? round(($orderCounts->completed / $orderCounts->total) * 100)
+            : 0;
+
+        // ─── Last Month Earnings ─────────────────────────────────────────
+        $lastMonth         = now()->subMonth();
+        $lastMonthEarnings = SellerEarnings::where('seller_id', $userId)
+            ->whereIn('status', ['available', 'withdrawn'])
+            ->whereYear('created_at', $lastMonth->year)
+            ->whereMonth('created_at', $lastMonth->month)
+            ->sum('net_amount');
+
+        // ─── Avg Response Time (minutes) ─────────────────────────────────
+        // Logic: first reply from expert (sender_id = userId) after each
+        // incoming message (receiver_id = userId), grouped per room
+        $avgResponseMinutes = DB::select("
+        SELECT ROUND(AVG(TIMESTAMPDIFF(MINUTE, incoming.created_at, reply.created_at))) AS avg_minutes
+        FROM chats AS incoming
+        INNER JOIN chats AS reply
+            ON  reply.room_id    = incoming.room_id
+            AND reply.sender_id  = :seller_id
+            AND reply.created_at > incoming.created_at
+            AND reply.id = (
+                SELECT MIN(r2.id)
+                FROM chats r2
+                WHERE r2.room_id   = incoming.room_id
+                  AND r2.sender_id = :seller_id2
+                  AND r2.created_at > incoming.created_at
+                  AND r2.deleted_at IS NULL
+            )
+        WHERE incoming.receiver_id = :seller_id3
+          AND incoming.deleted_at IS NULL
+    ", [
+            'seller_id'  => $userId,
+            'seller_id2' => $userId,
+            'seller_id3' => $userId,
+        ]);
+
+        $avgResponseMinutes = $avgResponseMinutes[0]->avg_minutes ?? null;
+
+        return [
+            'avg_rating'          => $reviewStats->avg_rating       ?? 0,
+            'total_reviews'       => (int) ($reviewStats->total_reviews ?? 0),
+            'avg_communication'   => $reviewStats->avg_communication ?? 0,
+            'avg_service'         => $reviewStats->avg_service       ?? 0,
+            'avg_delivery'        => $reviewStats->avg_delivery      ?? 0,
+            'success_score'       => $successScore,                       // e.g. 86
+            'last_month_earnings' => round((float) $lastMonthEarnings, 2), // e.g. 436.00
+            'avg_response_minutes' => $avgResponseMinutes              // e.g. 24
+                ? (int) $avgResponseMinutes
+                : null,
+            'last_month_label'    => $lastMonth->format('F'),             // e.g. "November"
+        ];
     }
 
 

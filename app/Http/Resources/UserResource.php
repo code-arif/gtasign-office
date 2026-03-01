@@ -16,28 +16,47 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'id'         => $this->id,
-            'email'      => $this->email,
-            'status'     => $this->status,
-            'role'       => $this->role ?? null,
-            'created_at' => $this->created_at->toDateTimeString(),
+        // Support both direct User model and ['user' => ..., 'stats' => ...] array
+        $user  = is_array($this->resource) ? $this->resource['user']  : $this->resource;
+        $stats = is_array($this->resource) ? $this->resource['stats'] : null;
 
-            // Profile info
-            'profile' => $this->whenLoaded('profile', function () {
-                return [
-                    'first_name' => $this->profile->first_name,
-                    'last_name'  => $this->profile->last_name,
-                    'username'   => $this->profile->username,
-                    'slug'       => $this->profile->slug,
-                    'avatar' => $this->profile->avatar
-                        ? asset('storage/' . $this->profile->avatar)
+        return [
+            'id'         => $user->id,
+            'email'      => $user->email,
+            'status'     => $user->status,
+            'role'       => $user->role ?? null,
+            'created_at' => $user->created_at->toDateTimeString(),
+
+            // ── Profile ───────────────────────────────────────────────
+            'profile' => $user->relationLoaded('profile') && $user->profile
+                ? [
+                    'first_name'  => $user->profile->first_name,
+                    'last_name'   => $user->profile->last_name,
+                    'username'    => $user->profile->username,
+                    'slug'        => $user->profile->slug,
+                    'avatar'      => $user->profile->avatar
+                        ? asset('storage/' . $user->profile->avatar)
                         : asset('default/profile.jpg'),
-                    'tagline'    => $this->profile->tagline,
-                    'biography'  => $this->profile->biography,
-                    'address'    => $this->profile->address,
-                ];
-            }),
+                    'tagline'     => $user->profile->tagline,
+                    'biography'   => $user->profile->biography,
+                    'address'     => $user->profile->address,
+                    'level'       => $user->profile->level      ?? null,
+                    'level_name'  => $user->profile->level_name ?? null,
+                ]
+                : null,
+
+            // ── Expert Stats (only for expert role) ───────────────────
+            'stats' => $stats ? [
+                'avg_rating'           => $stats['avg_rating'],
+                'total_reviews'        => $stats['total_reviews'],
+                'avg_communication'    => $stats['avg_communication'],
+                'avg_service'          => $stats['avg_service'],
+                'avg_delivery'         => $stats['avg_delivery'],
+                'success_score'        => $stats['success_score'],       // 86 → show as "86%"
+                'last_month_earnings'  => $stats['last_month_earnings'],  // 436.00
+                'last_month_label'     => $stats['last_month_label'],     // "November"
+                'avg_response_minutes' => $stats['avg_response_minutes'], // 24
+            ] : null,
         ];
     }
 }
