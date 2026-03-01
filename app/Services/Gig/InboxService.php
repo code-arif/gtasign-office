@@ -153,7 +153,7 @@ class InboxService
             $message = $message->load(['sender.profile', 'receiver.profile']);
 
             // Broadcast here (after commit)
-            broadcast(new MessageSent($message))->toOthers();
+            // broadcast(new MessageSent($message))->toOthers();
 
             return $message;
         } catch (Exception $e) {

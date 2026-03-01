@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Payment;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Withdrawal\CreateWithdrawalRequest;
 use App\Models\WithdrawalRequest;
+use App\Models\WithdrawalRequests;
 use App\Services\Payment\EscrowService;
 use App\Services\Payment\StripePaymentService;
 use App\Traits\ApiResponse;
@@ -252,7 +253,7 @@ class StripeConnectController extends Controller
         try {
             $user = auth('api')->user();
 
-            $withdrawals = WithdrawalRequest::where('seller_id', $user->id)
+            $withdrawals = WithdrawalRequests::where('seller_id', $user->id)
                 ->latest()
                 ->paginate(20);
 

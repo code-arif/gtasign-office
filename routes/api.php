@@ -235,7 +235,7 @@ Route::middleware(['auth:api'])->prefix('v1/order')->group(function () {
     Route::post('/delivery/{orderId}/delivered_to_client', [InboxOrderController::class, 'deliverToClient']); // DONE: Orer delivery to client after qa approved
     Route::get('/{orderId}/details', [InboxOrderController::class, 'show']); // DONE: Get order details
 
-    Route::post('/{orderId}/accept-delivery', [InboxOrderController::class, 'acceptDelivery']);
+    Route::post('/{orderId}/accept-delivery', [InboxOrderController::class, 'acceptDelivery']); // DONE: Accept delivery
     Route::post('/{orderId}/reject-delivery', [InboxOrderController::class, 'rejectDelivery']);
 });
 
@@ -266,7 +266,7 @@ Route::get('/v1/gigs/{gigId}/reviews', [ReviewController::class, 'index']);
 // Authenticated
 Route::middleware('auth:api')->group(function () {
     Route::post('/v1/reviews/{orderId}', [ReviewController::class, 'store']); // DONE: Client reviews order
-    Route::post('/v1/reviews/{reviewId}/reply', [ReviewController::class, 'reply']); // Expert replies
+    Route::post('/v1/reviews/{reviewId}/reply', [ReviewController::class, 'reply']); // DONE: Expert replies
     // Route::get('/v1/reviews/order/{orderId}', [ReviewController::class, 'checkOrderReview']); // Check if reviewed
 });
 
@@ -280,11 +280,11 @@ Route::prefix('v1/expert')->group(function () {
     // Stripe Connect onboarding
     Route::post('/stripe/connect', [StripeConnectController::class, 'connect']); // DONE: Connect Stripe account
     Route::get('/stripe/status', [StripeConnectController::class, 'status']); // DONE: Check Stripe connection status
-    Route::get('/stripe/dashboard', [StripeConnectController::class, 'dashboard']);
+    Route::get('/stripe/dashboard', [StripeConnectController::class, 'dashboard']); // DONE: Redirect to stripe dashboard
 
     // Wallet & Withdrawals
-    Route::get('/wallet', [StripeConnectController::class, 'wallet']);
-    Route::post('/wallet/withdraw', [StripeConnectController::class, 'withdraw']);
+    Route::get('/wallet', [StripeConnectController::class, 'wallet']); // DONE: Get my wallet
+    Route::post('/wallet/withdraw', [StripeConnectController::class, 'withdraw']); // Withdrawal request
     Route::get('/wallet/withdrawals', [StripeConnectController::class, 'withdrawalHistory']);
 });
 

@@ -35,7 +35,7 @@ class GigDetailResource extends JsonResource
                 $this->whenLoaded('tags')
             ),
 
-            'analytics' => new GigAnalyticsResource($this),
+            // 'analytics' => new GigAnalyticsResource($this),
 
 
             'reviews_count' => $this->reviews_count ?? 0,
