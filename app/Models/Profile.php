@@ -25,6 +25,8 @@ class Profile extends Model
         'is_online'
     ];
 
+    
+
     /**
      * Relationship: user table
      */
