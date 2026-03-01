@@ -519,7 +519,7 @@ class InboxOrderService
                 throw new Exception('No delivery found to withdraw');
             }
 
-            // 1️⃣ Update the previous chat message BEFORE deleting delivery
+            // Update the previous chat message BEFORE deleting delivery
             Chat::where('room_id', $order->room_id)
                 ->where('delivery_id', $delivery->id)
                 ->where('type', 'delivery_submitted')
@@ -533,31 +533,31 @@ class InboxOrderService
                     'updated_at' => now(),
                 ]);
 
-            // 2️⃣ Delete uploaded files from storage
+            // Delete uploaded files from storage
             if (!empty($delivery->files)) {
                 foreach ($delivery->files as $file) {
                     Storage::disk('public')->delete($file);
                 }
             }
 
-            // 3️⃣ Delete QA review linked to this delivery
+            // Delete QA review linked to this delivery
             OrderQaReview::where('delivery_id', $delivery->id)->delete();
 
-            // 4️⃣ Delete the delivery itself
+            // Delete the delivery itself
             $delivery->delete();
 
-            // 5️⃣ Reset order status and QA timestamp
+            // Reset order status and QA timestamp
             $order->update([
                 'status' => 'active',
                 'qa_submitted_at' => null,
             ]);
 
-            // 6️⃣ Update the room's last message timestamp
+            // Update the room's last message timestamp
             $order->room->update(['last_message_at' => now()]);
 
             DB::commit();
 
-            // 7️⃣ Return fresh order with relations
+            // Return fresh order with relations
             return $order->fresh([
                 'gig',
                 'buyer.profile',

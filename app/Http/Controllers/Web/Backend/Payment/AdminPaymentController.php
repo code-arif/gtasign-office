@@ -74,22 +74,19 @@ class AdminPaymentController extends Controller
     {
         if ($request->ajax()) {
             $users = User::with('profile')
-                ->where(function ($q) {
-                    $q->whereNotNull('stripe_account_id')
-                        ->orWhereHas('profile', fn($p) => $p->whereNotNull('stripe_account_id'));
-                })
+                ->whereRelation('profile', 'stripe_account_id', '!=', null)
                 ->select('users.*');
 
             return DataTables::of($users)
                 ->addIndexColumn()
                 ->addColumn('full_name', fn($u) => $u->profile?->first_name . ' ' . $u->profile?->last_name)
                 ->addColumn('username', fn($u) => $u->profile?->username ?? '—')
-                ->addColumn('stripe_account', fn($u) => $u->stripe_account_id ?? $u->profile?->stripe_account_id)
+                ->addColumn('stripe_account', fn($u) => $u->profile?->stripe_account_id)
                 ->addColumn('onboarded_at', fn($u) => $u->profile?->stripe_onboarded_at?->format('d M Y') ?? '—')
                 ->addColumn('available_balance', fn($u) => '$' . number_format($u->available_balance, 2))
                 ->addColumn('pending_clearance', fn($u) => '$' . number_format($u->pending_clearance, 2))
                 ->addColumn('stripe_status', function ($u) {
-                    $accountId = $u->stripe_account_id ?? $u->profile?->stripe_account_id;
+                    $accountId = $u->profile?->stripe_account_id;
                     try {
                         $ready = $this->stripeService->isConnectAccountReady($accountId);
                         return $ready

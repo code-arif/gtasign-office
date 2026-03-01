@@ -281,12 +281,12 @@ class CustomOfferService
             DB::commit();
 
             // Notify expert offer accepted
-            broadcast(new CustomOfferUpdated($offer, 'accepted'))->toOthers();
+            // broadcast(new CustomOfferUpdated($offer, 'accepted'))->toOthers();
 
             // send realtime chat message
-            broadcast(new MessageSent(
-                $chat->load(['sender.profile', 'receiver.profile'])
-            ))->toOthers();
+            // broadcast(new MessageSent(
+            //     $chat->load(['sender.profile', 'receiver.profile'])
+            // ))->toOthers();
 
             return [
                 'offer'        => $offer->fresh(['gig', 'expert.profile', 'client.profile', 'room']),
