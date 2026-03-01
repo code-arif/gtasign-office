@@ -107,6 +107,15 @@
                     </ul>
                 </li>
 
+                {{-- Payment Controle --}}
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.payments.index') ? 'has-link active' : '' }}"
+                        href="{{ route('admin.payments.index') }}">
+                        <i class="side-menu__icon fa-solid fa-dollar-sign"></i>
+                        <span class="side-menu__label">Payments</span>
+                    </a>
+                </li>
+
                 {{-- Contact Order --}}
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.contact.index') ? 'has-link active' : '' }}"

@@ -191,7 +191,7 @@ Route::prefix('extension-requests')->name('extension-requests.')->group(function
 
 // In web.php, inside Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(...)
 
-Route::prefix('payments')->name('admin.payments.')->group(function () {
+Route::prefix('payments')->name('payments.')->group(function () {
 
     // Dashboard
     Route::get('/', [AdminPaymentController::class, 'index'])->name('index');

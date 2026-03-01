@@ -128,6 +128,7 @@ class InboxController extends Controller
                 'Message sent successfully',
                 ['message' => new InboxMessageResource($message)]
             );
+
         } catch (Exception $e) {
             Log::error('Send message error: ' . $e->getMessage());
 

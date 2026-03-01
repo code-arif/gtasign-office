@@ -2,11 +2,13 @@
 
 namespace App\Services\Gig;
 
-use Exception;
-use App\Models\Room;
-use App\Models\Chat;
-use App\Models\User;
+use App\Events\Inbox\MessageRead;
+use App\Events\Inbox\MessageSent;
 use App\Helpers\Helper;
+use App\Models\Chat;
+use App\Models\Room;
+use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class InboxService
@@ -148,7 +150,12 @@ class InboxService
             DB::commit();
 
             // Load relationships
-            return $message->load(['sender.profile', 'receiver.profile']);
+            $message = $message->load(['sender.profile', 'receiver.profile']);
+
+            // Broadcast here (after commit)
+            broadcast(new MessageSent($message))->toOthers();
+
+            return $message;
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
@@ -196,18 +203,18 @@ class InboxService
      */
     public function markAsRead(int $roomId, int $userId): int
     {
-        $chat = Chat::where('room_id', $roomId)
-
-            // messages NOT sent by me
+        $count = Chat::where('room_id', $roomId)
             ->where('sender_id', '!=', $userId)
-
-            // unread messages only
             ->whereIn('status', ['sent', 'delivered'])
-
             ->update([
                 'status' => 'read',
                 'updated_at' => now(),
             ]);
-        return $chat;
+
+        if ($count > 0) {
+            broadcast(new MessageRead($roomId, $userId))->toOthers();
+        }
+
+        return $count;
     }
 }

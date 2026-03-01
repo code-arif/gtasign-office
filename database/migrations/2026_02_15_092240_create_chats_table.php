@@ -29,6 +29,7 @@ return new class extends Migration
                 'offer_withdrawn',
                 'order_placed',
                 'delivery_submitted',
+                'delivery_withdrawn',
                 'delivery_approved',
                 'delivery_rejected',
                 'delivery_sent',

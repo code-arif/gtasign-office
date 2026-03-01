@@ -1,43 +1,50 @@
 <?php
 
-use Illuminate\Support\Facades\Broadcast;
+use App\Models\Order;
 use App\Models\Room;
+use Illuminate\Support\Facades\Broadcast;
 
-/* Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-}); */
+/*
+|--------------------------------------------------------------------------
+| PRIVATE CHANNEL: inbox.room.{roomId}
+| — For all inbox messages (text, offer, order events)
+|--------------------------------------------------------------------------
+*/
 
-Broadcast::channel('test-notify.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
-
-Broadcast::channel('notify.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+Broadcast::channel('inbox.room.{roomId}', function ($user, $roomId) {
+    $room = Room::find($roomId);
+    if (!$room) return false;
+    return $user->id === $room->first_user_id || $user->id === $room->second_user_id;
 });
 
 /*
-# chat
+|--------------------------------------------------------------------------
+| PRIVATE CHANNEL: order.{orderId}
+| — order status, delivery, extension, revision events
+|--------------------------------------------------------------------------
 */
-Broadcast::channel('chat-room.{room_id}', function ($user, $room_id) {
-    $room = Room::find($room_id);
-    return (int) $user->id === (int) $room?->user_one_id || (int) $user->id === (int) $room?->user_two_id;
+Broadcast::channel('order.{orderId}', function ($user, $orderId) {
+    $order = Order::find($orderId);
+    if (!$order) return false;
+    return $user->id === $order->buyer_id || $user->id === $order->seller_id;
 });
 
-Broadcast::channel('chat-receiver.{receiver_id}', function ($user, $receiver_id) {
-    return (int) $user->id === (int) $receiver_id;
+/*
+|--------------------------------------------------------------------------
+| PRIVATE CHANNEL: user.{userId}
+| — personal notifications (payment, escrow, admin actions)
+|--------------------------------------------------------------------------
+*/
+Broadcast::channel('user.{userId}', function ($user, $userId) {
+    return (int) $user->id === (int) $userId;
 });
 
-Broadcast::channel('chat-sender.{sender_id}', function ($user, $sender_id) {
-    return (int) $user->id === (int) $sender_id;
-});
-
-
-// for notification send
-Broadcast::channel('offer-send-notification.{seller_id}', function ($user, $seller_id) {
-   return (int)$user->id === (int) $seller_id;
-});
-
-// for get status
-Broadcast::channel('offer-accept-notification.{buyer_id}', function ($user, $buyer_id) {
-    return (int)$user->id === (int) $buyer_id;
+/*
+|--------------------------------------------------------------------------
+| PRIVATE CHANNEL: inbox.list.{userId}
+| — inbox sidebar: unread count, last message, room sorting
+|--------------------------------------------------------------------------
+*/
+Broadcast::channel('inbox.list.{userId}', function ($user, $userId) {
+    return (int) $user->id === (int) $userId;
 });

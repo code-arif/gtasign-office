@@ -16,8 +16,8 @@ class GigStoreRequest extends FormRequest
         return [
             // Overview
             'title' => 'required|string|max:100',
-            'category_id' => 'required|exists:categories,id',
-            'sub_category_id' => 'nullable|exists:categories,id',
+            'category_id' => 'required|integer|exists:categories,id',
+            'sub_category_id' => 'nullable|integer|exists:categories,id',
             'tag_ids' => 'nullable|array',
             'tag_ids.*' => 'exists:tags,id',
 

@@ -28,7 +28,10 @@ class Gig extends Model
         'system_questions' => 'array',
         'custom_questions' => 'array',
         'published_at' => 'datetime',
+        'price'            => 'decimal:2',
+        'is_agreed'        => 'boolean',
     ];
+
 
     protected $hidden = [
         'deleted_at',

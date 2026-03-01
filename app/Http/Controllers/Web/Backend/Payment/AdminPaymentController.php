@@ -58,13 +58,12 @@ class AdminPaymentController extends Controller
                     return $accountId ? true : false;
                 })
                 ->addColumn('action', function ($o) {
-                    return view('backend.payments.partials.order-actions', compact('o'))->render();
+                    return view('backend.layouts.payments.partials.order-actions', compact('o'))->render();
                 })
                 ->rawColumns(['action'])
                 ->make(true);
         }
-
-        return view('backend.layouts.payments.orders');
+        return redirect()->route('admin.payments.index');
     }
 
     /**
@@ -101,13 +100,13 @@ class AdminPaymentController extends Controller
                     }
                 })
                 ->addColumn('action', function ($u) {
-                    return view('backend.payments.partials.stripe-actions', compact('u'))->render();
+                    return view('backend.layouts.payments.partials.stripe-actions', compact('u'))->render();
                 })
                 ->rawColumns(['stripe_status', 'action'])
                 ->make(true);
         }
 
-        return view('backend.payments.stripe-accounts');
+        return redirect()->route('admin.payments.index');
     }
 
     /**
@@ -123,13 +122,12 @@ class AdminPaymentController extends Controller
                 ->addIndexColumn()
                 ->addColumn('seller_name', fn($w) => $w->seller?->profile?->first_name . ' ' . $w->seller?->profile?->last_name)
                 ->addColumn('action', function ($w) {
-                    return view('backend.payments.partials.withdrawal-actions', compact('w'))->render();
+                    return view('backend.layouts.payments.partials.withdrawal-actions', compact('w'))->render();
                 })
                 ->rawColumns(['action'])
                 ->make(true);
         }
-
-        return view('backend.payments.withdrawals');
+        return redirect()->route('admin.payments.index');
     }
 
     // ─────────────────────────────────────────────────────────────────

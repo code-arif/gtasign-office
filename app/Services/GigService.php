@@ -137,19 +137,34 @@ class GigService
             ]);
 
             // Attach tags
+            // if (!empty($data['tag_ids'])) {
+            //     $gig->tags()->sync($data['tag_ids']);
+            // }
             if (!empty($data['tag_ids'])) {
-                $gig->tags()->sync($data['tag_ids']);
+                $gig->tags()->sync(array_map('intval', $data['tag_ids']));
             }
 
             // Upload images
+            // if (!empty($data['images'])) {
+            //     $this->uploadImages($gig, $data['images']);
+            // }
+
             if (!empty($data['images'])) {
-                $this->uploadImages($gig, $data['images']);
+                $images = is_array($data['images']) ? $data['images'] : $data['images']->all();
+                $this->uploadImages($gig, $images);
             }
 
             // Upload documents
+            // if (!empty($data['documents'])) {
+            //     $this->uploadDocuments($gig, $data['documents']);
+            // }
+
             if (!empty($data['documents'])) {
-                $this->uploadDocuments($gig, $data['documents']);
+                $documents = is_array($data['documents']) ? $data['documents'] : $data['documents']->all();
+                $this->uploadDocuments($gig, $documents);
             }
+
+            // dd($data);
 
             DB::commit();
 

@@ -412,7 +412,7 @@ class InboxOrderService
                 throw new Exception('Unauthorized');
             }
 
-            // Only qa_pending status withdraw করা যাবে
+            // Only qa_pending status withdraw
             if ($order->status !== 'qa_pending') {
                 throw new Exception('Delivery can only be withdrawn when QA is pending');
             }
@@ -443,24 +443,37 @@ class InboxOrderService
             ]);
 
             // Delete the delivery_submitted chat message
+            // Chat::where('room_id', $order->room_id)
+            //     ->where('delivery_id', $delivery->id)
+            //     ->where('type', 'delivery_submitted')
+            //     ->delete();
+
             Chat::where('room_id', $order->room_id)
                 ->where('delivery_id', $delivery->id)
                 ->where('type', 'delivery_submitted')
-                ->delete();
+                ->update([
+                    'type' => 'delivery_withdrawn',
+                    'text' => "Delivery withdrawn by expert - Order #{$order->order_number}",
+                    'status' => 'sent',
+                    'metadata' => json_encode([
+                        'action' => 'delivery_withdrawn',
+                    ]),
+                    'updated_at' => now(),
+                ]);
 
             // New chat message
-            Chat::create([
-                'sender_id'   => $sellerId,
-                'receiver_id' => $order->buyer_id,
-                'room_id'     => $order->room_id,
-                'type'        => 'system',
-                'order_id'    => $orderId,
-                'text'        => "Delivery withdrawn by expert - Order #{$order->order_number}",
-                'status'      => 'sent',
-                'metadata'    => [
-                    'action' => 'delivery_withdrawn',
-                ],
-            ]);
+            // Chat::create([
+            //     'sender_id'   => $sellerId,
+            //     'receiver_id' => $order->buyer_id,
+            //     'room_id'     => $order->room_id,
+            //     'type'        => 'delivery_withdrawn',
+            //     'order_id'    => $orderId,
+            //     'text'        => "Delivery withdrawn by expert - Order #{$order->order_number}",
+            //     'status'      => 'sent',
+            //     'metadata'    => [
+            //         'action' => 'delivery_withdrawn',
+            //     ],
+            // ]);
 
             $order->room->update(['last_message_at' => now()]);
 

@@ -35,7 +35,8 @@ class GigDetailResource extends JsonResource
                 $this->whenLoaded('tags')
             ),
 
-            'analytics' => new GigAnalyticsResource($this->resource),
+            'analytics' => new GigAnalyticsResource($this),
+
 
             'reviews_count' => $this->reviews_count ?? 0,
 
@@ -55,7 +56,7 @@ class GigDetailResource extends JsonResource
 
             'user' => new GigUserResource($this->whenLoaded('user')),
 
-            'room_id' => $this->room_id ?? null, // room থাকলে ID, না থাকলে null
+            'room_id' => $this->room_id ?? null,
 
             'published_at' => $this->published_at?->format('Y-m-d H:i:s'),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),

@@ -2,6 +2,8 @@
 
 namespace App\Services\Gig;
 
+use App\Events\Inbox\CustomOfferUpdated;
+use App\Events\Inbox\MessageSent;
 use App\Models\Chat;
 use App\Models\CustomOffer;
 use App\Models\Order;
@@ -249,7 +251,7 @@ class CustomOfferService
             $offer->update(['status' => 'converted_to_order']);
 
             // ── 4. Chat message (order placed) ────────────────────────────
-            Chat::create([
+            $chat = Chat::create([
                 'sender_id'   => $clientId,
                 'receiver_id' => $offer->expert_id,
                 'room_id'     => $offer->room_id,
@@ -263,7 +265,7 @@ class CustomOfferService
                 ],
             ]);
 
-            $offer->room->update(['last_message_at' => now()]);
+            $offer = $offer->room->update(['last_message_at' => now()]);
 
             OrderActivity::create([
                 'order_id'    => $order->id,
@@ -274,9 +276,17 @@ class CustomOfferService
 
             // ── 5. Create Stripe Checkout Session ─────────────────────────
             $stripeService = app(StripePaymentService::class);
-            $checkout      = $stripeService->createCheckoutSession($order);
+            $checkout = $stripeService->createCheckoutSession($order);
 
             DB::commit();
+
+            // Notify expert offer accepted
+            broadcast(new CustomOfferUpdated($offer, 'accepted'))->toOthers();
+
+            // send realtime chat message
+            broadcast(new MessageSent(
+                $chat->load(['sender.profile', 'receiver.profile'])
+            ))->toOthers();
 
             return [
                 'offer'        => $offer->fresh(['gig', 'expert.profile', 'client.profile', 'room']),
