@@ -19,6 +19,7 @@ use App\Http\Controllers\Web\Backend\Gig\GigManageController;
 use App\Http\Controllers\Web\Backend\Gig\TagManageController;
 use App\Http\Controllers\Web\Backend\Order\ExtensionRequestController;
 use App\Http\Controllers\Web\Backend\Order\OrderManageController;
+use App\Http\Controllers\Web\Backend\Payment\AdminPaymentController;
 use App\Http\Controllers\Web\Backend\QA\QaManageController;
 use App\Http\Controllers\Web\Backend\Settings\CaptchaController;
 use App\Http\Controllers\Web\Backend\Settings\EnvController;
@@ -179,6 +180,38 @@ Route::prefix('extension-requests')->name('extension-requests.')->group(function
     Route::get('/{id}', [ExtensionRequestController::class, 'show'])->name('show');
     Route::patch('/{id}/approve', [ExtensionRequestController::class, 'approve'])->name('approve');
     Route::patch('/{id}/reject', [ExtensionRequestController::class, 'reject'])->name('reject');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Admin Payment Routes
+| Add these inside your existing admin middleware group
+|--------------------------------------------------------------------------
+*/
+
+// In web.php, inside Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(...)
+
+Route::prefix('payments')->name('admin.payments.')->group(function () {
+
+    // Dashboard
+    Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
+
+    // Orders with payment control
+    Route::get('/orders', [AdminPaymentController::class, 'orders'])->name('orders');
+    Route::get('/orders/{orderId}/details', [AdminPaymentController::class, 'orderDetails'])->name('orders.details');
+    Route::post('/orders/{orderId}/release-escrow', [AdminPaymentController::class, 'releaseEscrow'])->name('orders.release-escrow');
+    Route::post('/orders/{orderId}/cancel', [AdminPaymentController::class, 'cancelOrder'])->name('orders.cancel');
+    Route::post('/orders/{orderId}/force-transfer', [AdminPaymentController::class, 'forceTransfer'])->name('orders.force-transfer');
+
+    // Stripe Accounts
+    Route::get('/stripe-accounts', [AdminPaymentController::class, 'stripeAccounts'])->name('stripe-accounts');
+    Route::get('/stripe/{userId}/dashboard', [AdminPaymentController::class, 'expertStripeDashboard'])->name('stripe.dashboard');
+
+    // Expert Wallet
+    Route::get('/expert/{userId}/wallet', [AdminPaymentController::class, 'expertWallet'])->name('expert.wallet');
+
+    // Withdrawals
+    Route::get('/withdrawals', [AdminPaymentController::class, 'withdrawals'])->name('withdrawals');
 });
 
 /*
