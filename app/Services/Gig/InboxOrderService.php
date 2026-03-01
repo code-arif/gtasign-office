@@ -398,9 +398,105 @@ class InboxOrderService
     /**
      * Withdraw delivery
      */
+    // public function withdrawDelivery(int $orderId, int $sellerId)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $order = Order::with(['room', 'latestDelivery'])->find($orderId);
+
+    //         if (!$order) {
+    //             throw new Exception('Order not found');
+    //         }
+
+    //         if (!$order->isOwnedBySeller($sellerId)) {
+    //             throw new Exception('Unauthorized');
+    //         }
+
+    //         // Only qa_pending status withdraw
+    //         if ($order->status !== 'qa_pending') {
+    //             throw new Exception('Delivery can only be withdrawn when QA is pending');
+    //         }
+
+    //         $delivery = $order->latestDelivery;
+
+    //         if (!$delivery) {
+    //             throw new Exception('No delivery found to withdraw');
+    //         }
+
+    //         // Delete uploaded files from storage
+    //         if (!empty($delivery->files)) {
+    //             foreach ($delivery->files as $file) {
+    //                 Storage::disk('public')->delete($file);
+    //             }
+    //         }
+
+    //         // Delete QA review
+    //         OrderQaReview::where('delivery_id', $delivery->id)->delete();
+
+    //         // Delete delivery
+    //         $delivery->delete();
+
+    //         // Reset order status back to active
+    //         $order->update([
+    //             'status'           => 'active',
+    //             'qa_submitted_at'  => null,
+    //         ]);
+
+    //         // Delete the delivery_submitted chat message
+    //         // Chat::where('room_id', $order->room_id)
+    //         //     ->where('delivery_id', $delivery->id)
+    //         //     ->where('type', 'delivery_submitted')
+    //         //     ->delete();
+
+    //         Chat::where('room_id', $order->room_id)
+    //             ->where('delivery_id', $delivery->id)
+    //             ->where('type', 'delivery_submitted')
+    //             ->update([
+    //                 'type' => 'delivery_withdrawn',
+    //                 'text' => "Delivery withdrawn by expert - Order #{$order->order_number}",
+    //                 'status' => 'sent',
+    //                 'metadata' => json_encode([
+    //                     'action' => 'delivery_withdrawn',
+    //                 ]),
+    //                 'updated_at' => now(),
+    //             ]);
+
+    //         // New chat message
+    //         // Chat::create([
+    //         //     'sender_id'   => $sellerId,
+    //         //     'receiver_id' => $order->buyer_id,
+    //         //     'room_id'     => $order->room_id,
+    //         //     'type'        => 'delivery_withdrawn',
+    //         //     'order_id'    => $orderId,
+    //         //     'text'        => "Delivery withdrawn by expert - Order #{$order->order_number}",
+    //         //     'status'      => 'sent',
+    //         //     'metadata'    => [
+    //         //         'action' => 'delivery_withdrawn',
+    //         //     ],
+    //         // ]);
+
+    //         $order->room->update(['last_message_at' => now()]);
+
+    //         // OrderActivity::create([
+    //         //     'order_id'    => $orderId,
+    //         //     'user_id'     => $sellerId,
+    //         //     'type'        => 'delivery_withdrawn',
+    //         //     'description' => "Delivery withdrawn, order reset to active",
+    //         // ]);
+
+    //         DB::commit();
+
+    //         return $order->fresh(['gig', 'buyer.profile', 'seller.profile', 'room', 'latestDelivery']);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         throw $e;
+    //     }
+    // }
+
     public function withdrawDelivery(int $orderId, int $sellerId)
     {
         DB::beginTransaction();
+
         try {
             $order = Order::with(['room', 'latestDelivery'])->find($orderId);
 
@@ -412,7 +508,7 @@ class InboxOrderService
                 throw new Exception('Unauthorized');
             }
 
-            // Only qa_pending status withdraw
+            // Only allow withdraw if QA is pending
             if ($order->status !== 'qa_pending') {
                 throw new Exception('Delivery can only be withdrawn when QA is pending');
             }
@@ -423,31 +519,7 @@ class InboxOrderService
                 throw new Exception('No delivery found to withdraw');
             }
 
-            // Delete uploaded files from storage
-            if (!empty($delivery->files)) {
-                foreach ($delivery->files as $file) {
-                    Storage::disk('public')->delete($file);
-                }
-            }
-
-            // Delete QA review
-            OrderQaReview::where('delivery_id', $delivery->id)->delete();
-
-            // Delete delivery
-            $delivery->delete();
-
-            // Reset order status back to active
-            $order->update([
-                'status'           => 'active',
-                'qa_submitted_at'  => null,
-            ]);
-
-            // Delete the delivery_submitted chat message
-            // Chat::where('room_id', $order->room_id)
-            //     ->where('delivery_id', $delivery->id)
-            //     ->where('type', 'delivery_submitted')
-            //     ->delete();
-
+            // 1️⃣ Update the previous chat message BEFORE deleting delivery
             Chat::where('room_id', $order->room_id)
                 ->where('delivery_id', $delivery->id)
                 ->where('type', 'delivery_submitted')
@@ -455,38 +527,44 @@ class InboxOrderService
                     'type' => 'delivery_withdrawn',
                     'text' => "Delivery withdrawn by expert - Order #{$order->order_number}",
                     'status' => 'sent',
-                    'metadata' => json_encode([
+                    'metadata' => [
                         'action' => 'delivery_withdrawn',
-                    ]),
+                    ],
                     'updated_at' => now(),
                 ]);
 
-            // New chat message
-            // Chat::create([
-            //     'sender_id'   => $sellerId,
-            //     'receiver_id' => $order->buyer_id,
-            //     'room_id'     => $order->room_id,
-            //     'type'        => 'delivery_withdrawn',
-            //     'order_id'    => $orderId,
-            //     'text'        => "Delivery withdrawn by expert - Order #{$order->order_number}",
-            //     'status'      => 'sent',
-            //     'metadata'    => [
-            //         'action' => 'delivery_withdrawn',
-            //     ],
-            // ]);
+            // 2️⃣ Delete uploaded files from storage
+            if (!empty($delivery->files)) {
+                foreach ($delivery->files as $file) {
+                    Storage::disk('public')->delete($file);
+                }
+            }
 
+            // 3️⃣ Delete QA review linked to this delivery
+            OrderQaReview::where('delivery_id', $delivery->id)->delete();
+
+            // 4️⃣ Delete the delivery itself
+            $delivery->delete();
+
+            // 5️⃣ Reset order status and QA timestamp
+            $order->update([
+                'status' => 'active',
+                'qa_submitted_at' => null,
+            ]);
+
+            // 6️⃣ Update the room's last message timestamp
             $order->room->update(['last_message_at' => now()]);
-
-            // OrderActivity::create([
-            //     'order_id'    => $orderId,
-            //     'user_id'     => $sellerId,
-            //     'type'        => 'delivery_withdrawn',
-            //     'description' => "Delivery withdrawn, order reset to active",
-            // ]);
 
             DB::commit();
 
-            return $order->fresh(['gig', 'buyer.profile', 'seller.profile', 'room', 'latestDelivery']);
+            // 7️⃣ Return fresh order with relations
+            return $order->fresh([
+                'gig',
+                'buyer.profile',
+                'seller.profile',
+                'room',
+                'latestDelivery',
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
