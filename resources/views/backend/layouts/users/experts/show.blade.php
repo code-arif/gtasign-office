@@ -377,7 +377,7 @@
                                             <p class="mb-0 text-muted small">{{ $review->review }}</p>
                                         @endif
                                         @if ($review->seller_reply)
-                                            <div class="seller-reply mt-2 p-2 rounded">
+                                            <div class="seller-reply mt-2 p-2 rounded-1">
                                                 <small class="fw-600 text-primary"><i
                                                         class="fe fe-corner-down-right me-1"></i>Expert Reply:</small>
                                                 <p class="mb-0 small text-muted mt-1">{{ $review->seller_reply }}</p>

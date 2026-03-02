@@ -566,7 +566,7 @@
                         <p>Manage orders, escrow releases, Stripe accounts, and payouts</p>
                     </div>
                     <div
-                        style="font-size:11px;color:var(--clr-muted-2);background:var(--clr-surface);border:1px solid var(--clr-border);padding:6px 12px;border-radius:6px">
+                        style="background:var(--clr-surface);border:1px solid var(--clr-border);padding:6px 12px;border-radius:6px">
                         <i class="fe fe-clock me-1"></i> {{ now()->format('d M Y, H:i') }}
                     </div>
                 </div>

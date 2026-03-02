@@ -414,7 +414,7 @@
                                         <p class="mb-0">{{ $order->review->review }}</p>
                                     @endif
                                     @if ($order->review->seller_reply)
-                                        <div class="alert alert-info-transparent mt-3 mb-0">
+                                        <div class="alert alert-info mt-3 mb-0">
                                             <strong>Seller Reply:</strong>
                                             <p class="mb-0 mt-1">{{ $order->review->seller_reply }}</p>
                                         </div>
