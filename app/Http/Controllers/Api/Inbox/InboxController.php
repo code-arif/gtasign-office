@@ -128,7 +128,6 @@ class InboxController extends Controller
                 'Message sent successfully',
                 ['message' => new InboxMessageResource($message)]
             );
-
         } catch (Exception $e) {
             Log::error('Send message error: ' . $e->getMessage());
 
@@ -196,6 +195,27 @@ class InboxController extends Controller
                 'Failed to mark messages as read',
                 500
             );
+        }
+    }
+
+    /**
+     * Toggle pin/unpin room
+     * POST /api/inbox/{room}/pin
+     */
+    public function togglePin(int $room)
+    {
+        try {
+            $user = auth('api')->user();
+
+            $result = $this->inboxService->togglePin($user->id, $room);
+
+            return $this->success(
+                $result['pinned'] ? 'Room pinned' : 'Room unpinned',
+                ['is_pinned' => $result['pinned']]
+            );
+        } catch (Exception $e) {
+            Log::error('Toggle pin error: ' . $e->getMessage());
+            return $this->error(['exception' => $e->getMessage()], 'Failed to toggle pin', 500);
         }
     }
 }

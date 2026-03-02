@@ -7,6 +7,7 @@ use App\Events\Inbox\MessageSent;
 use App\Helpers\Helper;
 use App\Models\Chat;
 use App\Models\Room;
+use App\Models\RoomPin;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -16,13 +17,52 @@ class InboxService
     /**
      * Get user's inbox list
      */
+    // public function getInboxList(int $userId, ?string $search = null, int $perPage = 20)
+    // {
+    //     $query = Room::with(['firstUser.profile', 'secondUser.profile', 'latestMessage'])
+    //         ->forUser($userId)
+    //         ->recentActivity();
+
+    //     // Search by other user's name
+    //     if ($search) {
+    //         $query->where(function ($q) use ($userId, $search) {
+    //             $q->whereHas('firstUser.profile', function ($pq) use ($search) {
+    //                 $pq->where('first_name', 'like', "%{$search}%")
+    //                     ->orWhere('last_name', 'like', "%{$search}%")
+    //                     ->orWhere('username', 'like', "%{$search}%");
+    //             })->orWhereHas('secondUser.profile', function ($pq) use ($search) {
+    //                 $pq->where('first_name', 'like', "%{$search}%")
+    //                     ->orWhere('last_name', 'like', "%{$search}%")
+    //                     ->orWhere('username', 'like', "%{$search}%");
+    //             });
+    //         });
+    //     }
+
+    //     $rooms = $query->paginate($perPage);
+
+    //     // Add unread count and other user info to each room
+    //     $rooms->getCollection()->transform(function ($room) use ($userId) {
+    //         $room->other_user = $room->getOtherUserAttribute($userId);
+    //         $room->unread_count = $room->getUnreadCount($userId);
+    //         return $room;
+    //     });
+
+    //     return $rooms;
+    // }
+
     public function getInboxList(int $userId, ?string $search = null, int $perPage = 20)
     {
+        // Keep pinned room IDs in advance.
+        $pinnedRoomIds = RoomPin::where('user_id', $userId)
+            ->pluck('room_id');
+
         $query = Room::with(['firstUser.profile', 'secondUser.profile', 'latestMessage'])
             ->forUser($userId)
-            ->recentActivity();
+            ->recentActivity()
+            // Pinned rooms first, then last_message_at desc
+            ->orderByRaw("CASE WHEN id IN (" . ($pinnedRoomIds->isNotEmpty() ? $pinnedRoomIds->implode(',') : '0') . ") THEN 0 ELSE 1 END ASC")
+            ->orderBy('last_message_at', 'desc');
 
-        // Search by other user's name
         if ($search) {
             $query->where(function ($q) use ($userId, $search) {
                 $q->whereHas('firstUser.profile', function ($pq) use ($search) {
@@ -39,10 +79,10 @@ class InboxService
 
         $rooms = $query->paginate($perPage);
 
-        // Add unread count and other user info to each room
-        $rooms->getCollection()->transform(function ($room) use ($userId) {
-            $room->other_user = $room->getOtherUserAttribute($userId);
+        $rooms->getCollection()->transform(function ($room) use ($userId, $pinnedRoomIds) {
+            $room->other_user   = $room->getOtherUserAttribute($userId);
             $room->unread_count = $room->getUnreadCount($userId);
+            $room->is_pinned    = $pinnedRoomIds->contains($room->id);
             return $room;
         });
 
@@ -216,5 +256,28 @@ class InboxService
         }
 
         return $count;
+    }
+
+    // ─── Toggle Pin ──────────────────────────────────────────────────────────────
+    public function togglePin(int $userId, int $roomId): array
+    {
+        // Verify that the room belongs to the user.
+        $room = Room::forUser($userId)->findOrFail($roomId);
+
+        $pin = RoomPin::where('user_id', $userId)
+            ->where('room_id', $room->id)
+            ->first();
+
+        if ($pin) {
+            $pin->delete();
+            return ['pinned' => false];
+        }
+
+        RoomPin::create([
+            'user_id' => $userId,
+            'room_id' => $room->id,
+        ]);
+
+        return ['pinned' => true];
     }
 }

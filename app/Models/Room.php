@@ -96,6 +96,14 @@ class Room extends Model
             ->where('expires_at', '>', now());
     }
 
+    /**
+     * Pinned room relations
+     */
+    public function pins()
+    {
+        return $this->hasMany(RoomPin::class);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Scopes

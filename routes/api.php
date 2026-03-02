@@ -188,6 +188,8 @@ Route::middleware(['auth:api'])->prefix('v1/inbox')->group(function () {
     Route::post('/start/{userId}', [InboxController::class, 'startConversation']); // DONE: Start conversation
     Route::post('/{roomId}/mark-read', [InboxController::class, 'markAsRead']); // Mark as read (PROBLEM)
 
+    Route::post('/{roomId}/pin', [InboxController::class, 'togglePin']);
+
     // Custom offers
     Route::prefix('custom-offers')->group(function () {
         Route::post('/create', [CustomOfferController::class, 'create']); // DONE: Create offer
