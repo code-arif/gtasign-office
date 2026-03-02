@@ -355,7 +355,7 @@
                             </div>
                             <div class="card-body">
                                 @forelse($recentReviews as $review)
-                                    <div class="review-card p-3 rounded mb-3">
+                                    <div class="review-card p-3 rounded-1 mb-3">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div>
                                                 <span class="fw-semibold">{{ $review->reviewer_email }}</span>
