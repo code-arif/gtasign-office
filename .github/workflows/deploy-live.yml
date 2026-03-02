@@ -1,0 +1,23 @@
+name: Deploy project to our server
+
+on:
+  push:
+    branches:
+      - deploy-live
+
+jobs:
+  FTP-Deploy-Action:
+    name: FTP Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2.1.0
+        with:
+          fetch-depth: 2
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: 72.62.120.217
+          username: gtasign
+          password: "5KPnJ65I0Em7QtURl9J7"
