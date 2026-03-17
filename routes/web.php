@@ -3,8 +3,8 @@
 use App\Http\Controllers\Api\Auth\SocialLoginController;
 use App\Http\Controllers\Api\Payment\StripeCallbackController;
 use App\Http\Controllers\Api\Payment\StripeWebhookController;
+use App\Http\Controllers\Web\Backend\CMS\Web\PrivacyTerms\PrivacAndTermsController;
 use App\Http\Controllers\Web\Frontend\AffiliateController;
-// use App\Http\Controllers\Api\StripeWebhookController as ApiStripeWebhookController;
 use App\Http\Controllers\Web\Frontend\HomeController;
 use App\Http\Controllers\Web\Frontend\SubscriberController;
 use App\Http\Controllers\Web\NotificationController;
@@ -55,3 +55,7 @@ Route::prefix('stripe')->name('stripe.')->group(function () {
 
 
 // Route::post('/rental/webhook', [RentedPaymentController::class, 'handleWebhook']);
+
+
+Route::get('/privacy-policy', [PrivacAndTermsController::class, 'getPrivecy']);
+Route::get('/terms-conditions', [PrivacAndTermsController::class, 'getTerms']);

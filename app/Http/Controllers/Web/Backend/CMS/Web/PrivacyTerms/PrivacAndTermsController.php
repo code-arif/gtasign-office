@@ -68,4 +68,34 @@ class PrivacAndTermsController extends Controller
 
         return redirect()->back()->with('success', 'Privacy Policy updated successfully.');
     }
+
+    /*
+    * Veiw privecy policy page
+    */
+    public function getTerms()
+    {
+        // dd('hello');
+        $page = PrivecyAndTerms::where('type', 'terms')->first();
+
+        if (!$page) {
+            abort(404, 'Terms & Condition page not found');
+        }
+
+        return view('backend.layouts.privacyandterms.terms', compact('page'));
+    }
+
+    /**
+     * View terms page
+     */
+    public function getPrivecy()
+    {
+        // dd('hello');
+        $page = PrivecyAndTerms::where('type', 'privacy')->first();
+
+        if (!$page) {
+            abort(404, 'Privacy Policy not found');
+        }
+
+        return view('backend.layouts.privacyandterms.privecy', compact('page'));
+    }
 }
