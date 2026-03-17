@@ -214,10 +214,10 @@ class RegisterController extends Controller
                 'identifier' => $user->email,
                 'token_hash' => Hash::make($otp),
                 'type' => 'email_verification',
-                'expires_at' => now()->addMinutes(60),
+                'expires_at' => now()->addSeconds(150),
             ]);
 
-            Mail::to($user->email)->queue(new OtpMail($otp, $user, 'Verify Your Email Address'));
+            Mail::to($user->email)->send(new OtpMail($otp, $user, 'Verify Your Email Address'));
 
             return $this->success(
                 'A new OTP has been sent to your email.',
