@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use Exception;
-use Carbon\Carbon;
-use App\Models\User;
 use App\Helpers\Helper;
-use App\Mail\ForgotPassOTP;
-use App\Traits\ApiResponse;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Models\UserSecurityToken;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Mail\ForgotPassOTP;
+use App\Mail\OtpMail;
+use App\Models\User;
+use App\Models\UserSecurityToken;
+use App\Traits\ApiResponse;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class ResetPasswordController extends Controller
 {
@@ -68,15 +69,15 @@ class ResetPasswordController extends Controller
                 'expires_at' => now()->addMinutes(60),
             ]);
 
-            // Mail::to($user->email)
-            //     ->queue(new OtpMail($otp, $user, 'Reset Your Password - SecAAX'));
+            Mail::to($user->email)
+                ->send(new ForgotPassOTP($otp, $user, 'Reset Your Password - SecAAX'));
 
             return $this->success(
                 'OTP sent successfully.',
                 [
-                    'otp' => $otp,
+                    // 'otp' => $otp,
                     'email' => $user->email,
-                    'expires_at' => now()->addMinutes(60)->format('Y-m-d H:i:s')
+                    // 'expires_at' => now()->addMinutes(60)->format('Y-m-d H:i:s')
                 ]
             );
         } catch (Exception $e) {

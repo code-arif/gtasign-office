@@ -105,7 +105,7 @@ class RegisterController extends Controller
             // }
 
             // // Send OTP email
-            // Mail::to($user->email)->send(new OtpMail($otp, $user, 'Verify Your Email Address'));
+            Mail::to($user->email)->send(new OtpMail($otp, $user, 'Verify Your Email Address'));
 
             DB::commit();
 
@@ -116,7 +116,7 @@ class RegisterController extends Controller
                     'username' => $username,
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
-                    'otp' => $otp,
+                    // 'otp' => $otp,
                     'is_agreed' => $user->is_agreed
                 ],
                 201
@@ -222,7 +222,7 @@ class RegisterController extends Controller
             return $this->success(
                 'A new OTP has been sent to your email.',
                 [
-                    'otp' => $otp
+                    // 'otp' => $otp
                 ],
                 201
             );

@@ -14,15 +14,21 @@
     </a>
 @endsection
 
+
 @section('content')
     <p>
         Hello <strong style="color:#0f5132">{{ $user->name }}</strong>,
     </p>
 
     <p>
-        Thank you for choosing <strong>{{ config('app.name') }}</strong>.
-        Use the OTP below to complete your registration.
+        We received a request to reset the password for your
+        <strong>{{ config('app.name') }}</strong> account.
     </p>
+
+    <p>
+        Use the OTP below to continue the password reset process.
+    </p>
+
 
     <!-- OTP BOX -->
 
@@ -66,7 +72,7 @@ letter-spacing:2px;
 text-transform:uppercase;
 ">
 
-                                One Time Password
+                                Password Reset OTP
 
                             </div>
 
@@ -81,6 +87,7 @@ text-transform:uppercase;
 
     </table>
 
+
     <!-- Security -->
 
     <div class="feature-box">
@@ -91,20 +98,22 @@ text-transform:uppercase;
 
         <ul class="list-positive">
 
-            <li>Never share your OTP with anyone</li>
+            <li>Never share this OTP with anyone</li>
 
             <li>{{ config('app.name') }} will never ask for your OTP</li>
 
-            <li>If you did not request this, simply ignore this email</li>
+            <li>If you did not request a password reset, please ignore this email</li>
 
         </ul>
 
     </div>
 
+
     <p>
         This OTP will expire in
         <strong style="color:#0f5132">1 hour</strong>.
     </p>
+
 
     <p style="margin-top:30px">
         Best regards,<br>
@@ -114,13 +123,6 @@ text-transform:uppercase;
 
 
 @section('footer')
-    {{-- <div>
-        Need help? Contact us
-        <a href="mailto:support@{{ config('app.domain') }}">
-            support@{{ config('app.domain') }}
-        </a>
-    </div> --}}
-
     <div style="margin-top:14px;font-size:12px;color:#94a3b8">
         © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
     </div>

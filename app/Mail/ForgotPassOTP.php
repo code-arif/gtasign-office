@@ -9,7 +9,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class ForgotPassOTP extends Mailable implements ShouldQueue
+class ForgotPassOTP extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -24,7 +24,7 @@ class ForgotPassOTP extends Mailable implements ShouldQueue
     {
         $this->otp = $otp;
         $this->user = $user;
-        $this->subject = $subject ?? 'Password Reset OTP - Whistle Works';
+        $this->subject = $subject ?? 'Password Reset OTP - SecaaX';
     }
 
     /**
