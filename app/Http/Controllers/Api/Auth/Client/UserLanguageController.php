@@ -7,6 +7,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Language;
 use Illuminate\Support\Facades\Validator;
 
 class UserLanguageController extends Controller
@@ -115,6 +116,29 @@ class UserLanguageController extends Controller
             return $this->error(
                 ['exception' => $e->getMessage()],
                 'Failed to remove language',
+                500
+            );
+        }
+    }
+
+    /**
+     * Get all language (NO Auth)
+     */
+    public function getAllLanguage()
+    {
+        try {
+            $languages = Language::get();
+
+            return $this->success(
+                'All languages retrieved successfully',
+                $languages
+            );
+        } catch (Exception $e) {
+            Log::error('Get languages error: ' . $e->getMessage());
+
+            return $this->error(
+                ['exception' => $e->getMessage()],
+                'Failed to retrieve languages',
                 500
             );
         }

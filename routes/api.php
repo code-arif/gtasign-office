@@ -80,6 +80,9 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
         Route::get('/gig-categories', [GigCategoryController::class, 'index']); // done
         Route::get('/gig-tags', [GigTagController::class, 'index']); // done
     });
+
+    // get all language (NO Auth)
+    Route::get('/all-languages', [UserLanguageController::class, 'getAllLanguage']);
 });
 
 Route::get('/v1/gigs/details/{id}', [GigController::class, 'show'])->middleware('auth:api'); // DONE: Auth Required
