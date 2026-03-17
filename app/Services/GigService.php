@@ -16,9 +16,14 @@ class GigService
      */
     public function getAllGigs(array $filters = [], int $perPage = 15)
     {
-        $query = Gig::where('status', 'active')->with(['user', 'category', 'subCategory', 'images'])
+        $query = Gig::where('status', 'active')
+            ->whereHas('user', function ($q) {
+                $q->where('status', 'active'); // only active users
+            })
+            ->with(['user', 'category', 'subCategory', 'images'])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating');
+
         $query = $this->applyFilters($query, $filters);
 
         return $query->latest()->paginate($perPage);

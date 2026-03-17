@@ -162,6 +162,99 @@ class UserController extends Controller
     /**
      * Update profile
      */
+    // public function updateProfile(Request $request)
+    // {
+    //     try {
+    //         $user = auth('api')->user()->load('profile');
+
+    //         if (!$user) {
+    //             return $this->error(
+    //                 null,
+    //                 'User not found',
+    //                 404
+    //             );
+    //         }
+
+    //         // Validation
+    //         $validator = Validator::make($request->all(), [
+    //             'first_name' => 'nullable|string|max:100',
+    //             'last_name'  => 'nullable|string|max:100',
+    //             'biography'  => 'nullable|string|max:2500',
+    //             'tagline'    => 'nullable|string|max:255',
+    //             'phone'      => 'nullable|string|max:150|unique:users,phone,' . $user->id,
+    //             'address'    => 'nullable|string|max:500',
+    //         ]);
+
+    //         if ($validator->fails()) {
+    //             return $this->validationError(
+    //                 $validator->errors()->toArray(),
+    //                 'Validation failed',
+    //                 422
+    //             );
+    //         }
+
+    //         $validatedData = $validator->validated();
+
+    //         // Update user table fields (phone)
+    //         if (isset($validatedData['phone'])) {
+    //             $user->update(['phone' => $validatedData['phone']]);
+    //         }
+
+    //         // Update or create profile
+    //         if (!$user->profile) {
+    //             // Create profile if doesn't exist
+    //             $profileData = [
+    //                 'first_name' => $validatedData['first_name'] ?? null,
+    //                 'last_name'  => $validatedData['last_name'] ?? null,
+    //                 'biography'  => $validatedData['biography'] ?? null,
+    //                 'tagline'    => $validatedData['tagline'] ?? null,
+    //                 'address'    => $validatedData['address'] ?? null,
+    //                 'username'   => $this->generateUsername($validatedData['first_name'] ?? 'user'),
+    //                 'slug'       => $this->generateSlug($validatedData['first_name'] ?? 'user'),
+    //             ];
+
+    //             $user->profile()->create($profileData);
+    //         } else {
+    //             // Update existing profile
+    //             $profileData = [];
+
+    //             if (isset($validatedData['first_name'])) {
+    //                 $profileData['first_name'] = $validatedData['first_name'];
+    //             }
+    //             if (isset($validatedData['last_name'])) {
+    //                 $profileData['last_name'] = $validatedData['last_name'];
+    //             }
+    //             if (isset($validatedData['biography'])) {
+    //                 $profileData['biography'] = $validatedData['biography'];
+    //             }
+    //             if (isset($validatedData['tagline'])) {
+    //                 $profileData['tagline'] = $validatedData['tagline'];
+    //             }
+    //             if (isset($validatedData['address'])) {
+    //                 $profileData['address'] = $validatedData['address'];
+    //             }
+
+    //             $user->profile->update($profileData);
+    //         }
+
+    //         // Reload user with profile
+    //         $user->refresh()->load('profile');
+
+    //         return $this->success(
+    //             'Profile updated successfully',
+    //             new UserResource($user)
+    //         );
+    //     } catch (Exception $e) {
+    //         Log::error('Update profile error: ' . $e->getMessage());
+    //         return $this->error(
+    //             ['exception' => $e->getMessage()],
+    //             'Failed to update profile',
+    //             500
+    //         );
+    //     }
+    // }
+
+
     public function updateProfile(Request $request)
     {
         try {
@@ -183,6 +276,7 @@ class UserController extends Controller
                 'tagline'    => 'nullable|string|max:255',
                 'phone'      => 'nullable|string|max:150|unique:users,phone,' . $user->id,
                 'address'    => 'nullable|string|max:500',
+                'avatar'     => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB
             ]);
 
             if ($validator->fails()) {
@@ -200,7 +294,7 @@ class UserController extends Controller
                 $user->update(['phone' => $validatedData['phone']]);
             }
 
-            // Update or create profile
+            // Ensure profile exists
             if (!$user->profile) {
                 // Create profile if doesn't exist
                 $profileData = [
@@ -212,6 +306,11 @@ class UserController extends Controller
                     'username'   => $this->generateUsername($validatedData['first_name'] ?? 'user'),
                     'slug'       => $this->generateSlug($validatedData['first_name'] ?? 'user'),
                 ];
+
+                // Avatar upload if provided
+                if (isset($validatedData['avatar'])) {
+                    $profileData['avatar'] = Helper::fileUpload($request->file('avatar'), 'user/avatar');
+                }
 
                 $user->profile()->create($profileData);
             } else {
@@ -232,6 +331,16 @@ class UserController extends Controller
                 }
                 if (isset($validatedData['address'])) {
                     $profileData['address'] = $validatedData['address'];
+                }
+
+                // Avatar upload if provided
+                if (isset($validatedData['avatar'])) {
+                    // Delete old avatar if exists
+                    if (!empty($user->profile->avatar) && file_exists(public_path($user->profile->avatar))) {
+                        Helper::fileDelete(public_path($user->profile->avatar));
+                    }
+
+                    $profileData['avatar'] = Helper::fileUpload($request->file('avatar'), 'user/avatar');
                 }
 
                 $user->profile->update($profileData);
