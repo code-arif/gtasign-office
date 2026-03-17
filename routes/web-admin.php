@@ -32,6 +32,7 @@ use App\Http\Controllers\Web\Backend\Settings\ProfileController;
 use App\Http\Controllers\Web\Backend\Settings\SettingController;
 use App\Http\Controllers\Web\Backend\Settings\SignatureController;
 use App\Http\Controllers\Web\Backend\Settings\SocialController;
+use App\Http\Controllers\Web\Backend\Settings\SocialLinkController;
 use App\Http\Controllers\Web\Backend\Settings\StripeController;
 use App\Http\Controllers\Web\Backend\SubscriberController;
 use App\Http\Controllers\Web\Backend\User\ClientManageController;
@@ -46,6 +47,7 @@ use Illuminate\Support\Facades\Route;
 | Admin Dashboard Routes
 |--------------------------------------------------------------------------
 */
+
 Route::get("dashboard", [DashboardController::class, 'index'])->name('dashboard');
 
 
@@ -335,6 +337,16 @@ Route::prefix('cms')->name('cms.')->group(function () {
         Route::get('/getting-started', [GettingStartedController::class, 'index'])->name('getting-started.index');
         Route::post('/getting-started-header/store', [GettingStartedController::class, 'storePageTitle'])->name('getting-started-header.store');
     });
+});
+
+/**
+ * Social links
+ */
+Route::group([], function () {
+    Route::get('social-links', [SocialLinkController::class, 'index'])->name('social.links.index');
+    Route::post('social-links/store', [SocialLinkController::class, 'store'])->name('social.links.store');
+    Route::patch('social-links/{id}/update', [SocialLinkController::class, 'update'])->name('social.links.update');
+    Route::delete('social-links/{id}', [SocialLinkController::class, 'destroy'])->name('social.links.delete');
 });
 
 

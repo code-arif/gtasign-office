@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\User\Profile\CertificateController;
 use App\Http\Controllers\Api\User\Profile\EducationController;
 use App\Http\Controllers\Api\User\Profile\UserAvailabilityController;
 use App\Http\Controllers\Api\User\Profile\UserExperienceController;
+use App\Http\Controllers\Web\Backend\Settings\SocialLinkController;
 use Illuminate\Support\Facades\Route;
 
 // health check
@@ -83,6 +84,7 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
 
     // get all language (NO Auth)
     Route::get('/all-languages', [UserLanguageController::class, 'getAllLanguage']);
+    Route::get('/social-links', [SocialLinkController::class, 'getSocialLinks']);
 });
 
 Route::get('/v1/gigs/details/{id}', [GigController::class, 'show'])->middleware('auth:api'); // DONE: Auth Required

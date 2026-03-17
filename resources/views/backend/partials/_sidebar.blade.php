@@ -227,6 +227,9 @@
                         <li><a href="{{ route('admin.setting.stripe.index') }}"
                                 class="slide-item {{ request()->routeIs('admin.setting.stripe*') ? 'active' : '' }}">
                                 Stripe Settings </a></li>
+                        <li><a href="{{ route('admin.social.links.index') }}"
+                                class="slide-item {{ request()->routeIs('admin.social.links.index') ? 'active' : '' }}">
+                                Social Links </a></li>
                     </ul>
                 </li>
             </ul>
