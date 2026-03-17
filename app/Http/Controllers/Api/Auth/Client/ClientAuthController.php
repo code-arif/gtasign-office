@@ -21,7 +21,7 @@ class ClientAuthController extends Controller
     public function profile()
     {
         try {
-            $user = auth('api')->user()->load('profile');
+            $user = auth('api')->user()->load('profile', 'languages');
 
             if (!$user) {
                 return $this->error(

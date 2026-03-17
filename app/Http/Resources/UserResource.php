@@ -57,6 +57,18 @@ class UserResource extends JsonResource
                 'last_month_label'     => $stats['last_month_label'],     // "November"
                 'avg_response_minutes' => $stats['avg_response_minutes'], // 24
             ] : null,
+
+            // Languages
+            'languages' => $user->relationLoaded('languages')
+                ? $user->languages->map(function ($language) {
+                    return [
+                        'id' => $language->id,
+                        'name' => $language->name,
+                        'display_name' => $language->display_name,
+                        'proficiency' => $language->pivot->proficiency,
+                    ];
+                })
+                : [],
         ];
     }
 }
