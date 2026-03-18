@@ -161,9 +161,9 @@
                         <li><a href="{{ route('admin.cms.home.tags.section') }}"
                                 class="slide-item {{ request()->routeIs('admin.cms.home.tags.section') ? 'active' : '' }}">
                                 Tags Section </a></li>
-                        <li><a href="{{ route('admin.cms.home.ai-security.index') }}"
+                        {{-- <li><a href="{{ route('admin.cms.home.ai-security.index') }}"
                                 class="slide-item {{ request()->routeIs('admin.cms.ai-security.section') ? 'active' : '' }}">
-                                Security Expert Section </a></li>
+                                Security Expert Section </a></li> --}}
                         {{-- <li><a href="{{ route('admin.cms.home.features.index') }}"
                                 class="slide-item {{ request()->routeIs('admin.cms.home.features*') ? 'active' : '' }}">
                                 Features Section </a></li> --}}
