@@ -122,28 +122,6 @@ class GigController extends Controller
     /**
      * Show single gig
      */
-    // public function show($id)
-    // {
-    //     try {
-    //         $gig = $this->gigService->getGigById($id);
-
-    //         if (!$gig) {
-    //             return $this->error(null, 'Gig not found', 404);
-    //         }
-
-    //         // Track impression
-    //         $this->gigService->trackImpression($id);
-
-    //         // Track click
-    //         $this->gigService->trackClick($id);
-
-    //         return $this->success('Gig retrieved successfully', new GigDetailResource($gig));
-    //     } catch (Exception $e) {
-    //         Log::error('Gig show error: ' . $e->getMessage());
-    //         return $this->error(['exception' => $e->getMessage()], 'Failed to retrieve gig', 500);
-    //     }
-    // }
-
     public function show($id)
     {
         try {
@@ -288,6 +266,59 @@ class GigController extends Controller
         } catch (Exception $e) {
             Log::error('Gig track click error: ' . $e->getMessage());
             return $this->error(['exception' => $e->getMessage()], 'Failed to track click', 500);
+        }
+    }
+
+    /**
+     * Get gigs by tag
+     */
+    public function byTag(Request $request, $tagId)
+    {
+        try {
+            $perPage = $request->input('per_page', 15);
+
+            $gigs = $this->gigService->getGigsByTag((int) $tagId, $perPage);
+
+            if ($gigs->isEmpty()) {
+                return $this->error(null, 'No gigs found for this tag', 404);
+            }
+
+            return $this->success('Gigs retrieved successfully', [
+                'gigs'       => GigListResource::collection($gigs),
+                'pagination' => $this->getPaginationMeta($gigs),
+            ]);
+        } catch (Exception $e) {
+            Log::error('Gig by tag error: ' . $e->getMessage());
+            return $this->error(['exception' => $e->getMessage()], 'Failed to retrieve gigs', 500);
+        }
+    }
+
+    /**
+     * Get gigs by category
+     */
+    public function byCategory(Request $request, $categoryId)
+    {
+        try {
+            $perPage        = $request->input('per_page', 15);
+            $subCategoryId  = $request->input('sub_category_id');
+
+            $gigs = $this->gigService->getGigsByCategory(
+                (int) $categoryId,
+                $subCategoryId ? (int) $subCategoryId : null,
+                $perPage
+            );
+
+            if ($gigs->isEmpty()) {
+                return $this->error(null, 'No gigs found for this category', 404);
+            }
+
+            return $this->success('Gigs retrieved successfully', [
+                'gigs'       => GigListResource::collection($gigs),
+                'pagination' => $this->getPaginationMeta($gigs),
+            ]);
+        } catch (Exception $e) {
+            Log::error('Gig by category error: ' . $e->getMessage());
+            return $this->error(['exception' => $e->getMessage()], 'Failed to retrieve gigs', 500);
         }
     }
 

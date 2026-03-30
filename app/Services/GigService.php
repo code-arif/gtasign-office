@@ -392,6 +392,46 @@ class GigService
     }
 
     /**
+     * Get active gigs by tag ID
+     */
+    public function getGigsByTag(int $tagId, int $perPage = 15)
+    {
+        return Gig::where('status', 'active')
+            ->whereHas('user', function ($q) {
+                $q->where('status', 'active');
+            })
+            ->whereHas('tags', function ($q) use ($tagId) {
+                $q->where('tags.id', $tagId);
+            })
+            ->with(['user', 'category', 'subCategory', 'images', 'tags'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->latest()
+            ->paginate($perPage);
+    }
+
+    /**
+     * Get active gigs by category ID (optionally filtered by sub-category)
+     */
+    public function getGigsByCategory(int $categoryId, ?int $subCategoryId = null, int $perPage = 15)
+    {
+        $query = Gig::where('status', 'active')
+            ->whereHas('user', function ($q) {
+                $q->where('status', 'active');
+            })
+            ->where('category_id', $categoryId)
+            ->with(['user', 'category', 'subCategory', 'images', 'tags'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating');
+
+        if ($subCategoryId !== null) {
+            $query->where('sub_category_id', $subCategoryId);
+        }
+
+        return $query->latest()->paginate($perPage);
+    }
+
+    /**
      * Upload images for gig
      */
     private function uploadImages(Gig $gig, array $images)

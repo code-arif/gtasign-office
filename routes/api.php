@@ -80,6 +80,10 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
         // Gig cageroires
         Route::get('/gig-categories', [GigCategoryController::class, 'index']); // done
         Route::get('/gig-tags', [GigTagController::class, 'index']); // done
+
+        // NEW
+        Route::get('/by-tag/{tagId}', [GigController::class, 'byTag']);
+        Route::get('/by-category/{categoryId}', [GigController::class, 'byCategory']);
     });
 
     // get all language (NO Auth)
