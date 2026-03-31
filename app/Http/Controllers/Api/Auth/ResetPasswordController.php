@@ -59,7 +59,7 @@ class ResetPasswordController extends Controller
                 ]);
             }
 
-            $otp = rand(1000, 9999);
+            $otp = rand(100000, 999999); // 6-digit OTP
 
             UserSecurityToken::create([
                 'user_id'    => $user->id,
@@ -93,7 +93,7 @@ class ResetPasswordController extends Controller
     {
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'otp'   => 'required|digits:4',
+            'otp'   => 'required|digits:6',
         ]);
 
         try {

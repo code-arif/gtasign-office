@@ -85,7 +85,7 @@ class RegisterController extends Controller
             ]);
 
             // Create OTP token for email verification
-            $otp = rand(1000, 9999);
+            $otp = rand(100000, 999999); // 6-digit OTP
             UserSecurityToken::create([
                 'user_id' => $user->id,
                 'identifier' => $user->email,
@@ -134,7 +134,7 @@ class RegisterController extends Controller
     {
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'otp'   => 'required|digits:4',
+            'otp'   => 'required|digits:6',
         ]);
 
         try {
@@ -207,7 +207,7 @@ class RegisterController extends Controller
                 return $this->error('Email already verified', null, 409);
             }
 
-            $otp = rand(1000, 9999);
+            $otp = rand(100000, 999999); // 6-digit OTP
 
             UserSecurityToken::create([
                 'user_id' => $user->id,
