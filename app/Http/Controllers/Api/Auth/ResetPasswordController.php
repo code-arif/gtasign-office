@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Mail\ForgotPassOTP;
-use App\Mail\OtpMail;
 use App\Models\User;
 use App\Models\UserSecurityToken;
 use App\Traits\ApiResponse;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -69,8 +66,7 @@ class ResetPasswordController extends Controller
                 'expires_at' => now()->addMinutes(60),
             ]);
 
-            Mail::to($user->email)
-                ->send(new ForgotPassOTP($otp, $user, 'Reset Your Password - SecAAX'));
+            Mail::to($user->email)->send(new ForgotPassOTP($otp, $user, 'Reset Your Password - SecAAX'));
 
             return $this->success(
                 'OTP sent successfully.',

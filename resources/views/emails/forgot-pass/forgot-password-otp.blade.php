@@ -4,7 +4,7 @@
     <a href="{{ config('app.frontend_url') }}">
 
         @if (file_exists(public_path('default/logo.png')))
-            <img src="{{ $message->embed(public_path('default/logo.png')) }}" class="logo" alt="{{ config('app.name') }}">
+            <img src="{{ asset('default/logo.png') }}" class="logo" alt="{{ config('app.name') }}">
         @else
             <div style="color:#fff;font-size:24px;font-weight:700;">
                 {{ strtoupper(config('app.name')) }}
@@ -33,58 +33,27 @@
     <!-- OTP BOX -->
 
     <table width="100%" role="presentation" style="margin:35px 0">
-
         <tr>
             <td align="center">
-
                 <table role="presentation">
-
                     <tr>
-
                         <td
-                            style="
-background:#f0fdf4;
-border:2px solid #16a34a;
-border-radius:14px;
-padding:26px 40px;
-text-align:center;
-">
+                            style="background:#f0fdf4;border:2px solid #16a34a;border-radius:14px;padding:26px 40px;text-align:center;">
 
                             <div
-                                style="
-font-size:40px;
-font-weight:700;
-letter-spacing:10px;
-color:#0f5132;
-font-family:Courier, monospace;
-">
-
+                                style="font-size:40px;font-weight:700;letter-spacing:10px;color:#0f5132;font-family:Courier, monospace;">
                                 {{ $otp }}
-
                             </div>
 
                             <div
-                                style="
-margin-top:10px;
-font-size:12px;
-color:#64748b;
-letter-spacing:2px;
-text-transform:uppercase;
-">
-
+                                style="margin-top:10px;font-size:12px;color:#64748b;letter-spacing:2px;text-transform:uppercase;">
                                 Password Reset OTP
-
                             </div>
-
                         </td>
-
                     </tr>
-
                 </table>
-
             </td>
         </tr>
-
     </table>
 
 

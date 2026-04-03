@@ -9,17 +9,15 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Attachment;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class OtpMail extends Mailable
 {
     use Queueable, SerializesModels;
+
     public int $otp;
     public User $user;
     public string $header_message;
-    /**
-     * Create a new message instance.
-     */
+
     public function __construct(int $otp, User $user, string $message)
     {
         $this->otp = $otp;
@@ -27,9 +25,6 @@ class OtpMail extends Mailable
         $this->header_message = $message;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -37,9 +32,6 @@ class OtpMail extends Mailable
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
@@ -47,13 +39,12 @@ class OtpMail extends Mailable
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, Attachment>
-     */
     public function attachments(): array
     {
-        return [];
+        return [
+            Attachment::fromPath(public_path('default/logo.png'))
+                ->as('logo.png')
+                ->withMime('image/png'),
+        ];
     }
 }

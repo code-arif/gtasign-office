@@ -4,11 +4,7 @@
     <a href="{{ config('app.frontend_url') }}">
 
         @if (file_exists(public_path('default/logo.png')))
-            <img src="{{ $message->embed(public_path('default/logo.png')) }}" class="logo" alt="{{ config('app.name') }}">
-        @else
-            <div style="color:#fff;font-size:24px;font-weight:700;">
-                {{ strtoupper(config('app.name')) }}
-            </div>
+            <img src="{{ asset('default/logo.png') }}" class="logo">
         @endif
 
     </a>
@@ -71,34 +67,23 @@ text-transform:uppercase;
                             </div>
 
                         </td>
-
                     </tr>
-
                 </table>
-
             </td>
         </tr>
-
     </table>
 
     <!-- Security -->
-
     <div class="feature-box">
-
         <p style="font-weight:600;margin-bottom:10px;color:#065f46">
             Security Reminder
         </p>
 
         <ul class="list-positive">
-
             <li>Never share your OTP with anyone</li>
-
             <li>{{ config('app.name') }} will never ask for your OTP</li>
-
             <li>If you did not request this, simply ignore this email</li>
-
         </ul>
-
     </div>
 
     <p>
@@ -114,13 +99,6 @@ text-transform:uppercase;
 
 
 @section('footer')
-    {{-- <div>
-        Need help? Contact us
-        <a href="mailto:support@{{ config('app.domain') }}">
-            support@{{ config('app.domain') }}
-        </a>
-    </div> --}}
-
     <div style="margin-top:14px;font-size:12px;color:#94a3b8">
         © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
     </div>
