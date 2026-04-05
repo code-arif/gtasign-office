@@ -1,4 +1,6 @@
-@extends('backend.app', ['title' => 'Privacy Policy'])
+@extends('backend.app')
+
+@section('title', 'Privacy Policy');
 
 @section('content')
     <!--app-content open-->

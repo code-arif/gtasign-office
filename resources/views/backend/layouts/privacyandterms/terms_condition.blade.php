@@ -1,4 +1,6 @@
-@extends('backend.app', ['title' => 'Terms & Conditions'])
+@extends('backend.app')
+
+@section('title', 'Terms & Conditions');
 
 @section('content')
     <!--app-content open-->
