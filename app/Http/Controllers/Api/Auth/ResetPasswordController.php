@@ -66,7 +66,11 @@ class ResetPasswordController extends Controller
                 'expires_at' => now()->addMinutes(60),
             ]);
 
+            Log::info('Sending Password Reset OTP to: ' . $user->email);
+            
             Mail::to($user->email)->send(new ForgotPassOTP($otp, $user, 'Reset Your Password - SecAAX'));
+
+            Log::info('Password Reset OTP sent successfully to: ' . $user->email);
 
             return $this->success(
                 'OTP sent successfully.',

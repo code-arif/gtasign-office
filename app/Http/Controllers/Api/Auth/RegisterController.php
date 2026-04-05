@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use Exception;
 use App\Models\User;
-use App\Mail\OtpMail;
+use App\Mail\RegistrationOtpMail;
 use App\Helpers\Helper;
 use App\Models\Profile;
 use App\Mail\WelcomeMail;
@@ -105,7 +105,7 @@ class RegisterController extends Controller
             // }
 
             // // Send OTP email
-            Mail::to($user->email)->send(new OtpMail($otp, $user, 'Verify Your Email Address'));
+            Mail::to($user->email)->send(new RegistrationOtpMail($otp, $user, 'Verify Your Email Address'));
 
             DB::commit();
 
@@ -217,7 +217,7 @@ class RegisterController extends Controller
                 'expires_at' => now()->addSeconds(150),
             ]);
 
-            Mail::to($user->email)->send(new OtpMail($otp, $user, 'Verify Your Email Address'));
+            Mail::to($user->email)->send(new RegistrationOtpMail($otp, $user, 'Verify Your Email Address'));
 
             return $this->success(
                 'A new OTP has been sent to your email.',

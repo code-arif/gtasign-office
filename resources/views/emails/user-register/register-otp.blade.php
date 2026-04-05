@@ -4,7 +4,7 @@
     <a href="{{ config('app.frontend_url') }}">
 
         @if (file_exists(public_path('default/logo.png')))
-            <img src="{{ asset('default/logo.png') }}" class="logo">
+            <img src="{{ $message->embed(public_path('default/logo.png')) }}" class="logo">
         @endif
 
     </a>
@@ -12,7 +12,7 @@
 
 @section('content')
     <p>
-        Hello <strong style="color:#0f5132">{{ $user->name }}</strong>,
+        Hello <strong style="color:#0f5132">{{ $user->profile->first_name ?? 'User' }}</strong>,
     </p>
 
     <p>

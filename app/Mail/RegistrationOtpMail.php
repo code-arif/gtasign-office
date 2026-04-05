@@ -10,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Attachment;
 
-class OtpMail extends Mailable
+class RegistrationOtpMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -36,15 +36,12 @@ class OtpMail extends Mailable
     {
         return new Content(
             view: 'emails.user-register.register-otp',
+            text: 'emails.user-register.register-otp-text',
         );
     }
 
     public function attachments(): array
     {
-        return [
-            Attachment::fromPath(public_path('default/logo.png'))
-                ->as('logo.png')
-                ->withMime('image/png'),
-        ];
+        return [];
     }
 }

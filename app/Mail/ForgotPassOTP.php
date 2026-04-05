@@ -34,6 +34,7 @@ class ForgotPassOTP extends Mailable
     {
         return new Content(
             view: 'emails.forgot-pass.forgot-password-otp',
+            text: 'emails.forgot-pass.forgot-password-otp-text',
             with: [
                 'otp' => $this->otp,
                 'user' => $this->user,
