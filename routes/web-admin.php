@@ -8,7 +8,6 @@ use App\Http\Controllers\Web\Backend\CMS\AboutPageOurTeamController;
 use App\Http\Controllers\Web\Backend\CMS\FeaturesController;
 use App\Http\Controllers\Web\Backend\CMS\GettingStartedController;
 use App\Http\Controllers\Web\Backend\CMS\HomePageController;
-use App\Http\Controllers\Web\Backend\CMS\SliderController;
 use App\Http\Controllers\Web\Backend\CMS\TestimonialController;
 use App\Http\Controllers\Web\Backend\CMS\Web\PrivacyTerms\PrivacAndTermsController;
 use App\Http\Controllers\Web\Backend\ContactController;
@@ -128,6 +127,9 @@ Route::prefix('experts')->name('experts.')->group(function () {
     // Level management
     Route::get('{id}/level-form',   [ExpertManageController::class, 'getLevelForm'])->name('level.form');
     Route::patch('{id}/level',      [ExpertManageController::class, 'updateLevel'])->name('level.update');
+
+    Route::get('/{id}/edit', [ExpertManageController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [ExpertManageController::class, 'update'])->name('update');
 });
 
 // Clients Management

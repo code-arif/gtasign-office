@@ -94,7 +94,8 @@
                             <div class="d-flex gap-2 flex-shrink-0 pb-1">
                                 @if (!$expert->deleted_at)
                                     <div class="dropdown">
-                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle d-inline-flex align-items-center"
+                                        <button
+                                            class="btn btn-outline-secondary btn-sm dropdown-toggle d-inline-flex align-items-center"
                                             data-bs-toggle="dropdown">
                                             <i class="fe fe-settings me-1"></i> Change Status
                                         </button>
@@ -109,8 +110,14 @@
                                         </ul>
                                     </div>
                                 @endif
-                                <a href="{{ route('admin.experts.index') }}" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center">
+                                <a href="{{ route('admin.experts.index') }}"
+                                    class="btn btn-outline-primary btn-sm d-inline-flex align-items-center">
                                     <i class="fe fe-arrow-left me-1"></i> Back
+                                </a>
+
+                                <a href="{{ route('admin.experts.edit', $expert) }}"
+                                    class="btn btn-outline-warning btn-sm d-inline-flex align-items-center">
+                                    <i class="fa fa-pen me-1"></i> Edit
                                 </a>
                             </div>
                         </div>

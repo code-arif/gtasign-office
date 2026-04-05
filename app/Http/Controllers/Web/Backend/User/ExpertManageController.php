@@ -193,6 +193,11 @@ class ExpertManageController extends Controller
                         <i class="fe fe-eye"></i>
                     </a>';
 
+                    $editBtn = '<a href="' . route('admin.experts.edit', $user->id) . '"
+                        class="btn btn-warning btn-sm me-1" title="Edit Expert">
+                        <i class="fe fe-edit-2"></i>
+                    </a>';
+
                     $levelBtn = '<button type="button" class="btn btn-success btn-sm me-1"
                         title="Change Level"
                         onclick="openLevelModal(' . $user->id . ')">
@@ -221,7 +226,7 @@ class ExpertManageController extends Controller
                         </div>';
                     }
 
-                    return '<div class="d-flex">' . $viewBtn . $levelBtn . $statusBtn . '</div>';
+                    return '<div class="d-flex">' . $viewBtn . $editBtn . $levelBtn . $statusBtn . '</div>';
                 })
                 ->rawColumns(['expert_info', 'contact', 'stats', 'status', 'joined_at', 'action'])
                 ->make(true);
@@ -482,6 +487,98 @@ class ExpertManageController extends Controller
                 'success' => false,
                 'message' => 'Failed to update level: ' . $e->getMessage(),
             ], 422);
+        }
+    }
+
+    /**
+     * Show the edit form for an expert
+     */
+    public function edit($id)
+    {
+        $expert = User::role('expert')
+            ->withTrashed()
+            ->with([
+                'profile',
+                'educations',
+                'certifications',
+                'experiences',
+            ])
+            ->findOrFail($id);
+
+        return view('backend.layouts.users.experts.edit', compact('expert'));
+    }
+
+    /**
+     * Update expert info
+     */
+    public function update(Request $request, $id)
+    {
+        $expert = User::role('expert')->withTrashed()->findOrFail($id);
+
+        $request->validate([
+            'first_name'  => 'required|string|max:100',
+            'last_name'   => 'nullable|string|max:100',
+            'email'       => 'required|email|max:191|unique:users,email,' . $expert->id,
+            'phone'       => 'nullable|string|max:20',
+            'username'    => 'nullable|string|max:80|unique:profiles,username,' . $expert->profile?->id,
+            'status'      => 'required|in:active,inactive,suspended',
+            'level'       => 'nullable|string|max:50',
+            'level_name'  => 'nullable|string|max:100',
+            'bio'         => 'nullable|string|max:1000',
+            'avatar'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Update user table
+            $expert->update([
+                'email'  => $request->email,
+                'phone'  => $request->phone,
+                'status' => $request->status,
+            ]);
+
+            // 2. Handle avatar upload
+            $avatarPath = $expert->profile?->avatar;
+
+            if ($request->hasFile('avatar')) {
+                // Delete old avatar if it exists and is a local file
+                if ($avatarPath && file_exists(public_path($avatarPath))) {
+                    @unlink(public_path($avatarPath));
+                }
+
+                $file      = $request->file('avatar');
+                $filename  = 'expert_' . $expert->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $directory = 'uploads/experts/avatars';
+
+                $file->move(public_path($directory), $filename);
+                $avatarPath = $directory . '/' . $filename;
+            }
+
+            // 3. Update profile table
+            $expert->profile()->updateOrCreate(
+                ['user_id' => $expert->id],
+                [
+                    'first_name' => $request->first_name,
+                    'last_name'  => $request->last_name,
+                    'username'   => $request->username ?: $expert->profile?->username,
+                    'bio'        => $request->bio,
+                    'level'      => $request->level,
+                    'level_name' => $request->level_name,
+                    'avatar'     => $avatarPath,
+                ]
+            );
+
+            DB::commit();
+
+            return redirect()->route('admin.experts.show', $expert->id)->with('t-success', 'Expert profile updated successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Expert update failed: ' . $e->getMessage());
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to update expert: ' . $e->getMessage());
         }
     }
 
