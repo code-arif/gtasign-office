@@ -1,5 +1,7 @@
 @extends('backend.app')
 
+@section('title', 'Stripe Settings');
+
 @section('content')
     <!--app-content open-->
     <div class="app-content main-content mt-0">
@@ -17,6 +19,7 @@
                     <div class="ms-auto pageheader-btn">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="javascript:void(0);">Settings</a></li>
+                            <span>&nbsp; &gt&gt &nbsp;</span>
                             <li class="breadcrumb-item active" aria-current="page">Stripe</li>
                         </ol>
                     </div>
@@ -181,7 +184,8 @@
                                         @csrf
                                         @method('PATCH')
                                         <div class="row mb-4">
-                                            <label for="admin_percentage" class="col-md-3 form-label">Add software fee</label>
+                                            <label for="admin_percentage" class="col-md-3 form-label">Add software
+                                                fee</label>
                                             <div class="col-md-9">
                                                 <input class="form-control @error('CAMP_EXTRA_PRICE') is-invalid @enderror"
                                                     id="admin_percentage" name="admin_percentage"

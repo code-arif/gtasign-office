@@ -18,6 +18,7 @@
                     <div class="ms-auto pageheader-btn">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="javascript:void(0);">Terms and Privacy</a></li>
+                             <span>&nbsp; &gt&gt &nbsp;</span>
                             <li class="breadcrumb-item active" aria-current="page">Privacy Policy</li>
                         </ol>
                     </div>
