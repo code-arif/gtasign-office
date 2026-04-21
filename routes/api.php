@@ -307,8 +307,8 @@ Route::get('/cms/home', [HomePageController::class, 'home']);
 Route::get('/cms/about', [AboutPageController::class, 'about']);
 
 // get privacy policy data
-Route::get('/privacy-policy', [PrivecyPolicyController::class, 'privecyPolicy']);
-Route::get('/terms-and-conditions', [PrivecyPolicyController::class, 'termsAndConditions']);
+Route::get('/v1/privacy-policy', [PrivecyPolicyController::class, 'privecyPolicy']);
+Route::get('/v1/terms-and-conditions', [PrivecyPolicyController::class, 'termsAndConditions']);
 
 // get setting data
 Route::get('/settings', [SettingsController::class, 'index']);
