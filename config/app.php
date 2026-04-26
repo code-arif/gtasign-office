@@ -53,7 +53,7 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
-    'frontend_url' => env('FRONTEND', 'https://whistleworks.org'),
+    'frontend_url' => env('FRONTEND', 'https://secaax.com'),
 
     /*
     |--------------------------------------------------------------------------

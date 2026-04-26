@@ -92,8 +92,8 @@ class StripePaymentService
             'mode'           => 'payment',
             'customer_email' => $order->buyer?->email,
             // Frontend URL — user lands here after Stripe
-            'success_url' => config('app.frontend_url') . '/orders/' . $order->id . '/payment/success?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url'  => config('app.frontend_url') . '/orders/' . $order->id . '/payment/cancel',
+            'success_url' => config('app.frontend_url') . '/payment/success?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url'  => config('app.frontend_url') . $order->id . '/payment/cancel',
             'metadata'    => [
                 'order_id'     => (string)$order->id,
                 'order_number' => $order->order_number,
