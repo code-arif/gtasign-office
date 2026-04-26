@@ -17,11 +17,10 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 15);
-        $type = $request->input('type'); // optional filter: announcement, camp, schedule, etc.
+        $type = $request->input('type');
 
         $query = auth()->user()->notifications();
 
-        // Filter by type if provided
         if ($type) {
             $notificationClass = $this->getNotificationClass($type);
             if ($notificationClass) {
@@ -97,13 +96,12 @@ class NotificationController extends Controller
             'announcements' => $user->unreadNotifications()
                 ->where('type', 'App\Notifications\AnnouncementNotification')
                 ->count(),
-            // Future notification types
-            // 'camps' => $user->unreadNotifications()
-            //     ->where('type', 'App\Notifications\CampNotification')
-            //     ->count(),
-            // 'schedules' => $user->unreadNotifications()
-            //     ->where('type', 'App\Notifications\ScheduleNotification')
-            //     ->count(),
+            'gig_creations' => $user->unreadNotifications()
+                ->where('type', 'App\Notifications\GigCreatedNotification')
+                ->count(),
+            'gig_status_changes' => $user->unreadNotifications()
+                ->where('type', 'App\Notifications\GigStatusChangedNotification')
+                ->count(),
         ];
 
         return $this->success('Notification counts retrieved', $counts, 200);
@@ -239,15 +237,25 @@ class NotificationController extends Controller
                 ];
                 break;
 
-            // Future notification types
-            // case 'App\Notifications\CampNotification':
-            //     $formatted['data'] = [
-            //         'camp_id' => $data['camp_id'] ?? null,
-            //         'camp_name' => $data['camp_name'] ?? null,
-            //         'action' => $data['action'] ?? null, // created, updated, cancelled
-            //         'message' => $data['message'] ?? null,
-            //     ];
-            //     break;
+            case 'App\Notifications\GigCreatedNotification':
+                $formatted['data'] = [
+                    'gig_id' => $data['gig_id'] ?? null,
+                    'title' => $data['title'] ?? null,
+                    'user_id' => $data['user_id'] ?? null,
+                    'message' => $data['message'] ?? null,
+                    'action_url' => $data['action_url'] ?? null,
+                ];
+                break;
+
+            case 'App\Notifications\GigStatusChangedNotification':
+                $formatted['data'] = [
+                    'gig_id' => $data['gig_id'] ?? null,
+                    'title' => $data['title'] ?? null,
+                    'status' => $data['status'] ?? null,
+                    'rejection_reason' => $data['rejection_reason'] ?? null,
+                    'message' => $data['message'] ?? null,
+                ];
+                break;
 
             default:
                 $formatted['data'] = $data;
@@ -264,6 +272,8 @@ class NotificationController extends Controller
     {
         $types = [
             'announcement' => 'App\Notifications\AnnouncementNotification',
+            'gig_created' => 'App\Notifications\GigCreatedNotification',
+            'gig_status_change' => 'App\Notifications\GigStatusChangedNotification',
             // 'camp' => 'App\Notifications\CampNotification',
             // 'schedule' => 'App\Notifications\ScheduleNotification',
             // 'evaluation' => 'App\Notifications\EvaluationNotification',
@@ -279,6 +289,8 @@ class NotificationController extends Controller
     {
         $types = [
             'App\Notifications\AnnouncementNotification' => 'announcement',
+            'App\Notifications\GigCreatedNotification' => 'gig_created',
+            'App\Notifications\GigStatusChangedNotification' => 'gig_status_change',
             // 'App\Notifications\CampNotification' => 'camp',
             // 'App\Notifications\ScheduleNotification' => 'schedule',
             // 'App\Notifications\EvaluationNotification' => 'evaluation',

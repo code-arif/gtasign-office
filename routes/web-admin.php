@@ -366,9 +366,6 @@ Route::controller(FaqController::class)->prefix('faq')->name('faq.')->group(func
 Route::get('subscriber', [SubscriberController::class, 'index'])->name('subscriber.index');
 
 
-
-
-
 /*
 * Users Access Route
 */

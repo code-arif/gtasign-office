@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\GigStatusChangedNotification;
 use Yajra\DataTables\Facades\DataTables;
 
 class GigManageController extends Controller
@@ -309,6 +311,11 @@ class GigManageController extends Controller
             }
 
             $gig->update($updateData);
+
+            // Notify the expert (gig owner)
+            if ($gig->user) {
+                Notification::send($gig->user, new GigStatusChangedNotification($gig, $request->status, $request->rejection_reason));
+            }
 
             DB::commit();
 

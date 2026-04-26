@@ -5,9 +5,12 @@ namespace App\Services;
 use App\Helpers\Helper;
 use App\Models\Gig;
 use App\Models\Room;
+use App\Models\User;
+use App\Notifications\GigCreatedNotification;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
 
 class GigService
 {
@@ -176,7 +179,9 @@ class GigService
                 $this->uploadDocuments($gig, $documents);
             }
 
-            // dd($data);
+            // Notification for authentication expert who is creator for this gig
+            $experts = User::role('expert', 'api')->where('id', $userId)->get();
+            Notification::send($experts, new GigCreatedNotification($gig));
 
             DB::commit();
 
