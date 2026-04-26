@@ -166,4 +166,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Order::class, 'buyer_id');
     }
+
+    /**
+     * Relationship: Custom Notifications
+     */
+    public function notifications()
+    {
+        return $this->morphMany(Notification::class, 'notifiable')->latest();
+    }
 }

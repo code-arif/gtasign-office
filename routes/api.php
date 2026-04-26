@@ -315,7 +315,7 @@ Route::get('/settings', [SettingsController::class, 'index']);
 
 
 // === Unified Notification Routes ===
-Route::prefix('notifications')->middleware(['auth:api', 'role:referee|evaluator|director,api'])->group(function () {
+Route::prefix('v1/notifications')->middleware(['auth:api'])->group(function () {
     // Get all notifications (with optional type filter)
     Route::get('/', [NotificationController::class, 'index']); // done
 
