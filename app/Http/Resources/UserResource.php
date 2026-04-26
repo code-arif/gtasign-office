@@ -56,6 +56,8 @@ class UserResource extends JsonResource
                 'last_month_earnings'  => $stats['last_month_earnings'],  // 436.00
                 'last_month_label'     => $stats['last_month_label'],     // "November"
                 'avg_response_minutes' => $stats['avg_response_minutes'], // 24
+                'rating_breakdown'     => $stats['rating_breakdown'] ?? null,
+                'recent_reviews'       => $stats['recent_reviews'] ?? [],
             ] : null,
 
             // Languages

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Models\Order;
+use App\Models\Profile;
 use App\Models\OrderReview;
 use App\Models\SellerEarnings;
 use App\Models\User;
@@ -24,33 +26,6 @@ class UserController extends Controller
     /**
      * Get User Profile
      */
-    // public function profile()
-    // {
-    //     try {
-    //         $user = auth('api')->user()->load('profile');
-
-    //         if (!$user) {
-    //             return $this->error(
-    //                 null,
-    //                 'User not found',
-    //                 404
-    //             );
-    //         }
-
-    //         return $this->success(
-    //             'User profile retrieved successfully',
-    //             new UserResource($user)
-    //         );
-    //     } catch (Exception $e) {
-    //         Log::error('Get profile error: ' . $e->getMessage());
-    //         return $this->error(
-    //             ['exception' => $e->getMessage()],
-    //             'Failed to retrieve profile',
-    //             500
-    //         );
-    //     }
-    // }
-
     public function profile()
     {
         try {
@@ -95,7 +70,7 @@ class UserController extends Controller
 
         // ─── Success Score ───────────────────────────────────────────────
         // Success = completed / (completed + cancelled) × 100
-        $orderCounts = \App\Models\Order::where('seller_id', $userId)
+        $orderCounts = Order::where('seller_id', $userId)
             ->whereIn('status', ['completed', 'cancelled'])
             ->selectRaw("
             COUNT(*) AS total,
@@ -143,18 +118,71 @@ class UserController extends Controller
 
         $avgResponseMinutes = $avgResponseMinutes[0]->avg_minutes ?? null;
 
+        // ─── Rating Breakdown ──────────────────────────────────────────
+        $breakdown = OrderReview::where('reviewed_user_id', $userId)
+            ->selectRaw('rating, COUNT(*) as count')
+            ->groupBy('rating')
+            ->pluck('count', 'rating')
+            ->toArray();
+
+        $ratingBreakdown = [
+            'five_star' => $breakdown[5] ?? 0,
+            'four_star' => $breakdown[4] ?? 0,
+            'three_star' => $breakdown[3] ?? 0,
+            'two_star' => $breakdown[2] ?? 0,
+            'one_star' => $breakdown[1] ?? 0,
+        ];
+
+        
+
+        // ─── Recent Reviews ─────────────────────────────────────────────
+        $recentReviews = OrderReview::where('reviewed_user_id', $userId)
+            ->with(['reviewer.profile', 'order', 'gig'])
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(function ($review) {
+                return [
+                    'id' => $review->id,
+                    'rating' => $review->rating,
+                    'content' => $review->review,
+                    'created_at' => $review->created_at->diffForHumans(),
+                    'reviewer' => [
+                        'name' => $review->reviewer->profile->first_name . ' ' . $review->reviewer->profile->last_name,
+                        'avatar' => $review->reviewer->profile->avatar
+                            ? asset('storage/' . $review->reviewer->profile->avatar)
+                            : asset('default/profile.jpg'),
+                        'address' => $review->reviewer->profile->address,
+                    ],
+                    'order' => [
+                        'price' => $review->order->price,
+                        'duration' => ($review->order->delivery_days % 7 == 0)
+                            ? ($review->order->delivery_days / 7) . ' ' . (($review->order->delivery_days / 7) > 1 ? 'weeks' : 'week')
+                            : $review->order->delivery_days . ' ' . ($review->order->delivery_days > 1 ? 'days' : 'day'),
+                    ],
+
+                    'gig' => [
+                        'id' => $review->gig->id ?? null,
+                        'title' => $review->gig->title ?? null,
+                        'image' => $review->gig->primaryImage?->image_url
+                            ? asset('storage/' . $review->gig->primaryImage->image_url)
+                            : asset('default/no_image.webp'),
+                    ]
+                ];
+            });
+
         return [
-            'avg_rating'          => $reviewStats->avg_rating       ?? 0,
-            'total_reviews'       => (int) ($reviewStats->total_reviews ?? 0),
-            'avg_communication'   => $reviewStats->avg_communication ?? 0,
-            'avg_service'         => $reviewStats->avg_service       ?? 0,
-            'avg_delivery'        => $reviewStats->avg_delivery      ?? 0,
-            'success_score'       => $successScore,                       // e.g. 86
-            'last_month_earnings' => round((float) $lastMonthEarnings, 2), // e.g. 436.00
-            'avg_response_minutes' => $avgResponseMinutes              // e.g. 24
-                ? (int) $avgResponseMinutes
-                : null,
-            'last_month_label'    => $lastMonth->format('F'),             // e.g. "November"
+            'avg_rating' => $reviewStats->avg_rating ?? 0,
+            'total_reviews' => (int) ($reviewStats->total_reviews ?? 0),
+            'avg_communication' => $reviewStats->avg_communication ?? 0,
+            'avg_service' => $reviewStats->avg_service ?? 0,
+            'avg_delivery' => $reviewStats->avg_delivery ?? 0,
+            'success_score' => $successScore,
+            'last_month_earnings' => round((float) $lastMonthEarnings, 2),
+            'avg_response_minutes' => $avgResponseMinutes ? (int) $avgResponseMinutes : null,
+            'last_month_label' => $lastMonth->format('F'),
+            'rating_breakdown' => $ratingBreakdown,
+            'recent_reviews' => $recentReviews,
         ];
     }
 
@@ -162,99 +190,6 @@ class UserController extends Controller
     /**
      * Update profile
      */
-    // public function updateProfile(Request $request)
-    // {
-    //     try {
-    //         $user = auth('api')->user()->load('profile');
-
-    //         if (!$user) {
-    //             return $this->error(
-    //                 null,
-    //                 'User not found',
-    //                 404
-    //             );
-    //         }
-
-    //         // Validation
-    //         $validator = Validator::make($request->all(), [
-    //             'first_name' => 'nullable|string|max:100',
-    //             'last_name'  => 'nullable|string|max:100',
-    //             'biography'  => 'nullable|string|max:2500',
-    //             'tagline'    => 'nullable|string|max:255',
-    //             'phone'      => 'nullable|string|max:150|unique:users,phone,' . $user->id,
-    //             'address'    => 'nullable|string|max:500',
-    //         ]);
-
-    //         if ($validator->fails()) {
-    //             return $this->validationError(
-    //                 $validator->errors()->toArray(),
-    //                 'Validation failed',
-    //                 422
-    //             );
-    //         }
-
-    //         $validatedData = $validator->validated();
-
-    //         // Update user table fields (phone)
-    //         if (isset($validatedData['phone'])) {
-    //             $user->update(['phone' => $validatedData['phone']]);
-    //         }
-
-    //         // Update or create profile
-    //         if (!$user->profile) {
-    //             // Create profile if doesn't exist
-    //             $profileData = [
-    //                 'first_name' => $validatedData['first_name'] ?? null,
-    //                 'last_name'  => $validatedData['last_name'] ?? null,
-    //                 'biography'  => $validatedData['biography'] ?? null,
-    //                 'tagline'    => $validatedData['tagline'] ?? null,
-    //                 'address'    => $validatedData['address'] ?? null,
-    //                 'username'   => $this->generateUsername($validatedData['first_name'] ?? 'user'),
-    //                 'slug'       => $this->generateSlug($validatedData['first_name'] ?? 'user'),
-    //             ];
-
-    //             $user->profile()->create($profileData);
-    //         } else {
-    //             // Update existing profile
-    //             $profileData = [];
-
-    //             if (isset($validatedData['first_name'])) {
-    //                 $profileData['first_name'] = $validatedData['first_name'];
-    //             }
-    //             if (isset($validatedData['last_name'])) {
-    //                 $profileData['last_name'] = $validatedData['last_name'];
-    //             }
-    //             if (isset($validatedData['biography'])) {
-    //                 $profileData['biography'] = $validatedData['biography'];
-    //             }
-    //             if (isset($validatedData['tagline'])) {
-    //                 $profileData['tagline'] = $validatedData['tagline'];
-    //             }
-    //             if (isset($validatedData['address'])) {
-    //                 $profileData['address'] = $validatedData['address'];
-    //             }
-
-    //             $user->profile->update($profileData);
-    //         }
-
-    //         // Reload user with profile
-    //         $user->refresh()->load('profile');
-
-    //         return $this->success(
-    //             'Profile updated successfully',
-    //             new UserResource($user)
-    //         );
-    //     } catch (Exception $e) {
-    //         Log::error('Update profile error: ' . $e->getMessage());
-    //         return $this->error(
-    //             ['exception' => $e->getMessage()],
-    //             'Failed to update profile',
-    //             500
-    //         );
-    //     }
-    // }
-
-
     public function updateProfile(Request $request)
     {
         try {
@@ -546,7 +481,7 @@ class UserController extends Controller
         $username = $baseUsername . '_' . $this->randomAlphaNum(4);
 
         // Check if username exists, regenerate if needed
-        while (\App\Models\Profile::where('username', $username)->exists()) {
+        while (Profile::where('username', $username)->exists()) {
             $username = $baseUsername . '_' . $this->randomAlphaNum(4);
         }
 
@@ -562,7 +497,7 @@ class UserController extends Controller
         $slug = $baseSlug . '-' . $this->randomAlphaNum(6);
 
         // Check if slug exists, regenerate if needed
-        while (\App\Models\Profile::where('slug', $slug)->exists()) {
+        while (Profile::where('slug', $slug)->exists()) {
             $slug = $baseSlug . '-' . $this->randomAlphaNum(6);
         }
 
