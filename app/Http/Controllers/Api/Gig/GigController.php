@@ -328,7 +328,7 @@ class GigController extends Controller
     private function buildFilters(Request $request): array
     {
         return array_filter([
-            'keyword'         => $request->input('keyword'),
+            'keyword' => $request->input('keyword'),
             'category_id' => $request->input('category_id'),
             'sub_category_id' => $request->input('sub_category_id'),
             'min_price' => $request->input('min_price'),

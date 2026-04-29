@@ -533,7 +533,10 @@ class GigService
 
             $query->where(function ($q) use ($keyword) {
                 $q->where('title', 'LIKE', "%{$keyword}%")
-                    ->orWhere('scope', 'LIKE', "%{$keyword}%");
+                    ->orWhere('scope', 'LIKE', "%{$keyword}%")
+                    ->orWhereHas('tags', function ($q) use ($keyword) {
+                        $q->where('name', 'LIKE', "%{$keyword}%");
+                    });
             });
         }
 
