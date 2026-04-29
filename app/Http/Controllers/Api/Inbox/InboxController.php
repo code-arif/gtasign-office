@@ -88,6 +88,10 @@ class InboxController extends Controller
                     //     'avatar' => $conversation['other_user']->profile?->avatar ? asset('storage/' . $conversation['other_user']->profile?->avatar) : asset('default/profile.jpg'),
                     // ],
                     // 'has_active_order' => $conversation['has_active_order'],
+                    'sidebar_data' => new \App\Http\Resources\Inbox\ConversationSidebarResource([
+                        'room' => $conversation['room'],
+                        'other_user' => $conversation['other_user']
+                    ]),
                     'messages' => InboxMessageResource::collection($messages),
                     'pagination' => [
                         'total' => $messages->total(),
