@@ -46,7 +46,7 @@ class OrderManageController extends Controller
                     'buyer.profile:id,user_id,first_name,last_name,avatar',
                     'seller:id',
                     'seller.profile:id,user_id,first_name,last_name',
-                ]);
+                ])->latest('id');
 
             // Status filter
             if ($request->filled('status')) {
