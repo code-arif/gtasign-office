@@ -298,6 +298,7 @@ class ClientAuthController extends Controller
                         'replied_at' => $review->replied_at
                             ? $review->replied_at->diffForHumans()
                             : null,
+                        'rating' => $review->rating,
                     ],
                     'expert' => [
                         'name'   => $review->reviewedUser->profile->first_name . ' ' . $review->reviewedUser->profile->last_name,
