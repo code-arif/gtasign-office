@@ -92,7 +92,7 @@ class OrderManageController extends Controller
                     $bp = $order->buyer?->profile;
                     $name = $bp ? trim($bp->first_name . ' ' . ($bp->last_name ?? '')) : ($order->buyer?->email ?? 'N/A');
                     $avatar = $bp?->avatar
-                        ? asset($bp->avatar)
+                        ? asset('storage/' . $bp->avatar)
                         : 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&size=32&background=0ea5e9&color=fff';
                     return '
                         <div class="d-flex align-items-center gap-2">
