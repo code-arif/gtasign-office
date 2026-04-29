@@ -334,6 +334,7 @@ class GigController extends Controller
             'min_price' => $request->input('min_price'),
             'max_price' => $request->input('max_price'),
             'delivery_days' => $request->input('delivery_days'),
+            'tag_ids' => $request->input('tag_ids'),
         ]);
     }
 
