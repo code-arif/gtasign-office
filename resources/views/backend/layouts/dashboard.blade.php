@@ -363,7 +363,7 @@
                                                         <div class="d-flex align-items-center gap-2">
                                                             @php
                                                                 $ba = $order->buyer?->profile?->avatar
-                                                                    ? asset($order->buyer->profile->avatar)
+                                                                    ? asset('storage/' . $order->buyer->profile->avatar)
                                                                     : 'https://ui-avatars.com/api/?name=' .
                                                                         urlencode(trim($buyerName)) .
                                                                         '&size=32&background=0ea5e9&color=fff';
@@ -428,7 +428,7 @@
                                             ? trim($ep->first_name . ' ' . ($ep->last_name ?? ''))
                                             : $expert->email;
                                         $eAvatar = $ep?->avatar
-                                            ? asset($ep->avatar)
+                                            ? asset('storage/' . $ep->avatar)
                                             : 'https://ui-avatars.com/api/?name=' .
                                                 urlencode($eName) .
                                                 '&size=40&background=6366f1&color=fff';
