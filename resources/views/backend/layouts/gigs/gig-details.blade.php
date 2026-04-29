@@ -115,7 +115,7 @@
                                                         : 'N/A';
                                                     $gAvatar =
                                                         $gProfile && $gProfile->avatar
-                                                            ? asset($gProfile->avatar)
+                                                            ? asset('storage/' . $gProfile->avatar)
                                                             : 'https://ui-avatars.com/api/?name=' .
                                                                 urlencode($gName) .
                                                                 '&background=random';
@@ -180,7 +180,7 @@
                                     <div class="col-md-8">
                                         <h2 class="mb-3">{{ $gig->title }}</h2>
                                         <div class="d-flex align-items-center mb-3">
-                                            <img src="{{ $avatar }}" class="rounded-circle me-3" width="50"
+                                            <img src="{{ asset('storage/' . $avatar) }}" class="rounded-circle me-3" width="50"
                                                 height="50" style="object-fit: cover;">
                                             <div>
                                                 <div class="fw-semibold">{{ $fullName }}</div>
@@ -288,10 +288,10 @@
                                         @foreach ($gig->images as $image)
                                             <div class="col-md-3 col-sm-6">
                                                 <div class="gig-image-wrapper">
-                                                    <img src="{{ asset('/' . $image->path) }}"
+                                                    <img src="{{ asset('storage/' . $image->path) }}"
                                                         class="img-fluid rounded-1 gig-thumbnail" alt="Gig Image"
                                                         data-bs-toggle="modal" data-bs-target="#imageModal"
-                                                        onclick="showImageModal('{{ asset('/' . $image->path) }}')">
+                                                        onclick="showImageModal('{{ asset('storage/' . $image->path) }}')">
                                                     @if ($image->is_primary)
                                                         <span class="badge bg-success primary-badge">Primary</span>
                                                     @endif
