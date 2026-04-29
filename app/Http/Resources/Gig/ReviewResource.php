@@ -15,8 +15,8 @@ class ReviewResource extends JsonResource
             'rating'     => $this->rating,
             'review'     => $this->review,
             'reply'      => $this->seller_reply,
-            'replied_at' => $this->replied_at?->toISOString(),
-            'created_at' => $this->created_at->toISOString(),
+            'replied_at' => $this->replied_at?->diffForHumans(),
+            'created_at' => $this->created_at?->diffForHumans(),
 
             'reviewer' => [
                 'id'       => $this->reviewer_id,
