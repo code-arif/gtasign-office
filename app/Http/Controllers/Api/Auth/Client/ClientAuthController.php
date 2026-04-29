@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Api\Auth\Client;
 
-use Exception;
 use App\Helpers\Helper;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\User\ClientUserResource;
+use App\Http\Resources\UserResource;
+use App\Models\Order;
+use App\Models\OrderReview;
 use App\Traits\ApiResponse;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Validator;
 
 class ClientAuthController extends Controller
@@ -31,9 +34,11 @@ class ClientAuthController extends Controller
                 );
             }
 
+            $stats = $this->computeClientStats($user->id);
+
             return $this->success(
                 'User profile retrieved successfully',
-                new UserResource($user)
+                new ClientUserResource(['user' => $user, 'stats' => $stats])
             );
         } catch (Exception $e) {
             Log::error('Get profile error: ' . $e->getMessage());
@@ -75,10 +80,10 @@ class ClientAuthController extends Controller
             $validated = $validator->validated();
 
             /*
-        |--------------------------------------------------------------------------
-        | Ensure profile exists
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Ensure profile exists
+            |--------------------------------------------------------------------------
+            */
             if (!$user->profile) {
                 $user->profile()->create([
                     'first_name' => $validated['first_name'] ?? null,
@@ -124,7 +129,7 @@ class ClientAuthController extends Controller
 
             return $this->success(
                 'Profile updated successfully',
-                new UserResource($user)
+                new ClientUserResource($user)
             );
         } catch (Exception $e) {
             Log::error('Update profile error: ' . $e->getMessage());
@@ -195,7 +200,7 @@ class ClientAuthController extends Controller
 
             return $this->success(
                 'Overview updated successfully',
-                new UserResource($user)
+                new ClientUserResource($user)
             );
         } catch (Exception $e) {
             Log::error('Update overview error: ' . $e->getMessage());
@@ -207,6 +212,132 @@ class ClientAuthController extends Controller
         }
     }
 
+    /**
+     * Compute stats for client (similar to buyer profile stats)
+     */
+    private function computeClientStats(int $userId): array
+    {
+        $reviewStats = OrderReview::where('reviewed_user_id', $userId)
+            ->selectRaw('
+            ROUND(AVG(rating), 1)                   AS avg_rating,
+            COUNT(*)                                AS total_reviews,
+            ROUND(AVG(communication_rating), 1)     AS avg_communication,
+            ROUND(AVG(service_rating), 1)           AS avg_service,
+            ROUND(AVG(delivery_rating), 1)          AS avg_delivery
+        ')
+            ->first();
+
+        $breakdown = OrderReview::where('reviewed_user_id', $userId)
+            ->selectRaw('rating, COUNT(*) as count')
+            ->groupBy('rating')
+            ->pluck('count', 'rating')
+            ->toArray();
+
+        $ratingBreakdown = [
+            'five_star'  => $breakdown[5] ?? 0,
+            'four_star'  => $breakdown[4] ?? 0,
+            'three_star' => $breakdown[3] ?? 0,
+            'two_star'   => $breakdown[2] ?? 0,
+            'one_star'   => $breakdown[1] ?? 0,
+        ];
+
+        $recentReviews = OrderReview::where('reviewed_user_id', $userId)
+            ->with(['reviewer.profile', 'order', 'gig'])
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(function ($review) {
+                return [
+                    'id'         => $review->id,
+                    'rating'     => $review->rating,
+                    'content'    => $review->review,
+                    'created_at' => $review->created_at->diffForHumans(),
+                    'reviewer'   => [
+                        'name'    => $review->reviewer->profile->first_name . ' ' . $review->reviewer->profile->last_name,
+                        'avatar'  => $review->reviewer->profile->avatar
+                            ? asset('storage/' . $review->reviewer->profile->avatar)
+                            : asset('default/profile.jpg'),
+                        'address' => $review->reviewer->profile->address,
+                    ],
+                    'order' => [
+                        'price'    => $review->order->price ?? 0,
+                        'duration' => isset($review->order->delivery_days)
+                            ? (($review->order->delivery_days % 7 == 0)
+                                ? ($review->order->delivery_days / 7) . ' ' . (($review->order->delivery_days / 7) > 1 ? 'weeks' : 'week')
+                                : $review->order->delivery_days . ' ' . ($review->order->delivery_days > 1 ? 'days' : 'day'))
+                            : null,
+                    ],
+                    'gig' => [
+                        'id'    => $review->gig->id ?? null,
+                        'title' => $review->gig->title ?? null,
+                        'image' => $review->gig->primaryImage?->image_url
+                            ? asset('storage/' . $review->gig->primaryImage->image_url)
+                            : asset('default/no_image.webp'),
+                    ],
+                ];
+            });
+
+        // ─── Expert replies to client's reviews ──────────────────────────────
+        // When a client gives a review to an expert, the expert replies to that review.
+        // reviewer_id = client, reviewed_user_id = expert, seller_reply = expert's reply
+        $receivedReplies = OrderReview::where('reviewer_id', $userId)
+            ->whereNotNull('seller_reply')
+            ->with(['reviewedUser.profile', 'order', 'gig']) // expert = reviewedUser
+            ->latest('replied_at')
+            ->limit(10)
+            ->get()
+            ->map(function ($review) {
+                return [
+                    'id'          => $review->id,
+                    'my_review'   => [
+                        'rating'  => $review->rating,
+                        'content' => $review->review,
+                    ],
+                    'expert_reply' => [
+                        'content'    => $review->seller_reply,
+                        'replied_at' => $review->replied_at
+                            ? $review->replied_at->diffForHumans()
+                            : null,
+                    ],
+                    'expert' => [
+                        'name'   => $review->reviewedUser->profile->first_name . ' ' . $review->reviewedUser->profile->last_name,
+                        'avatar' => $review->reviewedUser->profile->avatar
+                            ? asset('storage/' . $review->reviewedUser->profile->avatar)
+                            : asset('default/profile.jpg'),
+                    ],
+                    'order' => [
+                        'price'    => $review->order->price ?? 0,
+                        'duration' => isset($review->order->delivery_days)
+                            ? (($review->order->delivery_days % 7 == 0)
+                                ? ($review->order->delivery_days / 7) . ' ' . (($review->order->delivery_days / 7) > 1 ? 'weeks' : 'week')
+                                : $review->order->delivery_days . ' ' . ($review->order->delivery_days > 1 ? 'days' : 'day'))
+                            : null,
+                    ],
+                    'gig' => [
+                        'id'    => $review->gig->id ?? null,
+                        'title' => $review->gig->title ?? null,
+                        'image' => $review->gig->primaryImage?->image_url
+                            ? asset('storage/' . $review->gig->primaryImage->image_url)
+                            : asset('default/no_image.webp'),
+                    ],
+                ];
+            });
+
+        return [
+            'avg_rating'           => $reviewStats->avg_rating ?? 0,
+            'total_reviews'        => (int) ($reviewStats->total_reviews ?? 0),
+            'avg_communication'    => $reviewStats->avg_communication ?? 0,
+            'avg_service'          => $reviewStats->avg_service ?? 0,
+            'avg_delivery'         => $reviewStats->avg_delivery ?? 0,
+            'success_score'        => 0,
+            'last_month_earnings'  => 0,
+            'avg_response_minutes' => null,
+            'last_month_label'     => now()->subMonth()->format('F'),
+            'rating_breakdown'     => $ratingBreakdown,
+            'recent_reviews'       => $recentReviews,
+            'received_replies'     => $receivedReplies, // ← নতুন
+        ];
+    }
 
     /**
      * Generate unique username

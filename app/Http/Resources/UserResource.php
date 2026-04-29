@@ -47,17 +47,17 @@ class UserResource extends JsonResource
 
             // ── Expert Stats (only for expert role) ───────────────────
             'stats' => $stats ? [
-                'avg_rating'           => $stats['avg_rating'],
-                'total_reviews'        => $stats['total_reviews'],
-                'avg_communication'    => $stats['avg_communication'],
-                'avg_service'          => $stats['avg_service'],
-                'avg_delivery'         => $stats['avg_delivery'],
-                'success_score'        => $stats['success_score'],       // 86 → show as "86%"
-                'last_month_earnings'  => $stats['last_month_earnings'],  // 436.00
-                'last_month_label'     => $stats['last_month_label'],     // "November"
+                'avg_rating'  => $stats['avg_rating'],
+                'total_reviews' => $stats['total_reviews'],
+                'avg_communication' => $stats['avg_communication'],
+                'avg_service' => $stats['avg_service'],
+                'avg_delivery' => $stats['avg_delivery'],
+                'success_score' => $stats['success_score'],       // 86 → show as "86%"
+                'last_month_earnings' => $stats['last_month_earnings'],  // 436.00
+                'last_month_label' => $stats['last_month_label'],     // "November"
                 'avg_response_minutes' => $stats['avg_response_minutes'], // 24
-                'rating_breakdown'     => $stats['rating_breakdown'] ?? null,
-                'recent_reviews'       => $stats['recent_reviews'] ?? [],
+                'rating_breakdown' => $stats['rating_breakdown'] ?? null,
+                'recent_reviews' => $stats['recent_reviews'] ?? [],
             ] : null,
 
             // Languages
