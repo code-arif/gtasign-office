@@ -166,7 +166,7 @@ class GigManageController extends Controller
 
                     $fullName = trim($profile->first_name . ' ' . ($profile->middle_name ?? '') . ' ' . ($profile->last_name ?? ''));
                     $avatar = $profile->avatar
-                        ? asset($profile->avatar)
+                        ? asset('storage/' . $profile->avatar)
                         : 'https://ui-avatars.com/api/?name=' . urlencode($fullName) . '&background=random';
 
                     return '<div class="d-flex align-items-center">
