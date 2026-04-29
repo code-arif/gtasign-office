@@ -94,13 +94,25 @@ class StripeWebhookController extends Controller
             return;
         }
 
-        Log::info("checkout.session.completed: Activating order #{$orderId}");
+        if ($order->status === 'active') {
+            Log::info("checkout.session.completed: Order #{$orderId} is already active.");
+            return;
+        }
 
-        $this->webhookOrderService->activateOrder($order, [
-            'payment_intent_id' => $session->payment_intent,
-            'payment_method'    => 'stripe',
-            'session_id'        => $session->id,
-        ]);
+        if ($session->payment_status === 'paid' && $order->status === 'pending_payment') {
+            Log::info("checkout.session.completed: Activating order #{$orderId}");
+
+            $this->webhookOrderService->activateOrder($order, [
+                'payment_intent_id' => is_object($session->payment_intent) ? $session->payment_intent->id : $session->payment_intent,
+                'payment_method'    => 'stripe',
+                'session_id'        => $session->id,
+            ]);
+        } else {
+            Log::warning("checkout.session.completed: Payment status is not paid or order is not pending.", [
+                'payment_status' => $session->payment_status,
+                'order_status' => $order->status
+            ]);
+        }
     }
 
     /**
