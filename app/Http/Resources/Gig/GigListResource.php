@@ -55,6 +55,10 @@ class GigListResource extends JsonResource
             'price' => (float) $this->price,
             'impressions' => $this->impressions,
             'clicks' => $this->clicks,
+            'orders_count' => $this->orders ?? 0,
+            'cancellation_rate' => $this->orders > 0
+                ? round(($this->cancellations / $this->orders) * 100, 2)
+                : 0,
             'delivery_days' => $this->delivery_days,
             'status' => $this->status,
 
