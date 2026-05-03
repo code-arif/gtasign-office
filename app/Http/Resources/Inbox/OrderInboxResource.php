@@ -24,6 +24,7 @@ class OrderInboxResource extends JsonResource
             'can_request_revision' => $this->canRequestRevision(),
             'can_request_extension' => $this->canRequestExtension(),
             'can_accept' => $this->canAccept(),
+            'is_client_reviewed' => $this->client_reviewed,
             'quantity' => $this->gig?->price
                 ? (int) round($this->price / $this->gig->price)
                 : 1,

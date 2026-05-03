@@ -568,6 +568,13 @@ class GigService
             $query->where('status', $filters['status']);
         }
 
+        if (isset($filters['tag_ids']) && !empty($filters['tag_ids'])) {
+            $tagIds = is_array($filters['tag_ids']) ? $filters['tag_ids'] : explode(',', $filters['tag_ids']);
+            $query->whereHas('tags', function ($q) use ($tagIds) {
+                $q->whereIn('id', $tagIds);
+            });
+        }
+
         return $query;
     }
 }
