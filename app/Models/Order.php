@@ -43,6 +43,7 @@ class Order extends Model
         'completed_at',
         'cancelled_at',
         'stripe_checkout_session_id',
+        'client_reviewed'
     ];
 
     protected $casts = [

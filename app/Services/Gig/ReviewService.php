@@ -55,6 +55,9 @@ class ReviewService
                 'is_public'        => true,
             ]);
 
+            // Mark order as reviewed by client
+            $order->update(['client_reviewed' => true]);
+
             // Send message in inbox
             $chatMessage = Chat::create([
                 'sender_id'   => $reviewerId,

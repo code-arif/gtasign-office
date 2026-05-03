@@ -189,6 +189,8 @@ class InboxOrderService
                 'requirements' => $gig->scope,
 
                 'status' => 'pending_payment',
+
+                'client_reviewed' => false, // New field to track if client has reviewed the order
             ]);
 
             /*
