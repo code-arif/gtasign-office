@@ -87,68 +87,68 @@ class UserSeeder extends Seeder
         /* =========================================
          * EXPERTS — web + api both role
          * ========================================= */
-        for ($i = 1; $i <= 5; $i++) {
-            $users[] = [
-                'id'                => $id,
-                'email'             => "expert{$i}@example.com",
-                'phone'             => "200000000{$i}",
-                'password'          => $password,
-                'status'            => 'active',
-                'email_verified_at' => now(),
-                'remember_token'    => Str::random(10),
-                'created_at'        => now(),
-                'updated_at'        => now(),
-            ];
+        // for ($i = 1; $i <= 5; $i++) {
+        //     $users[] = [
+        //         'id'                => $id,
+        //         'email'             => "expert{$i}@example.com",
+        //         'phone'             => "200000000{$i}",
+        //         'password'          => $password,
+        //         'status'            => 'active',
+        //         'email_verified_at' => now(),
+        //         'remember_token'    => Str::random(10),
+        //         'created_at'        => now(),
+        //         'updated_at'        => now(),
+        //     ];
 
-            // web guard — admin panel will get User::role('expert', 'web')
-            $modelRoles[] = [
-                'role_id'    => 2, // expert (web)
-                'model_id'   => $id,
-                'model_type' => 'App\Models\User',
-            ];
+        //     // web guard — admin panel will get User::role('expert', 'web')
+        //     $modelRoles[] = [
+        //         'role_id'    => 2, // expert (web)
+        //         'model_id'   => $id,
+        //         'model_type' => 'App\Models\User',
+        //     ];
 
-            // api guard — API auth middleware তে hasRole('expert') কাজ করবে
-            $modelRoles[] = [
-                'role_id'    => 4, // expert (api)
-                'model_id'   => $id,
-                'model_type' => 'App\Models\User',
-            ];
+        //     // api guard — API auth middleware তে hasRole('expert') কাজ করবে
+        //     $modelRoles[] = [
+        //         'role_id'    => 4, // expert (api)
+        //         'model_id'   => $id,
+        //         'model_type' => 'App\Models\User',
+        //     ];
 
-            $id++;
-        }
+        //     $id++;
+        // }
 
         /* =========================================
          * CLIENTS — web + api two role
          * ========================================= */
-        for ($i = 1; $i <= 5; $i++) {
-            $users[] = [
-                'id'                => $id,
-                'email'             => "client{$i}@example.com",
-                'phone'             => "300000000{$i}",
-                'password'          => $password,
-                'status'            => 'active',
-                'email_verified_at' => now(),
-                'remember_token'    => Str::random(10),
-                'created_at'        => now(),
-                'updated_at'        => now(),
-            ];
+        // for ($i = 1; $i <= 5; $i++) {
+        //     $users[] = [
+        //         'id'                => $id,
+        //         'email'             => "client{$i}@example.com",
+        //         'phone'             => "300000000{$i}",
+        //         'password'          => $password,
+        //         'status'            => 'active',
+        //         'email_verified_at' => now(),
+        //         'remember_token'    => Str::random(10),
+        //         'created_at'        => now(),
+        //         'updated_at'        => now(),
+        //     ];
 
-            // web guard
-            $modelRoles[] = [
-                'role_id'    => 3, // client (web)
-                'model_id'   => $id,
-                'model_type' => 'App\Models\User',
-            ];
+        //     // web guard
+        //     $modelRoles[] = [
+        //         'role_id'    => 3, // client (web)
+        //         'model_id'   => $id,
+        //         'model_type' => 'App\Models\User',
+        //     ];
 
-            // api guard
-            $modelRoles[] = [
-                'role_id'    => 5, // client (api)
-                'model_id'   => $id,
-                'model_type' => 'App\Models\User',
-            ];
+        //     // api guard
+        //     $modelRoles[] = [
+        //         'role_id'    => 5, // client (api)
+        //         'model_id'   => $id,
+        //         'model_type' => 'App\Models\User',
+        //     ];
 
-            $id++;
-        }
+        //     $id++;
+        // }
 
         /* =========================================
          * INSERT
@@ -157,6 +157,6 @@ class UserSeeder extends Seeder
         DB::table('model_has_roles')->insert($modelRoles);
 
         $this->command->info('Users seeded: 2 admins, 5 experts, 5 clients.');
-        $this->command->info('Each expert & client has both web + api guard roles.');
+        // $this->command->info('Each expert & client has both web + api guard roles.');
     }
 }
