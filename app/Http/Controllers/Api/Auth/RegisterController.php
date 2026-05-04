@@ -35,10 +35,10 @@ class RegisterController extends Controller
      */
     public function register(Request $request)
     {
-        // dd($request->all());
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:100',
             'last_name'  => 'nullable|string|max:100',
+            'username'   => 'required|string|alpha_dash|max:50|unique:profiles,username',
             'email'      => 'required|string|email|max:150|unique:users',
             'password'   => 'required|string|min:6|confirmed',
             'agree'      => 'required',
@@ -64,16 +64,15 @@ class RegisterController extends Controller
                 'status' => 'active',
             ]);
 
-            // Generate unique username and slug
+            // Generate unique slug
             $slug = Helper::generateSlug($request->first_name);
-            $username = Helper::generateUsername($request->first_name);
 
             // Create Profile
             Profile::create([
                 'user_id'    => $user->id,
                 'first_name' => $request->first_name,
                 'last_name'  => $request->last_name,
-                'username'   => $username,
+                'username'   => $request->username,
                 'slug'       => $slug,
             ]);
 
@@ -113,7 +112,7 @@ class RegisterController extends Controller
                 'User registered successfully. Please verify your email using the OTP sent.',
                 [
                     'email' => $user->email,
-                    'username' => $username,
+                    'username' => $request->username,
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
                     // 'otp' => $otp,
