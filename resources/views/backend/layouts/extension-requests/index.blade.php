@@ -215,6 +215,8 @@
                 language: {
                     processing: `<div class="text-center"><img src="{{ asset('default/loader.gif') }}" style="width:50px;"></div>`
                 },
+                searching: false,
+                dom: "<'row justify-content-between table-topbar'<'col-md-4 col-sm-3'l><'col-md-5 col-sm-5 px-0'>>tipr",
                 ajax: {
                     url: '{{ route('admin.extension-requests.data') }}',
                     data: d => {
@@ -262,11 +264,20 @@
                 ]
             });
 
-            $('#resetFilter, #statusFilter, #dateFrom, #dateTo').on('change click', () => {
+            // Filter bindings
+            $('#resetFilter').click(function() {
+                $('#statusFilter, #dateFrom, #dateTo').val('').trigger('change');
+                $('#searchFilter').val('');
                 checkActiveFilters();
                 dataTable.ajax.reload();
             });
-            $('#searchFilter').on('keyup', () => {
+
+            $('#statusFilter, #dateFrom, #dateTo').change(function() {
+                checkActiveFilters();
+                dataTable.ajax.reload();
+            });
+
+            $('#searchFilter').on('keyup', function() {
                 checkActiveFilters();
                 dataTable.ajax.reload();
             });

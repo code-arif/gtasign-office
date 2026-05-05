@@ -61,7 +61,7 @@ class ExtensionRequestController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->whereHas('order', fn($oq) => $oq->where('order_number', 'like', "%{$search}%"))
                         ->orWhere('reason', 'like', "%{$search}%")
-                        ->orWhereHas('requestedBy.profile', fn($pq) =>
+                        ->orWhereHas('requester.profile', fn($pq) =>
                         $pq->where('first_name', 'like', "%{$search}%")
                             ->orWhere('last_name', 'like', "%{$search}%"));
                 });
@@ -73,8 +73,8 @@ class ExtensionRequestController extends Controller
                     return '<div class="fw-semibold">#' . e($ext->order?->order_number ?? 'N/A') . '</div>';
                 })
                 ->addColumn('requested_by', function ($ext) {
-                    $p = $ext->requestedBy?->profile;
-                    $name = $p ? trim($p->first_name . ' ' . ($p->last_name ?? '')) : ($ext->requestedBy?->email ?? 'N/A');
+                    $p = $ext->requester?->profile;
+                    $name = $p ? trim($p->first_name . ' ' . ($p->last_name ?? '')) : ($ext->requester?->email ?? 'N/A');
                     $avatar = $p?->avatar
                         ? asset($p->avatar)
                         : 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&size=32&background=6366f1&color=fff';

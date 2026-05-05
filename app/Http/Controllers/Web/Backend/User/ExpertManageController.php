@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ExpertStatusUpdateMail;
 
 class ExpertManageController extends Controller
 {
@@ -329,6 +331,13 @@ class ExpertManageController extends Controller
 
             $expert = User::role('expert')->findOrFail($id);
             $expert->update(['status' => $request->status]);
+
+            // Send email notification to expert
+            try {
+                Mail::to($expert->email)->send(new ExpertStatusUpdateMail($expert, $request->status, $request->reason));
+            } catch (Exception $mailEx) {
+                Log::error('Expert status update mail failed for user ' . $id . ': ' . $mailEx->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
