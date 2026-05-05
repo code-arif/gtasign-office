@@ -327,15 +327,24 @@ class GigController extends Controller
      */
     private function buildFilters(Request $request): array
     {
-        return array_filter([
+        $filters = [
             'keyword' => $request->input('keyword'),
             'category_id' => $request->input('category_id'),
             'sub_category_id' => $request->input('sub_category_id'),
             'min_price' => $request->input('min_price'),
             'max_price' => $request->input('max_price'),
+            'price' => $request->input('price'),
             'delivery_days' => $request->input('delivery_days'),
-            'tag_ids' => $request->input('tag_ids'),
-        ]);
+            'tag_ids' => $request->input('tag_ids') ?? $request->input('tag_id'),
+            'skill' => $request->input('skill'),
+            'rating' => $request->input('rating'),
+            'availability' => $request->input('availability'),
+            'location' => $request->input('location'),
+        ];
+
+        return array_filter($filters, function ($value) {
+            return $value !== null && $value !== '';
+        });
     }
 
     /**

@@ -556,6 +556,10 @@ class GigService
             $query->where('price', '<=', $filters['max_price']);
         }
 
+        if (isset($filters['price'])) {
+            $query->where('price', $filters['price']);
+        }
+
         if (isset($filters['delivery_days'])) {
             $query->where('delivery_days', '<=', $filters['delivery_days']);
         }
@@ -571,7 +575,46 @@ class GigService
         if (isset($filters['tag_ids']) && !empty($filters['tag_ids'])) {
             $tagIds = is_array($filters['tag_ids']) ? $filters['tag_ids'] : explode(',', $filters['tag_ids']);
             $query->whereHas('tags', function ($q) use ($tagIds) {
-                $q->whereIn('id', $tagIds);
+                $q->whereIn('tags.id', $tagIds);
+            });
+        }
+
+        if (isset($filters['skill'])) {
+            $skill = trim($filters['skill']);
+            $query->whereHas('user.experiences', function ($q) use ($skill) {
+                $q->where('skill_name', 'LIKE', "%{$skill}%");
+            });
+        }
+
+        if (isset($filters['rating'])) {
+            $rating = (float) $filters['rating'];
+            $query->where(function ($subQuery) {
+                $subQuery->selectRaw('coalesce(avg(rating), 0)')
+                    ->from('order_reviews')
+                    ->whereColumn('order_reviews.gig_id', 'gigs.id')
+                    ->where('is_public', true);
+            }, '>=', $rating);
+        }
+
+        if (isset($filters['availability'])) {
+            $avail = strtolower(trim($filters['availability']));
+            if ($avail === 'online' || $avail === '1' || $avail === 'true') {
+                $query->whereHas('user.profile', function ($q) {
+                    $q->where('is_online', true);
+                });
+            } else {
+                $query->whereDoesntHave('user.availabilities', function ($q) {
+                    $q->where('is_active', true)
+                      ->whereDate('start_date', '<=', now())
+                      ->whereDate('end_date', '>=', now());
+                });
+            }
+        }
+
+        if (isset($filters['location'])) {
+            $location = trim($filters['location']);
+            $query->whereHas('user.profile', function ($q) use ($location) {
+                $q->where('address', 'LIKE', "%{$location}%");
             });
         }
 
