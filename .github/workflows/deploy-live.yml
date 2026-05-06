@@ -21,3 +21,4 @@ jobs:
           server: 72.62.120.217
           username: secaax-ftp
           password: GGhK8GoX0Njf4eHbEQC9
+          server-dir: /
