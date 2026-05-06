@@ -20,5 +20,5 @@ jobs:
         with:
           server: 72.62.120.217
           username: secaax-ftp
-          password: ${{ secrets.FTP_PASSWORD }}
+          password: GGhK8GoX0Njf4eHbEQC9
           server-dir: /public_html/
