@@ -163,7 +163,7 @@ Route::prefix('qa')->name('qa.')->group(function () {
 /*
 |--------------------------------------------------------------------------
 | Order Management Routes
-|--------------------------------------------------------------------------
+|------------------------------------------------------------------------
 */
 Route::prefix('orders')->name('orders.')->group(function () {
     Route::get('/', [OrderManageController::class, 'index'])->name('index');
