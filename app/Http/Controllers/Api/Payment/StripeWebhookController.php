@@ -3,12 +3,19 @@
 namespace App\Http\Controllers\Api\Payment;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PaymentSuccessAdminMail;
+use App\Mail\PaymentSuccessBuyerMail;
+use App\Mail\PaymentSuccessExpertMail;
 use App\Models\Order;
+use App\Models\User;
 use App\Models\WithdrawalRequest;
 use App\Services\Payment\StripePaymentService;
 use App\Services\Payment\WebhookOrderService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Stripe\Exception\SignatureVerificationException;
 
 /**
  * StripeWebhookController
@@ -45,10 +52,10 @@ class StripeWebhookController extends Controller
         // ── Verify webhook signature ──────────────────────────────────
         try {
             $event = $this->stripeService->constructWebhookEvent($payload, $signature);
-        } catch (\Stripe\Exception\SignatureVerificationException $e) {
+        } catch (SignatureVerificationException $e) {
             Log::warning('Stripe webhook signature verification failed: ' . $e->getMessage());
             return response()->json(['error' => 'Invalid signature'], 400);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Stripe webhook error: ' . $e->getMessage());
             return response()->json(['error' => 'Webhook error'], 400);
         }
@@ -62,7 +69,7 @@ class StripeWebhookController extends Controller
                 'transfer.created'             => $this->handleTransferCreated($event->data->object),
                 default => Log::info("Unhandled Stripe event: {$event->type}"),
             };
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Stripe webhook handler error [{$event->type}]: " . $e->getMessage());
             // Return 200 so Stripe doesn't retry — log it for manual investigation
         }
@@ -107,11 +114,63 @@ class StripeWebhookController extends Controller
                 'payment_method'    => 'stripe',
                 'session_id'        => $session->id,
             ]);
+
+            // ── Send payment-success emails ───────────────────────────
+            $this->sendPaymentSuccessEmails($order);
         } else {
             Log::warning("checkout.session.completed: Payment status is not paid or order is not pending.", [
                 'payment_status' => $session->payment_status,
                 'order_status' => $order->status
             ]);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // MAIL HELPERS
+    // ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Send payment-success notification to admin and to the expert (seller).
+     */
+    protected function sendPaymentSuccessEmails(Order $order): void
+    {
+        // Eager-load relationships needed by both mail templates
+        $order->loadMissing(['buyer.profile', 'seller.profile', 'gig']);
+
+        // ── 1. Admin notification ─────────────────────────────────────
+        try {
+            $adminEmail = config('mail.admin_email', config('mail.from.address'));
+
+            Mail::to($adminEmail)
+                ->send(new PaymentSuccessAdminMail($order));
+
+            Log::info("Payment success email sent to admin for order #{$order->order_number}");
+        } catch (Exception $e) {
+            Log::error("Failed to send admin payment email for order #{$order->order_number}: " . $e->getMessage());
+        }
+
+        // ── 2. Expert (seller) notification ──────────────────────────
+        try {
+            if ($order->seller && $order->seller->email) {
+                Mail::to($order->seller->email)
+                    ->send(new PaymentSuccessExpertMail($order));
+
+                Log::info("Payment success email sent to expert ({$order->seller->email}) for order #{$order->order_number}");
+            }
+        } catch (Exception $e) {
+            Log::error("Failed to send expert payment email for order #{$order->order_number}: " . $e->getMessage());
+        }
+
+        // ── 3. Buyer (payment confirmation) ──────────────────────────
+        try {
+            if ($order->buyer && $order->buyer->email) {
+                Mail::to($order->buyer->email)
+                    ->send(new PaymentSuccessBuyerMail($order));
+
+                Log::info("Payment confirmation email sent to buyer ({$order->buyer->email}) for order #{$order->order_number}");
+            }
+        } catch (Exception $e) {
+            Log::error("Failed to send buyer payment email for order #{$order->order_number}: " . $e->getMessage());
         }
     }
 

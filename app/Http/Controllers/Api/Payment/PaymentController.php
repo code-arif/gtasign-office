@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\Payment;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PaymentSuccessAdminMail;
+use App\Mail\PaymentSuccessBuyerMail;
+use App\Mail\PaymentSuccessExpertMail;
 use App\Models\Order;
 use App\Services\Payment\StripePaymentService;
 use App\Services\Payment\WebhookOrderService;
@@ -10,6 +13,7 @@ use App\Traits\ApiResponse;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class PaymentController extends Controller
 {
@@ -100,6 +104,9 @@ class PaymentController extends Controller
 
                 $order->refresh();
 
+                // ── Send payment-success emails ───────────────────────────
+                $this->sendPaymentSuccessEmails($order);
+
                 return $this->success('Payment confirmed. Order is now active.', [
                     'order_status' => $order->status,
                     'order_number' => $order->order_number,
@@ -148,7 +155,12 @@ class PaymentController extends Controller
                 'session_id'        => 'cs_test_simulated_' . now()->timestamp,
             ]);
 
-            $order->refresh()->load(['gig', 'buyer.profile', 'seller.profile']);
+            $order->refresh();
+
+            // ── Send payment-success emails ───────────────────────────
+            $this->sendPaymentSuccessEmails($order);
+
+            $order->load(['gig', 'buyer.profile', 'seller.profile']);
 
             return $this->success('[TEST] Payment simulated. Order is now active.', [
                 'order_id'     => $order->id,
@@ -159,6 +171,48 @@ class PaymentController extends Controller
         } catch (Exception $e) {
             Log::error('Simulate payment error: ' . $e->getMessage());
             return $this->error(['exception' => $e->getMessage()], 'Simulation failed', 500);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // MAIL HELPERS
+    // ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Send payment-success notification to admin, expert, and buyer.
+     */
+    protected function sendPaymentSuccessEmails(Order $order): void
+    {
+        // Eager-load relationships needed by mail templates
+        $order->loadMissing(['buyer.profile', 'seller.profile', 'gig']);
+
+        // 1. Admin notification
+        try {
+            $adminEmail = config('mail.admin_email', config('mail.from.address'));
+            Mail::to($adminEmail)->send(new PaymentSuccessAdminMail($order));
+            Log::info("Payment success email sent to admin for order #{$order->order_number}");
+        } catch (Exception $e) {
+            Log::error("Failed to send admin payment email for order #{$order->order_number}: " . $e->getMessage());
+        }
+
+        // 2. Expert (seller) notification
+        try {
+            if ($order->seller && $order->seller->email) {
+                Mail::to($order->seller->email)->send(new PaymentSuccessExpertMail($order));
+                Log::info("Payment success email sent to expert ({$order->seller->email}) for order #{$order->order_number}");
+            }
+        } catch (Exception $e) {
+            Log::error("Failed to send expert payment email for order #{$order->order_number}: " . $e->getMessage());
+        }
+
+        // 3. Buyer (payment confirmation
+        try {
+            if ($order->buyer && $order->buyer->email) {
+                Mail::to($order->buyer->email)->send(new PaymentSuccessBuyerMail($order));
+                Log::info("Payment confirmation email sent to buyer ({$order->buyer->email}) for order #{$order->order_number}");
+            }
+        } catch (Exception $e) {
+            Log::error("Failed to send buyer payment email for order #{$order->order_number}: " . $e->getMessage());
         }
     }
 }

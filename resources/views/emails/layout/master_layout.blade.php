@@ -17,12 +17,13 @@
         }
 
         body {
-            font-family: Helvetica, Arial, sans-serif;
-            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
             margin: 0;
             padding: 0;
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
+            color: #1e293b;
         }
 
         table {
@@ -41,22 +42,25 @@
         }
 
         p {
-            margin-bottom: 15px;
-            line-height: 1.5;
+            margin-bottom: 16px;
+            line-height: 1.6;
+            font-size: 15px;
         }
 
         h1 {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            line-height: 1.2;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            line-height: 1.25;
+            color: #0f172a;
         }
 
         h2 {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
             line-height: 1.3;
+            color: #0f172a;
         }
 
         /* Container */
@@ -65,56 +69,63 @@
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
+            border: 1px solid #e2e8f0;
         }
 
         /* Header */
         .header {
-            background-color: #0f172a;
-            padding: 30px 30px;
-            text-align: center;
+            background-color: #ffffff;
+            padding: 40px 40px 20px 40px;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
         }
 
         .header-title {
-            color: #ffffff;
-            font-size: 28px;
-            font-weight: bold;
+            color: #0f172a;
+            font-size: 22px;
+            font-weight: 700;
             margin: 0;
         }
 
         .header-subtitle {
-            color: #38bdf8;
-            font-size: 16px;
-            margin-top: 5px;
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .logo {
-            max-width: 200px;
+            max-width: 160px;
             height: auto;
+            margin-bottom: 20px;
         }
 
         /* Content */
         .content {
-            padding: 40px 30px;
+            padding: 40px;
             color: #334155;
         }
 
         /* Lists - Common Styles */
         .list-negative,
         .list-positive {
-            margin: 25px 0;
-            padding-left: 20px;
+            margin: 20px 0;
+            padding-left: 0;
             list-style-type: none;
         }
 
         .list-negative li,
         .list-positive li {
-            margin-bottom: 12px;
-            padding-left: 28px;
+            margin-bottom: 10px;
+            padding-left: 24px;
             position: relative;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         .list-negative li:before {
-            content: "✕";
+            content: "•";
             color: #ef4444;
             font-weight: bold;
             position: absolute;
@@ -122,7 +133,7 @@
         }
 
         .list-positive li:before {
-            content: "✓";
+            content: "•";
             color: #10b981;
             font-weight: bold;
             position: absolute;
@@ -135,59 +146,61 @@
 
         .list-positive li {
             color: #334155;
-            font-weight: 500;
         }
 
         /* Button */
         .btn {
             display: inline-block;
-            background-color: #05402e;
+            background-color: #0f172a;
             color: #ffffff;
             text-decoration: none;
-            padding: 14px 32px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 16px;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 14px;
             margin: 20px 0;
-        }
-
-        .btn:hover {
-            background-color: #05402e;
         }
 
         /* Feature Box */
         .feature-box {
             background-color: #f8fafc;
-            border-left: 4px solid #05402e;
-            padding: 20px;
-            margin: 25px 0;
-            border-radius: 0 8px 8px 0;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            margin: 24px 0;
+            border-radius: 6px;
         }
 
         .feature-box p {
             margin-bottom: 0;
             color: #475569;
+            font-size: 14px;
         }
 
         /* Footer */
         .footer {
-            background-color: #f8fafc;
-            padding: 30px 30px;
-            text-align: center;
-            font-size: 14px;
+            background-color: #ffffff;
+            padding: 40px;
+            text-align: left;
+            font-size: 13px;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .footer-tagline {
             color: #64748b;
-            border-top: 1px solid #e2e8f0;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
 
         .footer-links {
-            margin-top: 20px;
+            margin-top: 16px;
         }
 
         .footer-links a {
-            color: #05402e;
+            color: #64748b;
             text-decoration: none;
-            margin: 0 15px;
-            font-size: 14px;
+            margin-right: 20px;
+            font-size: 12px;
         }
 
         .footer-links a:hover {
@@ -195,79 +208,71 @@
         }
 
         .copyright {
-            margin-top: 20px;
-            color: #94a3b8;
+            margin-top: 16px;
+            color: #cbd5e1;
+            font-size: 11px;
+        }
+
+        /* Data Table */
+        .data-table {
+            width: 100%;
+            margin: 24px 0;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+            color: #64748b;
             font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-label {
+            color: #64748b;
+            font-size: 13px;
+            width: 40%;
+        }
+
+        .data-value {
+            color: #0f172a;
+            font-weight: 500;
+            text-align: right;
         }
 
         /* Mobile Responsive */
         @media only screen and (max-width: 600px) {
             .email-container {
                 width: 100% !important;
+                border: none !important;
             }
 
             .header,
             .content,
             .footer {
-                padding: 20px 15px !important;
-            }
-
-            .content {
-                padding: 30px 15px !important;
+                padding: 30px 20px !important;
             }
 
             h1 {
-                font-size: 28px !important;
-            }
-
-            h2 {
                 font-size: 22px !important;
             }
 
-            .btn {
-                padding: 12px 24px !important;
-                font-size: 15px !important;
-            }
-
-            .logo {
-                max-width: 150px !important;
-            }
-        }
-
-        /* Dark Mode Support */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #0f172a !important;
-            }
-
-            .email-container {
-                background-color: #1e293b !important;
-            }
-
-            .content {
-                color: #e2e8f0 !important;
-            }
-
-            .feature-box {
-                background-color: #334155 !important;
-            }
-
-            .feature-box p {
-                color: #cbd5e1 !important;
-            }
-
-            .list-positive li {
-                color: #e2e8f0 !important;
-            }
-
-            .list-negative li {
-                color: #94a3b8 !important;
-            }
-
-            .footer {
-                background-color: #0f172a !important;
-                border-top-color: #334155 !important;
-                color: #94a3b8 !important;
+            h2 {
+                font-size: 18px !important;
             }
         }
     </style>
@@ -284,12 +289,14 @@
                     <table class="email-container" role="presentation" cellspacing="0" cellpadding="0" border="0"
                         width="100%">
 
-                        <!-- Header Section - Can be overridden -->
+                        <!-- Header Section -->
                         <tr>
                             <td class="header">
                                 @hasSection('header')
                                     @yield('header')
                                 @else
+                                    {{-- Optional Logo placeholder --}}
+                                    {{-- <img src="{{ asset('logo.png') }}" class="logo" alt="{{ config('app.name') }}"> --}}
                                     <h1 class="header-title">@yield('header-title', config('app.name'))</h1>
                                     @hasSection('header-subtitle')
                                         <div class="header-subtitle">@yield('header-subtitle')</div>
@@ -305,15 +312,18 @@
                             </td>
                         </tr>
 
-                        <!-- Footer Section - Can be overridden -->
+                        <!-- Footer Section -->
                         <tr>
                             <td class="footer">
                                 @hasSection('footer')
                                     @yield('footer')
                                 @else
-                                    <div style="margin-bottom: 15px;">
-                                        <strong>{{ config('app.name') }}</strong><br>
-                                        @yield('footer-tagline', 'Enterprise-Grade AI Security')
+                                    <div class="footer-tagline">
+                                        @yield('footer-tagline', config('app.name'))
+                                    </div>
+                                    
+                                    <div style="line-height: 1.5;">
+                                        @yield('footer-address', 'Professional Services Platform')
                                     </div>
 
                                     <div class="footer-links">

@@ -22,7 +22,7 @@ class WelcomeMail extends Mailable
     public function __construct($user, $subject = null)
     {
         $this->user = $user;
-        $this->subject = $subject ?? 'Welcome to Whistle Works! Your Account is Verified';
+        $this->subject = $subject ?? 'Welcome to SECaaX! Your Account is Verified';
     }
 
     /**
