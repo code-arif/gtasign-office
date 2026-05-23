@@ -5,11 +5,31 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Models\Certification;
+use App\Models\Chat;
+use App\Models\CustomOffer;
+use App\Models\Education;
+use App\Models\ExtensionRequest;
+use App\Models\FirebaseTokens;
+use App\Models\Gig;
+use App\Models\GigDocument;
+use App\Models\GigImage;
+use App\Models\Notification;
 use App\Models\Order;
-use App\Models\Profile;
+use App\Models\OrderActivity;
+use App\Models\OrderDelivery;
+use App\Models\OrderQaReview;
 use App\Models\OrderReview;
+use App\Models\OtpVerification;
+use App\Models\Profile;
+use App\Models\Room;
+use App\Models\RoomPin;
 use App\Models\SellerEarnings;
 use App\Models\User;
+use App\Models\UserAvailability;
+use App\Models\UserExperience;
+use App\Models\UserSecurityToken;
+use App\Models\WithdrawalRequests;
 use App\Traits\ApiResponse;
 use Exception;
 use Illuminate\Http\Request;
@@ -57,7 +77,7 @@ class UserController extends Controller
 
     private function computeExpertStats(int $userId): array
     {
-        // ─── Rating & Reviews ───────────────────────────────────────────
+        // Rating & Reviews
         $reviewStats = OrderReview::where('reviewed_user_id', $userId)
             ->selectRaw('
             ROUND(AVG(rating), 1)                   AS avg_rating,
@@ -68,7 +88,7 @@ class UserController extends Controller
         ')
             ->first();
 
-        // ─── Success Score ───────────────────────────────────────────────
+        // Success Score
         // Success = completed / (completed + cancelled) × 100
         $orderCounts = Order::where('seller_id', $userId)
             ->whereIn('status', ['completed', 'cancelled'])
@@ -82,7 +102,7 @@ class UserController extends Controller
             ? round(($orderCounts->completed / $orderCounts->total) * 100)
             : 0;
 
-        // ─── Last Month Earnings ─────────────────────────────────────────
+        // Last Month Earnings
         $lastMonth         = now()->subMonth();
         $lastMonthEarnings = SellerEarnings::where('seller_id', $userId)
             ->whereIn('status', ['available', 'withdrawn'])
@@ -90,7 +110,7 @@ class UserController extends Controller
             ->whereMonth('created_at', $lastMonth->month)
             ->sum('net_amount');
 
-        // ─── Avg Response Time (minutes) ─────────────────────────────────
+        // Avg Response Time (minutes)
         // Logic: first reply from expert (sender_id = userId) after each
         // incoming message (receiver_id = userId), grouped per room
         $avgResponseMinutes = DB::select("
@@ -118,7 +138,7 @@ class UserController extends Controller
 
         $avgResponseMinutes = $avgResponseMinutes[0]->avg_minutes ?? null;
 
-        // ─── Rating Breakdown ──────────────────────────────────────────
+        // Rating Breakdown
         $breakdown = OrderReview::where('reviewed_user_id', $userId)
             ->selectRaw('rating, COUNT(*) as count')
             ->groupBy('rating')
@@ -133,9 +153,9 @@ class UserController extends Controller
             'one_star' => $breakdown[1] ?? 0,
         ];
 
-        
 
-        // ─── Recent Reviews ─────────────────────────────────────────────
+
+        // Recent Reviews
         $recentReviews = OrderReview::where('reviewed_user_id', $userId)
             ->with(['reviewer.profile', 'order', 'gig'])
             ->latest()
@@ -365,10 +385,25 @@ class UserController extends Controller
     }
 
     /**
-     * Delete User Profile
+     * Delete User Profile — cascades all related assets.
      * @method DELETE
-     * @route /api/v1/delete-profile
+     * @route  /api/v1/delete-profile
      * @middleware auth:api
+     *
+     * Deletion order (respects FK dependencies):
+     *  1. Order child records (activities, QA reviews, extension requests, deliveries)
+     *  2. Order reviews  (reviewer / reviewed)
+     *  3. Seller earnings & withdrawal requests
+     *  4. Orders (force-delete, both as buyer & seller)
+     *  5. Gig assets (images + documents with file cleanup, tag pivots, gigs)
+     *  6. Chat messages in shared rooms (with file cleanup), custom offers, room-pins, rooms
+     *  7. Any remaining direct chats / custom offers not tied to a room
+     *  8. Notifications
+     *  9. Firebase tokens
+     * 10. Profile sub-records (education, certifications, skills, availability, language pivots)
+     * 11. OTP & security tokens
+     * 12. Avatar file  →  profile record
+     * 13. JWT logout  →  force-delete user
      */
     public function destroy(Request $request)
     {
@@ -388,16 +423,122 @@ class UserController extends Controller
                 return $this->error(null, 'Invalid password', 403);
             }
 
-            // Delete avatar from storage
-            if ($user->profile?->avatar) {
-                Helper::fileDelete($user->profile->avatar);
-            }
+            DB::transaction(function () use ($user) {
+                $userId = $user->id;
 
-            // Logout user
-            auth('api')->logout();
+                // 1. Collect IDs we need repeatedly
+                $gigIds = Gig::withTrashed()
+                    ->where('user_id', $userId)
+                    ->pluck('id')
+                    ->toArray();
 
-            // Permanently delete user (profile auto deleted)
-            $user->forceDelete();
+                $orderIds = Order::withTrashed()
+                    ->where('buyer_id', $userId)
+                    ->orWhere('seller_id', $userId)
+                    ->pluck('id')
+                    ->toArray();
+
+                $roomIds = Room::where('first_user_id', $userId)
+                    ->orWhere('second_user_id', $userId)
+                    ->pluck('id')
+                    ->toArray();
+
+                // 2. Order child records
+                if (!empty($orderIds)) {
+                    OrderActivity::whereIn('order_id', $orderIds)->delete();
+                    OrderQaReview::whereIn('order_id', $orderIds)->delete();
+                    ExtensionRequest::whereIn('order_id', $orderIds)->delete();
+                    // OrderDelivery files are stored in the order room's chat;
+                    // we handle file cleanup in step 6 (chat deletion).
+                    OrderDelivery::whereIn('order_id', $orderIds)->delete();
+                }
+
+                // 3. Order reviews
+                OrderReview::where('reviewer_id', $userId)
+                    ->orWhere('reviewed_user_id', $userId)
+                    ->delete();
+
+                // 4. Seller earnings & withdrawal requests
+                SellerEarnings::where('seller_id', $userId)->delete();
+                WithdrawalRequests::where('seller_id', $userId)->delete();
+
+                // 5. Orders (buyer + seller)
+                if (!empty($orderIds)) {
+                    Order::withTrashed()->whereIn('id', $orderIds)->forceDelete();
+                }
+
+                // 6. Gig assets
+                if (!empty($gigIds)) {
+                    // Model boot events delete the physical files automatically
+                    GigImage::whereIn('gig_id', $gigIds)
+                        ->get()
+                        ->each(fn($img) => $img->delete());
+
+                    GigDocument::whereIn('gig_id', $gigIds)
+                        ->get()
+                        ->each(fn($doc) => $doc->delete());
+
+                    // Detach tag pivots
+                    DB::table('gig_tags')->whereIn('gig_id', $gigIds)->delete();
+
+                    // Force-delete gigs (uses SoftDeletes)
+                    Gig::withTrashed()->whereIn('id', $gigIds)->forceDelete();
+                }
+
+                // 7. Chats, custom offers & rooms
+                if (!empty($roomIds)) {
+                    // Chat model boot event deletes attached files
+                    Chat::withTrashed()
+                        ->whereIn('room_id', $roomIds)
+                        ->get()
+                        ->each(fn($msg) => $msg->forceDelete());
+
+                    CustomOffer::whereIn('room_id', $roomIds)->delete();
+                    RoomPin::whereIn('room_id', $roomIds)->delete();
+                    Room::whereIn('id', $roomIds)->delete();
+                }
+
+                // Clean up any direct chats not belonging to a room
+                Chat::withTrashed()
+                    ->where('sender_id', $userId)
+                    ->orWhere('receiver_id', $userId)
+                    ->get()
+                    ->each(fn($msg) => $msg->forceDelete());
+
+                // Clean up any custom offers not already deleted above
+                CustomOffer::where('expert_id', $userId)
+                    ->orWhere('client_id', $userId)
+                    ->delete();
+
+                // 8. Notifications
+                Notification::where('notifiable_type', User::class)
+                    ->where('notifiable_id', $userId)
+                    ->delete();
+
+                // 9. Firebase tokens
+                FirebaseTokens::where('user_id', $userId)->delete();
+
+                // 10. Profile sub-records
+                Education::where('user_id', $userId)->delete();
+                Certification::where('user_id', $userId)->delete();
+                UserExperience::where('user_id', $userId)->delete();
+                UserAvailability::where('user_id', $userId)->delete();
+                DB::table('user_languages')->where('user_id', $userId)->delete();
+
+                // 11. OTP & security tokens
+                OtpVerification::where('user_id', $userId)->delete();
+                UserSecurityToken::where('user_id', $userId)->delete();
+
+                // 12. Avatar file & profile record
+                if ($user->profile?->avatar) {
+                    Helper::fileDelete($user->profile->avatar);
+                }
+                $user->profile?->delete();
+
+                // ── 13. Revoke JWT & permanently delete user ──────────────
+                auth('api')->logout();
+                $user->forceDelete();
+            });
 
             return $this->success('Account deleted successfully');
         } catch (Exception $e) {
