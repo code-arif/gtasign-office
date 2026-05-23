@@ -80,6 +80,7 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
         // Gig categories
         Route::get('/gig-categories', [GigCategoryController::class, 'index']); // done
         Route::get('/popular-categories', [GigCategoryController::class, 'popular']); // done
+        Route::get('/categories-alphabetical', [GigCategoryController::class, 'alphabetical']); // done
         Route::get('/gig-tags', [GigTagController::class, 'index']); // done
 
         // NEW

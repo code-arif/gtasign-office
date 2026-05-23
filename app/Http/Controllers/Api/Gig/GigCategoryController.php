@@ -69,4 +69,36 @@ class GigCategoryController extends Controller
             $categories
         );
     }
+
+    /**
+     * Get all categories grouped alphabetically
+     *
+     * Response shape:
+     * {
+     *   "A": [ { "id": 1, "name": "Animation", "image_url": "..." }, ... ],
+     *   "B": [ { "id": 2, "name": "Branding",  "image_url": "..." }, ... ],
+     *   ...
+     * }
+     *
+     * @GET /gigs/categories-alphabetical  (no auth required)
+     */
+    public function alphabetical()
+    {
+        $grouped = Category::whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderByRaw('UPPER(name) ASC')
+            ->get(['id', 'name', 'image'])
+            ->groupBy(fn($cat) => strtoupper(substr($cat->name, 0, 1)))
+            ->map(fn($cats) => $cats->map(fn($cat) => [
+                'id'        => $cat->id,
+                'name'      => $cat->name,
+                'image_url' => $cat->image_url,
+            ])->values())
+            ->sortKeys();   // ensure A → Z key order
+
+        return $this->success(
+            'Categories retrieved alphabetically',
+            $grouped
+        );
+    }
 }
