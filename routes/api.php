@@ -77,8 +77,9 @@ Route::group(['middleware' => 'guest:api', 'prefix' => 'v1'], function ($router)
         // Track analytics
         Route::post('/{id}/track-click', [GigController::class, 'trackClick']); // done (partial)
 
-        // Gig cageroires
+        // Gig categories
         Route::get('/gig-categories', [GigCategoryController::class, 'index']); // done
+        Route::get('/popular-categories', [GigCategoryController::class, 'popular']); // done
         Route::get('/gig-tags', [GigTagController::class, 'index']); // done
 
         // NEW
