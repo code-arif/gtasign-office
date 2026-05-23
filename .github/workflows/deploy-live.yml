@@ -20,8 +20,8 @@ jobs:
           server: 72.62.120.217
           username: secaax-ftp
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: 21
+          protocol: sftp
+          port: 22
           timeout: 120000
           server-dir: /
           dangerous-clean-slate: false
