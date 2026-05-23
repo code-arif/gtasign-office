@@ -11,14 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2.1.0
-        with:
-          fetch-depth: 2
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: 72.62.120.217
           username: secaax-ftp
-          password: GGhK8GoX0Njf4eHbEQC9
-          timeout: 60000
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          timeout: 120000
+          server-dir: /
+          dangerous-clean-slate: false
